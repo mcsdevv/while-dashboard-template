@@ -4,7 +4,6 @@ import { Button } from "@/shared/ui";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui";
 import { signIn } from "next-auth/react";
 import { useCallback, useEffect, useState } from "react";
-import { CopyValue } from "./copy-value";
 
 interface GoogleStepProps {
   status?: {
