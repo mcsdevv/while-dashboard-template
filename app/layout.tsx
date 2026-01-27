@@ -22,7 +22,7 @@ export default async function RootLayout({
   const session = isAuthConfigured() ? await auth() : null;
 
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={`${GeistSans.className} antialiased`}>
         <Providers session={session}>{children}</Providers>
       </body>

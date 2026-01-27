@@ -2,6 +2,7 @@
 
 import { Button } from "@/shared/ui";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui";
+import { CopyValue } from "./copy-value";
 import { signIn } from "next-auth/react";
 import { useCallback, useEffect, useState } from "react";
 import { CopyValue } from "./copy-value";
@@ -167,48 +168,76 @@ export function GoogleStep({ status, onBack, onNext }: GoogleStepProps) {
       {!isConnected ? (
         <>
           {showConfigError ? (
-            // Credentials not configured - show prominent error
+            // Credentials not configured - show setup instructions
             <div className="space-y-4">
-              <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4 space-y-3">
-                <div className="flex items-start gap-2">
-                  <svg
-                    aria-hidden="true"
-                    className="h-5 w-5 text-destructive shrink-0 mt-0.5"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                  <div className="space-y-2">
-                    <p className="text-sm font-medium text-destructive">
-                      Google OAuth not configured
+              <p className="text-sm text-muted-foreground">
+                Set up Google OAuth to enable calendar synchronization. Follow the steps below to
+                configure your credentials.
+              </p>
+
+              {/* Google OAuth Configuration Values */}
+              <div className="rounded-lg border p-3 space-y-3">
+                <h3 className="font-medium">Configure Google OAuth</h3>
+
+                <div className="space-y-3">
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-1">
+                      1. Go to{" "}
+                      <a
+                        href="https://console.cloud.google.com/apis/credentials"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary underline"
+                      >
+                        Google Cloud Credentials
+                      </a>{" "}
+                      and create an OAuth 2.0 Client ID
                     </p>
-                    <p className="text-sm text-destructive/90">
-                      Add the following environment variables in Vercel → Settings → Environment
-                      Variables, then redeploy:
+                  </div>
+
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-1">
+                      2. Add this <strong>Authorized redirect URI</strong>:
                     </p>
-                    <ul className="text-sm text-destructive/80 list-disc list-inside space-y-1">
+                    <CopyValue value={redirectUri} />
+                  </div>
+
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-1">
+                      3. Add these <strong>OAuth Scopes</strong> to your consent screen:
+                    </p>
+                    <CopyValue value="openid email profile https://www.googleapis.com/auth/calendar" />
+                  </div>
+
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-1">
+                      4. Copy your Client ID and Secret, then add them to Vercel:
+                    </p>
+                    <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1 ml-1">
                       <li>
-                        <code className="bg-destructive/20 px-1 rounded">GOOGLE_CLIENT_ID</code>
+                        <code className="bg-muted px-1 rounded">GOOGLE_CLIENT_ID</code>
                       </li>
                       <li>
-                        <code className="bg-destructive/20 px-1 rounded">GOOGLE_CLIENT_SECRET</code>
+                        <code className="bg-muted px-1 rounded">GOOGLE_CLIENT_SECRET</code>
                       </li>
                     </ul>
-                    <a
-                      href="https://while.so/docs/setup/google"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-sm text-destructive underline font-medium inline-block mt-2"
-                    >
-                      View full setup guide
-                    </a>
+                  </div>
+
+                  <div>
+                    <p className="text-sm text-muted-foreground">
+                      5. Redeploy your app, then return here to sign in
+                    </p>
                   </div>
                 </div>
+
+                <a
+                  href="https://while.so/docs/setup/google"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-primary underline inline-block"
+                >
+                  Full Setup Guide →
+                </a>
               </div>
             </div>
           ) : (
@@ -291,6 +320,54 @@ export function GoogleStep({ status, onBack, onNext }: GoogleStepProps) {
                   <p className="text-sm text-amber-600 dark:text-amber-400">{error}</p>
                 </div>
               )}
+
+              {/* Google OAuth Configuration Values */}
+              <div className="rounded-lg border p-3 space-y-3">
+                <h3 className="font-medium">Configure Google OAuth</h3>
+                <p className="text-sm text-muted-foreground">
+                  Add these values to your Google Cloud OAuth credentials before signing in:
+                </p>
+
+                <div className="space-y-3">
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-1">
+                      1. Go to{" "}
+                      <a
+                        href="https://console.cloud.google.com/apis/credentials"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary underline"
+                      >
+                        Google Cloud Credentials
+                      </a>{" "}
+                      and edit your OAuth 2.0 Client
+                    </p>
+                  </div>
+
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-1">
+                      2. Add this <strong>Authorized redirect URI</strong>:
+                    </p>
+                    <CopyValue value={redirectUri} />
+                  </div>
+
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-1">
+                      3. Add these <strong>OAuth Scopes</strong> to your consent screen:
+                    </p>
+                    <CopyValue value="openid email profile https://www.googleapis.com/auth/calendar" />
+                  </div>
+                </div>
+
+                <a
+                  href="https://while.so/docs/setup/google"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-primary underline inline-block"
+                >
+                  Full Setup Guide →
+                </a>
+              </div>
 
               <div className="rounded-lg bg-muted/50 p-4 text-sm">
                 <p className="font-medium mb-2">What permissions are requested:</p>
