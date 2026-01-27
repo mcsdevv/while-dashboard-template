@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 const envSchema = z.object({
-  // Notion (optional - can be configured via settings UI)
+  // Notion (required at runtime, optional at build time for Vercel)
   NOTION_API_TOKEN: z.string().optional(),
   NOTION_DATABASE_ID: z.string().optional(),
 
@@ -142,5 +142,23 @@ export function getGoogleClientConfig(): { clientId: string; clientSecret: strin
   return {
     clientId: env.GOOGLE_CLIENT_ID,
     clientSecret: env.GOOGLE_CLIENT_SECRET,
+  };
+}
+
+/**
+ * Get required Notion env vars, throwing a helpful error if missing.
+ * Call this at runtime when Notion functionality is needed.
+ */
+export function requireNotionEnv(): {
+  NOTION_API_TOKEN: string;
+} {
+  if (!env.NOTION_API_TOKEN) {
+    throw new Error(
+      "Notion not configured. Missing environment variable: NOTION_API_TOKEN. Please set this variable in your environment.",
+    );
+  }
+
+  return {
+    NOTION_API_TOKEN: env.NOTION_API_TOKEN,
   };
 }
