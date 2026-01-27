@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@googleapis/calendar": "^9.0.0",
+    "geist": "^1.5.1",
     "@notionhq/client": "^2.2.15",
     "@upstash/redis": "^1.36.0",
     "google-auth-library": "^9.0.0",
