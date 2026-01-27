@@ -47,19 +47,6 @@ export function SetupWizard() {
       if (response.ok) {
         const data = await response.json();
         setStatus(data);
-
-        // Auto-advance to appropriate step based on status
-        if (data.setupComplete) {
-          setCurrentStep(5);
-        } else if (data.notion.databaseSelected) {
-          setCurrentStep(4);
-        } else if (data.notion.configured) {
-          setCurrentStep(3);
-        } else if (data.google.connected) {
-          setCurrentStep(3);
-        } else if (data.google.configured) {
-          setCurrentStep(2);
-        }
       }
     } catch (error) {
       console.error("Failed to fetch status:", error);
