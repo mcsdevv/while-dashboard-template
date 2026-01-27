@@ -1,15 +1,9 @@
-import { SetupWizard } from "@/components/setup";
-import { isSetupComplete } from "@/lib/settings";
 import { redirect } from "next/navigation";
 
-export const dynamic = "force-dynamic";
-
-export default async function SetupPage() {
-  const setupComplete = await isSetupComplete();
-
-  if (setupComplete) {
-    redirect("/");
-  }
-
-  return <SetupWizard />;
+/**
+ * Base setup route - redirects to step 1.
+ * The actual setup wizard is rendered at /setup/[step].
+ */
+export default function SetupPage() {
+  redirect("/setup/1");
 }

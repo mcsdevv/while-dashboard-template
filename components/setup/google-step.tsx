@@ -105,7 +105,7 @@ export function GoogleStep({ status, onBack, onNext }: GoogleStepProps) {
     try {
       // Trigger NextAuth sign-in with Google
       // This will redirect to Google, get consent, store refresh token, and redirect back
-      await signIn("google", { callbackUrl: "/setup?google=connected" });
+      await signIn("google", { callbackUrl: "/setup/3" });
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Failed to sign in";
       setError(getActionableErrorMessage(errorMessage, redirectUri));

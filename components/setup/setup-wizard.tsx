@@ -10,6 +10,7 @@ import {
   SkeletonSetupWizard,
 } from "@/shared/ui";
 import { Calendar, Check, Database, GitBranch, Sparkles, TestTube } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { FieldMappingStep } from "./field-mapping-step";
 import { GoogleStep } from "./google-step";
@@ -42,8 +43,12 @@ const STEPS = [
   { id: 5, name: "Test", description: "Verify everything works", icon: TestTube },
 ] as const;
 
-export function SetupWizard() {
-  const [currentStep, setCurrentStep] = useState(1);
+interface SetupWizardProps {
+  currentStep: 1 | 2 | 3 | 4 | 5;
+}
+
+export function SetupWizard({ currentStep }: SetupWizardProps) {
+  const router = useRouter();
   const [status, setStatus] = useState<SetupStatus | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -65,33 +70,16 @@ export function SetupWizard() {
     fetchStatus();
   }, [fetchStatus]);
 
-  // Check URL params for OAuth callback results
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    const params = new URLSearchParams(window.location.search);
-    if (params.get("google") === "connected") {
-      setCurrentStep(3); // Move to Notion step
-      // Clean URL
-      window.history.replaceState({}, "", "/setup");
-      fetchStatus();
-    } else if (params.get("error")) {
-      // Handle error (could show toast)
-      console.error("OAuth error:", params.get("error"));
-      window.history.replaceState({}, "", "/setup");
-    }
-  }, [fetchStatus]);
-
   const goToStep = (step: number) => {
     if (step >= 1 && step <= 5) {
-      setCurrentStep(step);
+      router.push(`/setup/${step}`);
     }
   };
 
   const handleStepComplete = () => {
     fetchStatus();
     if (currentStep < 5) {
-      setCurrentStep(currentStep + 1);
+      router.push(`/setup/${currentStep + 1}`);
     }
   };
 
@@ -108,10 +96,10 @@ export function SetupWizard() {
         {/* Progress bar */}
         <div className="max-w-4xl mx-auto px-4">
           <div className="bg-muted h-1 overflow-hidden">
-          <div
-            className="h-full bg-foreground transition-all duration-300 ease-out"
-            style={{ width: `${(currentStep / STEPS.length) * 100}%` }}
-          />
+            <div
+              className="h-full bg-foreground transition-all duration-300 ease-out"
+              style={{ width: `${(currentStep / STEPS.length) * 100}%` }}
+            />
           </div>
         </div>
 
@@ -141,11 +129,7 @@ export function SetupWizard() {
                     aria-label={`Step ${step.id}: ${step.name}`}
                     aria-current={isCurrent ? "step" : undefined}
                   >
-                    {isComplete ? (
-                      <Check className="w-5 h-5" />
-                    ) : (
-                      <Icon className="w-5 h-5" />
-                    )}
+                    {isComplete ? <Check className="w-5 h-5" /> : <Icon className="w-5 h-5" />}
                   </button>
                   {index < STEPS.length - 1 && (
                     <div
@@ -188,34 +172,34 @@ export function SetupWizard() {
       <div className="flex-1 space-y-6">
         {/* Step content */}
         <Card className="animate-in slide-in-from-bottom duration-300">
-        <CardHeader className="pb-4">
-          <CardTitle>{currentStepData.name}</CardTitle>
-          <CardDescription>{currentStepData.description}</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {currentStep === 1 && <WelcomeStep onNext={handleStepComplete} />}
-          {currentStep === 2 && (
-            <GoogleStep
-              status={status?.google}
-              onBack={() => goToStep(1)}
-              onNext={handleStepComplete}
-            />
-          )}
-          {currentStep === 3 && (
-            <NotionStep
-              status={status?.notion}
-              onBack={() => goToStep(2)}
-              onNext={handleStepComplete}
-            />
-          )}
-          {currentStep === 4 && (
-            <FieldMappingStep onBack={() => goToStep(3)} onNext={handleStepComplete} />
-          )}
-          {currentStep === 5 && (
-            <TestStep onBack={() => goToStep(4)} setupComplete={status?.setupComplete || false} />
-          )}
-        </CardContent>
-      </Card>
+          <CardHeader className="pb-4">
+            <CardTitle>{currentStepData.name}</CardTitle>
+            <CardDescription>{currentStepData.description}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {currentStep === 1 && <WelcomeStep onNext={handleStepComplete} />}
+            {currentStep === 2 && (
+              <GoogleStep
+                status={status?.google}
+                onBack={() => goToStep(1)}
+                onNext={handleStepComplete}
+              />
+            )}
+            {currentStep === 3 && (
+              <NotionStep
+                status={status?.notion}
+                onBack={() => goToStep(2)}
+                onNext={handleStepComplete}
+              />
+            )}
+            {currentStep === 4 && (
+              <FieldMappingStep onBack={() => goToStep(3)} onNext={handleStepComplete} />
+            )}
+            {currentStep === 5 && (
+              <TestStep onBack={() => goToStep(4)} setupComplete={status?.setupComplete || false} />
+            )}
+          </CardContent>
+        </Card>
 
         {/* Step counter */}
         <p className="text-center text-sm text-muted-foreground">

@@ -27,8 +27,13 @@ test.describe("Setup Wizard", () => {
     });
   });
 
-  test("displays welcome step on initial load", async ({ page }) => {
+  test("redirects /setup to /setup/1", async ({ page }) => {
     await page.goto("/setup");
+    await expect(page).toHaveURL(/\/setup\/1/);
+  });
+
+  test("displays welcome step on initial load", async ({ page }) => {
+    await page.goto("/setup/1");
 
     // Check welcome step is visible
     await expect(page.getByRole("heading", { name: "Welcome" })).toBeVisible();
@@ -39,19 +44,39 @@ test.describe("Setup Wizard", () => {
     await expect(progressButtons.first()).toHaveClass(/bg-primary/);
   });
 
-  test("navigates through wizard steps", async ({ page }) => {
-    await page.goto("/setup");
+  test("navigates through wizard steps with URL changes", async ({ page }) => {
+    await page.goto("/setup/1");
 
     // Step 1: Welcome - click Get Started
     await expect(page.getByRole("heading", { name: "Welcome" })).toBeVisible();
     await page.getByRole("button", { name: "Get Started" }).click();
 
-    // Step 2: Google
+    // Step 2: Google - URL should change
+    await expect(page).toHaveURL(/\/setup\/2/);
     await expect(page.getByRole("heading", { name: "Google" })).toBeVisible();
 
     // Go back to Welcome
     await page.getByRole("button", { name: "Back" }).click();
+    await expect(page).toHaveURL(/\/setup\/1/);
     await expect(page.getByRole("heading", { name: "Welcome" })).toBeVisible();
+  });
+
+  test("browser back button works with URL-based navigation", async ({ page }) => {
+    await page.goto("/setup/1");
+    await page.getByRole("button", { name: "Get Started" }).click();
+    await expect(page).toHaveURL(/\/setup\/2/);
+
+    // Use browser back
+    await page.goBack();
+    await expect(page).toHaveURL(/\/setup\/1/);
+    await expect(page.getByRole("heading", { name: "Welcome" })).toBeVisible();
+  });
+
+  test("direct navigation to step via URL", async ({ page }) => {
+    // Direct navigation to step 2 should redirect to step 1 (can't skip steps)
+    await page.goto("/setup/2");
+    // Server-side validation redirects to max allowed step (1 for fresh start)
+    await expect(page).toHaveURL(/\/setup\/1/);
   });
 
   test("shows progress indicator correctly", async ({ page }) => {
