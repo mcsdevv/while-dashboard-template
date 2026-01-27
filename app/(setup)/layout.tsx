@@ -8,8 +8,8 @@ export default function SetupLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="w-full max-w-4xl px-4 py-8">{children}</div>
+    <div className="min-h-screen flex flex-col bg-background">
+      <div className="w-full max-w-4xl mx-auto px-4 py-8 flex-1 flex flex-col">{children}</div>
     </div>
   );
 }

@@ -102,82 +102,92 @@ export function SetupWizard() {
   const currentStepData = STEPS[currentStep - 1];
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-300">
-      {/* Progress bar */}
-      <div className="bg-muted h-1 overflow-hidden">
-        <div
-          className="h-full bg-foreground transition-all duration-300 ease-out"
-          style={{ width: `${(currentStep / STEPS.length) * 100}%` }}
-        />
-      </div>
+    <div className="flex flex-col min-h-full animate-in fade-in duration-300">
+      {/* Fixed navigation wrapper */}
+      <div className="fixed top-0 left-0 right-0 z-10 bg-background pt-8 pb-4 space-y-6">
+        {/* Progress bar */}
+        <div className="max-w-4xl mx-auto px-4">
+          <div className="bg-muted h-1 overflow-hidden">
+          <div
+            className="h-full bg-foreground transition-all duration-300 ease-out"
+            style={{ width: `${(currentStep / STEPS.length) * 100}%` }}
+          />
+          </div>
+        </div>
 
-      {/* Stepper */}
-      <nav aria-label="Progress" className="flex justify-center">
-        <ol className="flex items-center gap-2 sm:gap-3">
-          {STEPS.map((step, index) => {
-            const Icon = step.icon;
-            const isComplete = step.id < currentStep;
-            const isCurrent = step.id === currentStep;
-            const isDisabled = step.id > currentStep + 1;
+        {/* Stepper */}
+        <nav aria-label="Progress" className="flex justify-center">
+          <ol className="flex items-center gap-2 sm:gap-3">
+            {STEPS.map((step, index) => {
+              const Icon = step.icon;
+              const isComplete = step.id < currentStep;
+              const isCurrent = step.id === currentStep;
+              const isDisabled = step.id > currentStep + 1;
 
-            return (
-              <li key={step.id} className="flex items-center">
-                <button
-                  type="button"
-                  onClick={() => goToStep(step.id)}
-                  disabled={isDisabled}
-                  className={cn(
-                    "w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center border transition-colors",
-                    isCurrent && "bg-foreground text-background border-foreground",
-                    isComplete && "bg-muted border-border",
-                    !isCurrent && !isComplete && "bg-background border-border opacity-50",
-                    !isDisabled && "hover:bg-muted cursor-pointer",
-                    isDisabled && "cursor-not-allowed",
-                  )}
-                  aria-label={`Step ${step.id}: ${step.name}`}
-                  aria-current={isCurrent ? "step" : undefined}
-                >
-                  {isComplete ? (
-                    <Check className="w-5 h-5" />
-                  ) : (
-                    <Icon className="w-5 h-5" />
-                  )}
-                </button>
-                {index < STEPS.length - 1 && (
-                  <div
+              return (
+                <li key={step.id} className="flex items-center">
+                  <button
+                    type="button"
+                    onClick={() => goToStep(step.id)}
+                    disabled={isDisabled}
                     className={cn(
-                      "w-6 sm:w-10 h-px mx-1 transition-colors",
-                      isComplete ? "bg-foreground/30" : "bg-border",
+                      "w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center border transition-colors",
+                      isCurrent && "bg-foreground text-background border-foreground",
+                      isComplete && "bg-muted border-border",
+                      !isCurrent && !isComplete && "bg-background border-border opacity-50",
+                      !isDisabled && "hover:bg-muted cursor-pointer",
+                      isDisabled && "cursor-not-allowed",
                     )}
-                  />
-                )}
-              </li>
-            );
-          })}
-        </ol>
-      </nav>
+                    aria-label={`Step ${step.id}: ${step.name}`}
+                    aria-current={isCurrent ? "step" : undefined}
+                  >
+                    {isComplete ? (
+                      <Check className="w-5 h-5" />
+                    ) : (
+                      <Icon className="w-5 h-5" />
+                    )}
+                  </button>
+                  {index < STEPS.length - 1 && (
+                    <div
+                      className={cn(
+                        "w-6 sm:w-10 h-px mx-1 transition-colors",
+                        isComplete ? "bg-foreground/30" : "bg-border",
+                      )}
+                    />
+                  )}
+                </li>
+              );
+            })}
+          </ol>
+        </nav>
 
-      {/* Step labels (desktop only) */}
-      <div className="hidden sm:flex justify-center -mt-3">
-        <div className="flex items-center gap-2 sm:gap-3">
-          {STEPS.map((step, index) => (
-            <div key={step.id} className="flex items-center">
-              <span
-                className={cn(
-                  "w-10 sm:w-12 text-center text-xs font-medium transition-colors",
-                  step.id === currentStep ? "text-foreground" : "text-muted-foreground",
-                )}
-              >
-                {step.name}
-              </span>
-              {index < STEPS.length - 1 && <div className="w-6 sm:w-10 mx-1" />}
-            </div>
-          ))}
+        {/* Step labels (desktop only) */}
+        <div className="hidden sm:flex justify-center -mt-3">
+          <div className="flex items-center gap-2 sm:gap-3">
+            {STEPS.map((step, index) => (
+              <div key={step.id} className="flex items-center">
+                <span
+                  className={cn(
+                    "w-10 sm:w-12 text-center text-xs font-medium transition-colors",
+                    step.id === currentStep ? "text-foreground" : "text-muted-foreground",
+                  )}
+                >
+                  {step.name}
+                </span>
+                {index < STEPS.length - 1 && <div className="w-6 sm:w-10 mx-1" />}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
-      {/* Step content */}
-      <Card className="animate-in slide-in-from-bottom duration-300">
+      {/* Spacer for fixed nav - approximately 140px on desktop, 120px on mobile */}
+      <div className="h-[120px] sm:h-[140px]" />
+
+      {/* Scrollable content */}
+      <div className="flex-1 space-y-6">
+        {/* Step content */}
+        <Card className="animate-in slide-in-from-bottom duration-300">
         <CardHeader className="pb-4">
           <CardTitle>{currentStepData.name}</CardTitle>
           <CardDescription>{currentStepData.description}</CardDescription>
@@ -207,10 +217,11 @@ export function SetupWizard() {
         </CardContent>
       </Card>
 
-      {/* Step counter */}
-      <p className="text-center text-sm text-muted-foreground">
-        Step {currentStep} of {STEPS.length}
-      </p>
+        {/* Step counter */}
+        <p className="text-center text-sm text-muted-foreground">
+          Step {currentStep} of {STEPS.length}
+        </p>
+      </div>
     </div>
   );
 }
