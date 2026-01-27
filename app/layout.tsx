@@ -1,0 +1,31 @@
+import { Providers } from "@/components/providers";
+import { auth } from "@/lib/auth";
+import { isAuthConfigured } from "@/lib/env";
+import { GeistMono } from "geist/font/mono";
+import { GeistSans } from "geist/font/sans";
+import type { Metadata } from "next";
+import "./globals.css";
+
+export const metadata: Metadata = {
+  title: "Notion-GCal Sync Dashboard",
+  description: "Real-time bidirectional sync between Notion and Google Calendar",
+  icons: {
+    icon: "/icon.svg",
+  },
+};
+
+export default async function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  const session = isAuthConfigured() ? await auth() : null;
+
+  return (
+    <html lang="en">
+      <body className={`${GeistSans.className} antialiased`}>
+        <Providers session={session}>{children}</Providers>
+      </body>
+    </html>
+  );
+}

@@ -1,0 +1,10 @@
+/**
+ * Setup page layout - No authentication required
+ */
+export default function SetupLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return <div className="min-h-screen bg-background">{children}</div>;
+}

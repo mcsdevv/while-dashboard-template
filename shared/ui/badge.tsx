@@ -1,0 +1,30 @@
+import { tv, type VariantProps } from "tailwind-variants";
+import type * as React from "react";
+
+const badgeVariants = tv({
+  base: "inline-flex items-center rounded-none border px-2.5 py-0.5 text-xs font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+  variants: {
+    variant: {
+      default: "border-transparent bg-foreground text-background hover:bg-foreground/80",
+      secondary: "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80",
+      destructive:
+        "border border-foreground/20 bg-foreground/5 text-foreground hover:bg-foreground/10",
+      success: "border border-foreground/20 bg-foreground/5 text-foreground hover:bg-foreground/10",
+      warning: "border border-foreground/20 bg-foreground/5 text-foreground hover:bg-foreground/10",
+      outline: "text-foreground border-foreground/20",
+    },
+  },
+  defaultVariants: {
+    variant: "default",
+  },
+});
+
+export interface BadgeProps
+  extends React.HTMLAttributes<HTMLDivElement>,
+    VariantProps<typeof badgeVariants> {}
+
+function Badge({ className, variant, ...props }: BadgeProps) {
+  return <div className={badgeVariants({ variant, class: className })} {...props} />;
+}
+
+export { Badge, badgeVariants };
