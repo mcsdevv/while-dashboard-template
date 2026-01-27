@@ -4,14 +4,12 @@ import { cn } from "@/lib/utils";
 import { navigation, footerLinks } from "@/lib/navigation";
 import { ThemeToggle } from "@/shared/ui";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useTheme } from "next-themes";
 import Link from "next/link";
 import { SidebarNav } from "./sidebar-nav";
 import { useSidebar } from "./sidebar-context";
 
 export function AppSidebar() {
   const { collapsed, toggleCollapsed } = useSidebar();
-  const { theme, setTheme } = useTheme();
 
   return (
     <aside
@@ -62,7 +60,7 @@ export function AppSidebar() {
       {/* Footer */}
       <div className="p-4 border-t border-sidebar-border space-y-4">
         <div className={cn("flex items-center", collapsed ? "justify-center" : "justify-between")}>
-          <ThemeToggle theme={theme} setTheme={setTheme} />
+          <ThemeToggle />
           {!collapsed && (
             <span className="text-xs text-muted-foreground">v0.1.0</span>
           )}

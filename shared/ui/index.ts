@@ -7,6 +7,9 @@ export { Button, buttonVariants, type ButtonProps } from "./button";
 // Card
 export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent } from "./card";
 
+// Footer
+export { Footer } from "./footer";
+
 // Dropdown Menu
 export {
   DropdownMenu,

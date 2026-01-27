@@ -4,13 +4,11 @@ import { UserMenu } from "@/components/auth/user-menu";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/shared/ui";
 import { Menu } from "lucide-react";
-import { useTheme } from "next-themes";
 import Link from "next/link";
 import { useSidebar } from "./sidebar-context";
 
 export function AppHeader() {
-  const { collapsed, setMobileOpen } = useSidebar();
-  const { theme, setTheme } = useTheme();
+  const { setMobileOpen } = useSidebar();
 
   return (
     <header
@@ -44,7 +42,7 @@ export function AppHeader() {
       <div className="flex items-center gap-3">
         {/* Theme toggle (mobile only, desktop is in sidebar) */}
         <div className="lg:hidden">
-          <ThemeToggle theme={theme} setTheme={setTheme} />
+          <ThemeToggle />
         </div>
         <UserMenu />
       </div>
