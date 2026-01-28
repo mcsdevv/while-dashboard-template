@@ -115,13 +115,26 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    await updateSettings({
-      fieldMapping: fieldMapping as unknown as import("@/lib/settings/types").FieldMapping,
-    });
+    let warning: string | undefined;
+    try {
+      await updateSettings({
+        fieldMapping: fieldMapping as unknown as import("@/lib/settings/types").FieldMapping,
+      });
+    } catch (settingsError) {
+      console.error("Failed to save settings:", settingsError);
+      const isRedisError =
+        settingsError instanceof Error && settingsError.message.includes("Redis is not configured");
+      if (!isRedisError) {
+        throw settingsError;
+      }
+      warning =
+        "Storage not configured. Field mapping won't be saved until storage is set up.";
+    }
 
     return NextResponse.json({
       status: "success",
       fieldMapping,
+      ...(warning ? { warning } : {}),
     });
   } catch (error) {
     console.error("Error saving field mapping:", error);

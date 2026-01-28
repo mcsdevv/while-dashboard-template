@@ -3,6 +3,7 @@
  * POST: Save selected database and fetch schema for field mapping
  */
 
+import { env } from "@/lib/env";
 import { getSettings, updateSettings } from "@/lib/settings";
 import { Client } from "@notionhq/client";
 import { type NextRequest, NextResponse } from "next/server";
@@ -10,6 +11,7 @@ import { z } from "zod";
 
 const databaseSelectSchema = z.object({
   databaseId: z.string().min(1, "Database ID is required"),
+  apiToken: z.string().min(1).optional(),
 });
 
 /**
@@ -25,16 +27,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Validation failed", details: errors }, { status: 400 });
     }
 
-    const { databaseId } = result.data;
+    const { databaseId, apiToken } = result.data;
 
     // Get stored Notion token
     const settings = await getSettings();
-    if (!settings?.notion?.apiToken) {
+    const notionToken = settings?.notion?.apiToken ?? apiToken ?? env.NOTION_API_TOKEN;
+    if (!notionToken) {
       return NextResponse.json({ error: "Notion not connected" }, { status: 400 });
     }
 
     // Fetch database schema
-    const notion = new Client({ auth: settings.notion.apiToken });
+    const notion = new Client({ auth: notionToken });
 
     try {
       const database = await notion.databases.retrieve({ database_id: databaseId });
@@ -53,13 +56,26 @@ export async function POST(request: NextRequest) {
           : "Untitled";
 
       // Save database selection
-      await updateSettings({
-        notion: {
-          ...settings.notion,
-          databaseId,
-          databaseName,
-        },
-      });
+      let warning: string | undefined;
+      try {
+        await updateSettings({
+          notion: {
+            ...(settings?.notion ?? {}),
+            apiToken: settings?.notion?.apiToken ?? apiToken ?? env.NOTION_API_TOKEN,
+            databaseId,
+            databaseName,
+          },
+        });
+      } catch (settingsError) {
+        console.error("Failed to save settings:", settingsError);
+        const isRedisError =
+          settingsError instanceof Error && settingsError.message.includes("Redis is not configured");
+        if (!isRedisError) {
+          throw settingsError;
+        }
+        warning =
+          "Storage not configured. Database selection won't be saved until storage is set up.";
+      }
 
       return NextResponse.json({
         status: "success",
@@ -68,6 +84,7 @@ export async function POST(request: NextRequest) {
           name: databaseName,
           properties,
         },
+        ...(warning ? { warning } : {}),
       });
     } catch (notionError) {
       console.error("Error fetching database:", notionError);

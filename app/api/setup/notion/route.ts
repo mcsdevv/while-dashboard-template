@@ -76,13 +76,28 @@ export async function POST(request: NextRequest) {
       }
 
       // Save the token (will be encrypted)
-      await updateSettings({
-        notion: {
-          apiToken,
-          databaseId: "", // Will be set when user selects database
-          databaseName: undefined,
-        },
-      });
+      let warning: string | undefined;
+      try {
+        await updateSettings({
+          notion: {
+            apiToken,
+            databaseId: "", // Will be set when user selects database
+            databaseName: undefined,
+          },
+        });
+      } catch (settingsError) {
+        console.error("Failed to save settings:", settingsError);
+        const isRedisError =
+          settingsError instanceof Error && settingsError.message.includes("Redis is not configured");
+        if (!isRedisError) {
+          return NextResponse.json(
+            { error: "Failed to save settings. Please try again." },
+            { status: 500 },
+          );
+        }
+        warning =
+          "Storage not configured. Token validated, but settings won't be saved until storage is set up.";
+      }
 
       return NextResponse.json({
         status: "success",
@@ -90,6 +105,7 @@ export async function POST(request: NextRequest) {
         databases,
         integrationName,
         workspaceName,
+        ...(warning ? { warning } : {}),
       });
     } catch (notionError) {
       console.error("Notion API error:", notionError);

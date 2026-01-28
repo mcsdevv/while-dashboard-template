@@ -9,17 +9,21 @@ import {
   CardTitle,
   SkeletonSetupWizard,
 } from "@/shared/ui";
-import { Calendar, Check, Database, GitBranch, Sparkles, TestTube } from "lucide-react";
+import { Calendar, Check, Database, GitBranch, HardDrive, Sparkles, TestTube } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { FieldMappingStep } from "./field-mapping-step";
 import { GoogleStep } from "./google-step";
 import { NotionStep } from "./notion-step";
+import { StorageStep } from "./storage-step";
 import { TestStep } from "./test-step";
 import { WelcomeStep } from "./welcome-step";
 
 interface SetupStatus {
   setupComplete: boolean;
+  storage: {
+    configured: boolean;
+  };
   google: {
     configured: boolean;
     connected: boolean;
@@ -38,14 +42,15 @@ interface SetupStatus {
 
 const STEPS = [
   { id: 1, name: "Welcome", description: "Get started with While", icon: Sparkles },
-  { id: 2, name: "Google", description: "Connect your calendar", icon: Calendar },
-  { id: 3, name: "Notion", description: "Connect your database", icon: Database },
-  { id: 4, name: "Mapping", description: "Map your properties", icon: GitBranch },
-  { id: 5, name: "Test", description: "Verify everything works", icon: TestTube },
+  { id: 2, name: "Storage", description: "Configure database", icon: HardDrive },
+  { id: 3, name: "Google", description: "Connect your calendar", icon: Calendar },
+  { id: 4, name: "Notion", description: "Connect your database", icon: Database },
+  { id: 5, name: "Mapping", description: "Map your properties", icon: GitBranch },
+  { id: 6, name: "Test", description: "Verify everything works", icon: TestTube },
 ] as const;
 
 interface SetupWizardProps {
-  currentStep: 1 | 2 | 3 | 4 | 5;
+  currentStep: 1 | 2 | 3 | 4 | 5 | 6;
 }
 
 export function SetupWizard({ currentStep }: SetupWizardProps) {
@@ -72,14 +77,14 @@ export function SetupWizard({ currentStep }: SetupWizardProps) {
   }, [fetchStatus]);
 
   const goToStep = (step: number) => {
-    if (step >= 1 && step <= 5) {
+    if (step >= 1 && step <= 6) {
       router.push(`/setup/${step}`);
     }
   };
 
   const handleStepComplete = () => {
     fetchStatus();
-    if (currentStep < 5) {
+    if (currentStep < 6) {
       router.push(`/setup/${currentStep + 1}`);
     }
   };
@@ -184,24 +189,27 @@ export function SetupWizard({ currentStep }: SetupWizardProps) {
           <CardContent>
             {currentStep === 1 && <WelcomeStep onNext={handleStepComplete} />}
             {currentStep === 2 && (
-              <GoogleStep
-                status={status?.google}
-                onBack={() => goToStep(1)}
-                onNext={handleStepComplete}
-              />
+              <StorageStep onBack={() => goToStep(1)} onNext={handleStepComplete} />
             )}
             {currentStep === 3 && (
-              <NotionStep
-                status={status?.notion}
+              <GoogleStep
+                status={status?.google}
                 onBack={() => goToStep(2)}
                 onNext={handleStepComplete}
               />
             )}
             {currentStep === 4 && (
-              <FieldMappingStep onBack={() => goToStep(3)} onNext={handleStepComplete} />
+              <NotionStep
+                status={status?.notion}
+                onBack={() => goToStep(3)}
+                onNext={handleStepComplete}
+              />
             )}
             {currentStep === 5 && (
-              <TestStep onBack={() => goToStep(4)} setupComplete={status?.setupComplete || false} />
+              <FieldMappingStep onBack={() => goToStep(4)} onNext={handleStepComplete} />
+            )}
+            {currentStep === 6 && (
+              <TestStep onBack={() => goToStep(5)} setupComplete={status?.setupComplete || false} />
             )}
           </CardContent>
         </Card>

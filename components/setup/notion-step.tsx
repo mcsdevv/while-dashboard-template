@@ -35,11 +35,13 @@ export function NotionStep({ status, onBack, onNext }: NotionStepProps) {
   const [apiToken, setApiToken] = useState("");
   const [validating, setValidating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
   const [databases, setDatabases] = useState<Database[]>([]);
   const [selectedDatabase, setSelectedDatabase] = useState<string>("");
   const [validated, setValidated] = useState(status?.configured || false);
   const [selectingDb, setSelectingDb] = useState(false);
   const [validationStatus, setValidationStatus] = useState<ValidationStatus>({ status: "idle" });
+  const [tokenForDatabase, setTokenForDatabase] = useState<string | null>(null);
 
   // Debounce timer ref
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -149,6 +151,8 @@ export function NotionStep({ status, onBack, onNext }: NotionStepProps) {
   const handleValidateWithEnvToken = useCallback(async () => {
     setValidating(true);
     setError(null);
+    setNotice(null);
+    setTokenForDatabase(null);
 
     try {
       const response = await fetch("/api/setup/notion", {
@@ -165,6 +169,7 @@ export function NotionStep({ status, onBack, onNext }: NotionStepProps) {
 
       setDatabases(data.databases);
       setValidated(true);
+      setNotice(data.warning ?? null);
 
       if (data.databases.length === 0) {
         setError(
@@ -202,6 +207,8 @@ export function NotionStep({ status, onBack, onNext }: NotionStepProps) {
 
     setValidating(true);
     setError(null);
+    setNotice(null);
+    setTokenForDatabase(null);
 
     try {
       const response = await fetch("/api/setup/notion", {
@@ -218,6 +225,8 @@ export function NotionStep({ status, onBack, onNext }: NotionStepProps) {
 
       setDatabases(data.databases);
       setValidated(true);
+      setTokenForDatabase(apiToken);
+      setNotice(data.warning ?? null);
 
       if (data.databases.length === 0) {
         setError(
@@ -235,12 +244,18 @@ export function NotionStep({ status, onBack, onNext }: NotionStepProps) {
     setSelectedDatabase(databaseId);
     setSelectingDb(true);
     setError(null);
+    setNotice(null);
 
     try {
+      const requestBody = {
+        databaseId,
+        ...(tokenForDatabase ? { apiToken: tokenForDatabase } : {}),
+      };
+
       const response = await fetch("/api/setup/notion/database", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ databaseId }),
+        body: JSON.stringify(requestBody),
       });
 
       const data = await response.json();
@@ -248,6 +263,8 @@ export function NotionStep({ status, onBack, onNext }: NotionStepProps) {
       if (!response.ok) {
         throw new Error(data.error || "Failed to select database");
       }
+
+      setNotice(data.warning ?? null);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to select database");
       setSelectedDatabase("");
@@ -462,6 +479,16 @@ export function NotionStep({ status, onBack, onNext }: NotionStepProps) {
 
           {error && (
             <div className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive">{error}</div>
+          )}
+          {notice && (
+            <div className="rounded-lg border border-border bg-muted/50 p-3 text-sm text-muted-foreground">
+              {notice}
+            </div>
+          )}
+          {notice && (
+            <div className="rounded-lg border border-border bg-muted/50 p-3 text-sm text-muted-foreground">
+              {notice}
+            </div>
           )}
 
           <div className="flex justify-between">

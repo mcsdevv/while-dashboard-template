@@ -151,13 +151,25 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Google not connected" }, { status: 400 });
     }
 
-    await updateSettings({
-      google: {
-        ...settings.google,
-        calendarId: result.data.calendarId,
-        calendarName: result.data.calendarName,
-      },
-    });
+    let warning: string | undefined;
+    try {
+      await updateSettings({
+        google: {
+          ...settings.google,
+          calendarId: result.data.calendarId,
+          calendarName: result.data.calendarName,
+        },
+      });
+    } catch (settingsError) {
+      console.error("Failed to save settings:", settingsError);
+      const isRedisError =
+        settingsError instanceof Error && settingsError.message.includes("Redis is not configured");
+      if (!isRedisError) {
+        throw settingsError;
+      }
+      warning =
+        "Storage not configured. Calendar selection won't be saved until storage is set up.";
+    }
 
     // Reset cached client so it picks up new calendar ID
     resetGcalClient();
@@ -166,6 +178,7 @@ export async function POST(request: NextRequest) {
       status: "success",
       calendarId: result.data.calendarId,
       calendarName: result.data.calendarName,
+      ...(warning ? { warning } : {}),
     });
   } catch (error) {
     console.error("Error selecting calendar:", error);
