@@ -3,12 +3,16 @@
 import { Button } from "@/shared/ui";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui";
 import { signIn } from "next-auth/react";
+import { useSearchParams } from "next/navigation";
 
 /**
  * Sign-in component with Google OAuth
  * Shown to unauthenticated users
  */
 export function SignIn() {
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl") ?? "/";
+
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-8">
       <Card className="w-full max-w-md border-border/40">
@@ -20,7 +24,7 @@ export function SignIn() {
         </CardHeader>
         <CardContent className="space-y-6">
           <Button
-            onClick={() => signIn("google", { callbackUrl: "/" })}
+            onClick={() => signIn("google", { callbackUrl })}
             variant="outline"
             className="w-full h-11 text-base"
             size="lg"
