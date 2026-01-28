@@ -59,6 +59,7 @@ function getActionableErrorMessage(error: string, redirectUri: string): string {
 export function GoogleStep({ status, onBack, onNext }: GoogleStepProps) {
   const [connecting, setConnecting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
   const [calendars, setCalendars] = useState<Calendar[]>([]);
   const [selectedCalendar, setSelectedCalendar] = useState<string>("");
   const [loadingCalendars, setLoadingCalendars] = useState(false);
@@ -133,6 +134,8 @@ export function GoogleStep({ status, onBack, onNext }: GoogleStepProps) {
 
   const handleSelectCalendar = async (calendarId: string) => {
     setSelectedCalendar(calendarId);
+    setError(null);
+    setNotice(null);
     try {
       // Find calendar name for storage
       const selectedCal = calendars.find((cal) => cal.id === calendarId);
@@ -144,9 +147,13 @@ export function GoogleStep({ status, onBack, onNext }: GoogleStepProps) {
         body: JSON.stringify({ calendarId, calendarName }),
       });
 
+      const data = await response.json().catch(() => null);
+
       if (!response.ok) {
-        throw new Error("Failed to select calendar");
+        throw new Error(data?.error || "Failed to select calendar");
       }
+
+      setNotice(data?.warning ?? null);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to select calendar");
     }
@@ -437,6 +444,11 @@ export function GoogleStep({ status, onBack, onNext }: GoogleStepProps) {
 
           {error && (
             <div className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive">{error}</div>
+          )}
+          {notice && (
+            <div className="rounded-lg border border-border bg-muted/50 p-3 text-sm text-muted-foreground">
+              {notice}
+            </div>
           )}
 
           <div className="flex justify-between">
