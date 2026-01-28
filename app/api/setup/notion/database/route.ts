@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
         await updateSettings({
           notion: {
             ...(settings?.notion ?? {}),
-            apiToken: settings?.notion?.apiToken ?? apiToken ?? env.NOTION_API_TOKEN,
+            apiToken: notionToken,
             databaseId,
             databaseName,
           },
