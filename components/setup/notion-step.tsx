@@ -379,7 +379,7 @@ export function NotionStep({ status, onBack, onNext }: NotionStepProps) {
               <Input
                 id="apiToken"
                 type="password"
-                placeholder="secret_xxx..."
+                placeholder="secret_xxx…"
                 value={apiToken}
                 onChange={handleTokenChange}
               />
@@ -458,7 +458,7 @@ export function NotionStep({ status, onBack, onNext }: NotionStepProps) {
               aria-labelledby="database-label"
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select a database" />
+                <SelectValue placeholder="Select a database…" />
               </SelectTrigger>
               <SelectContent>
                 {databases.map((db) => (

@@ -21,10 +21,10 @@ export function AppHeader() {
       {/* Mobile menu trigger */}
       <button
         onClick={() => setMobileOpen(true)}
-        className="lg:hidden p-2 hover:bg-muted transition-colors"
+        className="lg:hidden p-2 hover:bg-muted transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
         aria-label="Open menu"
       >
-        <Menu className="w-5 h-5" />
+        <Menu aria-hidden="true" className="w-5 h-5" />
       </button>
 
       {/* Mobile logo */}

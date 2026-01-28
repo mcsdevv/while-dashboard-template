@@ -99,7 +99,7 @@ const SidebarNavItem = React.forwardRef<HTMLButtonElement, SidebarNavItemProps>(
     <button
       ref={ref}
       className={cn(
-        "w-full flex items-center gap-3 px-3 py-2 text-sm transition-colors",
+        "w-full flex items-center gap-3 px-3 py-2 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
         active
           ? "bg-muted text-foreground font-medium"
           : "text-muted-foreground hover:bg-muted hover:text-foreground",

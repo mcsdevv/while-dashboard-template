@@ -423,7 +423,7 @@ export function GoogleStep({ status, onBack, onNext }: GoogleStepProps) {
             >
               <SelectTrigger>
                 <SelectValue
-                  placeholder={loadingCalendars ? "Loading calendars..." : "Select a calendar"}
+                  placeholder={loadingCalendars ? "Loading calendars…" : "Select a calendar…"}
                 />
               </SelectTrigger>
               <SelectContent>

@@ -129,7 +129,11 @@ export function SetupWizard({ currentStep }: SetupWizardProps) {
                     aria-label={`Step ${step.id}: ${step.name}`}
                     aria-current={isCurrent ? "step" : undefined}
                   >
-                    {isComplete ? <Check className="w-5 h-5" /> : <Icon className="w-5 h-5" />}
+                    {isComplete ? (
+                      <Check aria-hidden="true" className="w-5 h-5" />
+                    ) : (
+                      <Icon aria-hidden="true" className="w-5 h-5" />
+                    )}
                   </button>
                   {index < STEPS.length - 1 && (
                     <div

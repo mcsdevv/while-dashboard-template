@@ -183,7 +183,7 @@ export function FieldMappingEditor({ initialMapping, onSave }: FieldMappingEdito
                   {properties.length > 0 ? (
                     <Select value={currentValue} onValueChange={(val) => handleChange(field, val)}>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select a property" />
+                        <SelectValue placeholder="Select a property…" />
                       </SelectTrigger>
                       <SelectContent>
                         {!required && (
@@ -206,7 +206,7 @@ export function FieldMappingEditor({ initialMapping, onSave }: FieldMappingEdito
                       type="text"
                       value={mapping[field]}
                       onChange={(e) => handleChange(field, e.target.value)}
-                      placeholder={`Enter property name`}
+                      placeholder="Enter property name…"
                       className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                     />
                   )}

@@ -39,15 +39,15 @@ export function AppSidebar() {
         <button
           onClick={toggleCollapsed}
           className={cn(
-            "p-1.5 hover:bg-muted transition-colors",
+            "p-1.5 hover:bg-muted transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm",
             collapsed && "absolute -right-3 top-4 bg-sidebar border border-sidebar-border",
           )}
           aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
           {collapsed ? (
-            <ChevronRight className="w-4 h-4" />
+            <ChevronRight aria-hidden="true" className="w-4 h-4" />
           ) : (
-            <ChevronLeft className="w-4 h-4" />
+            <ChevronLeft aria-hidden="true" className="w-4 h-4" />
           )}
         </button>
       </div>

@@ -163,7 +163,7 @@ export function FieldMappingStep({ onBack, onNext }: FieldMappingStepProps) {
               disabled={!isRequired && !config.enabled}
             >
               <SelectTrigger className={!isRequired && !config.enabled ? "opacity-50" : ""}>
-                <SelectValue placeholder="Select property" />
+                <SelectValue placeholder="Select property…" />
               </SelectTrigger>
               <SelectContent>
                 {!isRequired && (
@@ -187,7 +187,7 @@ export function FieldMappingStep({ onBack, onNext }: FieldMappingStepProps) {
               value={config.notionPropertyName}
               onChange={(e) => handlePropertyChange(field, e.target.value)}
               disabled={!isRequired && !config.enabled}
-              placeholder="Property name"
+              placeholder="Property name…"
               className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:opacity-50"
             />
           )}

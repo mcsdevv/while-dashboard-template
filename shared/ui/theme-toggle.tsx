@@ -29,7 +29,7 @@ export function ThemeToggle() {
   if (!mounted) {
     return (
       <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-        <Monitor className="size-4" />
+        <Monitor aria-hidden="true" className="size-4" />
         <span>Theme</span>
       </div>
     );
@@ -41,15 +41,15 @@ export function ThemeToggle() {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
-        <Icon className="size-4" />
+      <DropdownMenuTrigger className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm">
+        <Icon aria-hidden="true" className="size-4" />
         <span>{currentTheme.label}</span>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="center">
         <DropdownMenuRadioGroup value={currentValue} onValueChange={setTheme}>
           {themes.map(({ value, label, icon: ThemeIcon }) => (
             <DropdownMenuRadioItem key={value} value={value}>
-              <ThemeIcon className="size-4 mr-2" />
+              <ThemeIcon aria-hidden="true" className="size-4 mr-2" />
               {label}
             </DropdownMenuRadioItem>
           ))}

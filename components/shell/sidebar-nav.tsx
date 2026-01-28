@@ -62,15 +62,16 @@ function NavItemComponent({
         <button
           onClick={() => setExpanded(!expanded)}
           className={cn(
-            "w-full flex items-center gap-3 px-3 py-2 text-sm transition-colors",
+            "w-full flex items-center gap-3 px-3 py-2 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
             isActive
               ? "bg-muted text-foreground font-medium"
               : "text-muted-foreground hover:bg-muted hover:text-foreground",
           )}
         >
-          <Icon className="w-5 h-5 flex-shrink-0" />
+          <Icon aria-hidden="true" className="w-5 h-5 flex-shrink-0" />
           <span className="flex-1 text-left truncate">{item.title}</span>
           <ChevronDown
+            aria-hidden="true"
             className={cn(
               "w-4 h-4 transition-transform duration-200",
               expanded && "rotate-180",
@@ -98,7 +99,7 @@ function NavItemComponent({
   const content = (
     <SidebarNavItem
       active={pathname === item.href}
-      icon={<Icon className="w-5 h-5" />}
+      icon={<Icon aria-hidden="true" className="w-5 h-5" />}
       collapsed={collapsed}
       onClick={onNavigate}
     >

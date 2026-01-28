@@ -132,7 +132,7 @@ export function LogsViewer({ logs }: LogsViewerProps) {
         {/* Filters */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Input
-            placeholder="Search by event or error..."
+            placeholder="Search by event or error…"
             value={searchQuery}
             onChange={handleSearchChange}
             className="w-full"
@@ -140,7 +140,7 @@ export function LogsViewer({ logs }: LogsViewerProps) {
 
           <Select value={directionFilter} onValueChange={handleDirectionChange}>
             <SelectTrigger>
-              <SelectValue placeholder="Direction" />
+              <SelectValue placeholder="Direction…" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Directions</SelectItem>
@@ -151,7 +151,7 @@ export function LogsViewer({ logs }: LogsViewerProps) {
 
           <Select value={operationFilter} onValueChange={handleOperationChange}>
             <SelectTrigger>
-              <SelectValue placeholder="Operation" />
+              <SelectValue placeholder="Operation…" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Operations</SelectItem>
@@ -163,7 +163,7 @@ export function LogsViewer({ logs }: LogsViewerProps) {
 
           <Select value={statusFilter} onValueChange={handleStatusChange}>
             <SelectTrigger>
-              <SelectValue placeholder="Status" />
+              <SelectValue placeholder="Status…" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Statuses</SelectItem>

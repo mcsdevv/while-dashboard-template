@@ -27,6 +27,8 @@ export function UserMenu() {
           <img
             src={session.user.image}
             alt={session.user.name || "User"}
+            width={20}
+            height={20}
             className="w-5 h-5 rounded-full"
           />
         )}

@@ -132,7 +132,7 @@ export function Dashboard() {
           onValueChange={(value) => setTimeWindow(value as TimeWindow)}
         >
           <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Select time range" />
+            <SelectValue placeholder="Select time range…" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="24h">{timeWindowLabels["24h"]}</SelectItem>

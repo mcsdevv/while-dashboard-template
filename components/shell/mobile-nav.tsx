@@ -27,7 +27,7 @@ export function MobileNav() {
       {/* Drawer */}
       <div
         className={cn(
-          "fixed inset-y-0 left-0 z-50 w-72 lg:hidden",
+          "fixed inset-y-0 left-0 z-50 w-72 lg:hidden overscroll-contain",
           "bg-sidebar border-r border-sidebar-border",
           "animate-in slide-in-from-left duration-200",
         )}
@@ -43,10 +43,10 @@ export function MobileNav() {
           </Link>
           <button
             onClick={() => setMobileOpen(false)}
-            className="p-2 hover:bg-muted transition-colors"
+            className="p-2 hover:bg-muted transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
             aria-label="Close menu"
           >
-            <X className="w-5 h-5" />
+            <X aria-hidden="true" className="w-5 h-5" />
           </button>
         </div>
 

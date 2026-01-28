@@ -43,6 +43,7 @@ export function CopyValue({ value, label, className }: CopyValueProps) {
           size="sm"
           onClick={handleCopy}
           className="shrink-0 h-8 px-2"
+          aria-label={copied ? "Copied" : "Copy to clipboard"}
         >
           {copied ? (
             <svg
