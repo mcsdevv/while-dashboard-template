@@ -57,7 +57,7 @@ export function WelcomeStep({ onNext }: WelcomeStepProps) {
               <span>
                 A Google Cloud project with Calendar API enabled and OAuth 2.0 credentials.{" "}
                 <a
-                  href="https://console.cloud.google.com/apis/credentials"
+                  href="https://console.cloud.google.com/auth/clients/create"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-primary underline"

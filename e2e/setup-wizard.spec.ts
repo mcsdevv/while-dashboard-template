@@ -474,11 +474,11 @@ test.describe("Setup Wizard - Welcome Step UX", () => {
     await page.getByRole("button", { name: /Google OAuth Configuration Values/i }).click();
 
     // Check links
-    const credentialsLink = page.getByRole("link", { name: /Google Cloud Credentials/i });
+    const credentialsLink = page.getByRole("link", { name: /Create an OAuth 2\.0 Client ID/i });
     await expect(credentialsLink).toBeVisible();
     await expect(credentialsLink).toHaveAttribute(
       "href",
-      "https://console.cloud.google.com/apis/credentials",
+      "https://console.cloud.google.com/auth/clients/create",
     );
 
     const guideLink = page.getByRole("link", { name: /Full Setup Guide/i });

@@ -68,7 +68,7 @@ describe("WelcomeStep", () => {
       const googleLink = screen.getByRole("link", { name: /Create credentials/i });
       expect(googleLink).toHaveAttribute(
         "href",
-        "https://console.cloud.google.com/apis/credentials",
+        "https://console.cloud.google.com/auth/clients/create",
       );
       expect(googleLink).toHaveAttribute("target", "_blank");
       expect(googleLink).toHaveAttribute("rel", "noopener noreferrer");

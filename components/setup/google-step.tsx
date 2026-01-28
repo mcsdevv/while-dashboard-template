@@ -183,14 +183,13 @@ export function GoogleStep({ status, onBack, onNext }: GoogleStepProps) {
                     <p className="text-sm text-muted-foreground mb-1">
                       1. Go to{" "}
                       <a
-                        href="https://console.cloud.google.com/apis/credentials"
+                        href="https://console.cloud.google.com/auth/clients/create"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-primary underline"
                       >
-                        Google Cloud Credentials
-                      </a>{" "}
-                      and create an OAuth 2.0 Client ID
+                        Create an OAuth 2.0 Client ID
+                      </a>
                     </p>
                   </div>
 
