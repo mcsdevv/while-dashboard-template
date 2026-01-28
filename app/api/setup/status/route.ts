@@ -3,7 +3,7 @@
  * GET: Get current setup status
  */
 
-import { getGoogleClientConfig } from "@/lib/env";
+import { env, getGoogleClientConfig } from "@/lib/env";
 import { getSettings, isSetupComplete } from "@/lib/settings";
 import { NextResponse } from "next/server";
 
@@ -30,6 +30,7 @@ export async function GET() {
         configured: !!settings?.notion?.apiToken,
         databaseSelected: !!settings?.notion?.databaseId,
         databaseName: settings?.notion?.databaseName || null,
+        hasEnvToken: !!env.NOTION_API_TOKEN && !settings?.notion?.apiToken,
       },
       fieldMapping: {
         configured: !!settings?.fieldMapping,

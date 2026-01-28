@@ -3,15 +3,21 @@
  * POST: Validate Notion API token and list accessible databases
  */
 
+import { env } from "@/lib/env";
 import { updateSettings } from "@/lib/settings";
 import { Client } from "@notionhq/client";
 import type { DatabaseObjectResponse } from "@notionhq/client/build/src/api-endpoints";
 import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
-const notionTokenSchema = z.object({
-  apiToken: z.string().min(1, "API token is required"),
-});
+const notionTokenSchema = z
+  .object({
+    apiToken: z.string().optional(),
+    useEnvToken: z.boolean().optional(),
+  })
+  .refine((data) => data.apiToken || data.useEnvToken, {
+    message: "Either apiToken or useEnvToken is required",
+  });
 
 /**
  * POST - Validate Notion API token and list databases
@@ -26,7 +32,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Validation failed", details: errors }, { status: 400 });
     }
 
-    const { apiToken } = result.data;
+    const { apiToken: providedToken, useEnvToken } = result.data;
+    const apiToken = useEnvToken ? env.NOTION_API_TOKEN : providedToken;
+
+    if (!apiToken) {
+      return NextResponse.json({ error: "No token provided" }, { status: 400 });
+    }
 
     // Test the token by listing databases
     const notion = new Client({ auth: apiToken });

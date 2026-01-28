@@ -29,6 +29,7 @@ interface SetupStatus {
     configured: boolean;
     databaseSelected: boolean;
     databaseName: string | null;
+    hasEnvToken?: boolean;
   };
   fieldMapping: {
     configured: boolean;

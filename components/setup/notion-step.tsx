@@ -11,6 +11,7 @@ interface NotionStepProps {
     configured: boolean;
     databaseSelected: boolean;
     databaseName: string | null;
+    hasEnvToken?: boolean;
   };
   onBack: () => void;
   onNext: () => void;
@@ -44,6 +45,7 @@ export function NotionStep({ status, onBack, onNext }: NotionStepProps) {
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const validationRequestId = useRef(0);
   const validationAbortController = useRef<AbortController | null>(null);
+  const hasTriedEnvToken = useRef(false);
 
   // Debounced validation function
   const validateTokenDebounced = useCallback((token: string) => {
@@ -142,6 +144,48 @@ export function NotionStep({ status, onBack, onNext }: NotionStepProps) {
       }
     };
   }, []);
+
+  // Auto-validate if env token exists
+  const handleValidateWithEnvToken = useCallback(async () => {
+    setValidating(true);
+    setError(null);
+
+    try {
+      const response = await fetch("/api/setup/notion", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ useEnvToken: true }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to validate token");
+      }
+
+      setDatabases(data.databases);
+      setValidated(true);
+
+      if (data.databases.length === 0) {
+        setError(
+          "No databases found. Make sure you've shared at least one database with your integration.",
+        );
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to validate token");
+      setApiToken(""); // Reset on failure so user can enter manually
+    } finally {
+      setValidating(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (status?.hasEnvToken && !validated && !hasTriedEnvToken.current) {
+      hasTriedEnvToken.current = true;
+      setApiToken("••••••••••••••••");
+      handleValidateWithEnvToken();
+    }
+  }, [status?.hasEnvToken, validated, handleValidateWithEnvToken]);
 
   // Handle token input change
   const handleTokenChange = (e: React.ChangeEvent<HTMLInputElement>) => {
