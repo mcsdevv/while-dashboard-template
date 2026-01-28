@@ -146,8 +146,8 @@ export function StorageStep({ onBack, onNext }: StorageStepProps) {
           <div className="rounded-lg bg-muted/50 p-3 text-sm text-muted-foreground">
             <p className="font-medium">Required environment variables:</p>
             <ul className="mt-1 font-mono text-xs space-y-0.5">
-              <li>UPSTASH_REDIS_REST_URL</li>
-              <li>UPSTASH_REDIS_REST_TOKEN</li>
+              <li>KV_REST_API_URL</li>
+              <li>KV_REST_API_TOKEN</li>
             </ul>
           </div>
         </>

@@ -10,7 +10,7 @@ let redis: Redis | null = null;
  * Check if Redis environment variables are configured.
  */
 export function isRedisConfigured(): boolean {
-  return Boolean(process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN);
+  return Boolean(process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN);
 }
 
 /**
@@ -23,7 +23,10 @@ export function getRedis(): Redis | null {
     return null;
   }
   if (!redis) {
-    redis = Redis.fromEnv();
+    redis = new Redis({
+      url: process.env.KV_REST_API_URL!,
+      token: process.env.KV_REST_API_TOKEN!,
+    });
   }
   return redis;
 }
