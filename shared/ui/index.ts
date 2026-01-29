@@ -4,6 +4,20 @@ export { Badge, badgeVariants, type BadgeProps } from "./badge";
 // Button
 export { Button, buttonVariants, type ButtonProps } from "./button";
 
+// Dialog
+export {
+  Dialog,
+  DialogPortal,
+  DialogOverlay,
+  DialogClose,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogFooter,
+  DialogTitle,
+  DialogDescription,
+} from "./dialog";
+
 // Card
 export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent } from "./card";
 
@@ -31,6 +45,9 @@ export {
 
 // Input
 export { Input } from "./input";
+
+// Label
+export { Label, type LabelProps } from "./label";
 
 // Select
 export {

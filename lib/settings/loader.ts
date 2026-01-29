@@ -122,9 +122,7 @@ export async function getLegacyFieldMapping(): Promise<FieldMapping> {
  * Returns default configuration until settings migration is complete.
  */
 export async function getExtendedFieldMapping(): Promise<ExtendedFieldMapping> {
-  // TODO: Read from settings once migration to ExtendedFieldMapping is complete
-  // For now, return defaults which have the new fields disabled by default
-  return DEFAULT_EXTENDED_FIELD_MAPPING;
+  return getFieldMapping();
 }
 
 /**

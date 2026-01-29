@@ -215,10 +215,14 @@ describe("migrateFieldMapping", () => {
       expect(result.gcalEventId.propertyType).toBe("rich_text");
       expect(result.attendees.propertyType).toBe("rich_text");
       expect(result.organizer.propertyType).toBe("rich_text");
-      expect(result.conferenceLink.propertyType).toBe("rich_text");
       expect(result.recurrence.propertyType).toBe("rich_text");
-      expect(result.color.propertyType).toBe("rich_text");
-      expect(result.visibility.propertyType).toBe("rich_text");
+    });
+
+    it("conferenceLink uses url and color/visibility use select", () => {
+      const result = migrateFieldMapping(customLegacy);
+      expect(result.conferenceLink.propertyType).toBe("url");
+      expect(result.color.propertyType).toBe("select");
+      expect(result.visibility.propertyType).toBe("select");
     });
   });
 

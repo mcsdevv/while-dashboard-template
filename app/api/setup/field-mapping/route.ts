@@ -21,7 +21,7 @@ const fieldConfigSchema = z.object({
   enabled: z.boolean(),
   notionPropertyName: z.string(),
   displayLabel: z.string(),
-  propertyType: z.enum(["title", "rich_text", "number", "date", "checkbox"]),
+  propertyType: z.enum(["title", "rich_text", "number", "date", "checkbox", "url", "select"]),
   required: z.boolean(),
 });
 

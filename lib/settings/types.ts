@@ -28,7 +28,14 @@ export interface FieldMapping {
   reminders: string;
 }
 
-export type NotionPropertyType = "title" | "rich_text" | "number" | "date" | "checkbox";
+export type NotionPropertyType =
+  | "title"
+  | "rich_text"
+  | "number"
+  | "date"
+  | "checkbox"
+  | "url"
+  | "select";
 
 export interface FieldConfig {
   enabled: boolean;
@@ -131,7 +138,7 @@ export const DEFAULT_EXTENDED_FIELD_MAPPING: ExtendedFieldMapping = {
     enabled: false,
     notionPropertyName: "Conference Link",
     displayLabel: "Conference Link",
-    propertyType: "rich_text",
+    propertyType: "url",
     required: false,
   },
   recurrence: {
@@ -145,14 +152,14 @@ export const DEFAULT_EXTENDED_FIELD_MAPPING: ExtendedFieldMapping = {
     enabled: false,
     notionPropertyName: "Color",
     displayLabel: "Calendar Color",
-    propertyType: "rich_text",
+    propertyType: "select",
     required: false,
   },
   visibility: {
     enabled: false,
     notionPropertyName: "Visibility",
     displayLabel: "Visibility",
-    propertyType: "rich_text",
+    propertyType: "select",
     required: false,
   },
 };

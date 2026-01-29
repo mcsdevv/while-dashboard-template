@@ -49,10 +49,10 @@ export const TEMPLATE_PROPERTY_TYPES: Record<string, string> = {
   [TEMPLATE_PROPERTIES.reminders]: "number",
   [TEMPLATE_PROPERTIES.attendees]: "rich_text",
   [TEMPLATE_PROPERTIES.organizer]: "rich_text",
-  [TEMPLATE_PROPERTIES.conferenceLink]: "rich_text",
+  [TEMPLATE_PROPERTIES.conferenceLink]: "url",
   [TEMPLATE_PROPERTIES.recurrence]: "rich_text",
-  [TEMPLATE_PROPERTIES.color]: "rich_text",
-  [TEMPLATE_PROPERTIES.visibility]: "rich_text",
+  [TEMPLATE_PROPERTIES.color]: "select",
+  [TEMPLATE_PROPERTIES.visibility]: "select",
 };
 
 /**
@@ -189,7 +189,7 @@ export function generateTemplateFieldMapping() {
       enabled: false,
       notionPropertyName: TEMPLATE_PROPERTIES.conferenceLink,
       displayLabel: "Conference Link",
-      propertyType: "rich_text" as const,
+      propertyType: "url" as const,
       required: false,
     },
     recurrence: {
@@ -203,14 +203,14 @@ export function generateTemplateFieldMapping() {
       enabled: false,
       notionPropertyName: TEMPLATE_PROPERTIES.color,
       displayLabel: "Color",
-      propertyType: "rich_text" as const,
+      propertyType: "select" as const,
       required: false,
     },
     visibility: {
       enabled: false,
       notionPropertyName: TEMPLATE_PROPERTIES.visibility,
       displayLabel: "Visibility",
-      propertyType: "rich_text" as const,
+      propertyType: "select" as const,
       required: false,
     },
   };
