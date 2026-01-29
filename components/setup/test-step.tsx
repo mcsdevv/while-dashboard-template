@@ -1,8 +1,10 @@
 "use client";
 
 import { Button } from "@/shared/ui";
+import { CheckCircle2, PartyPopper, XCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import Confetti from "react-confetti";
 
 interface TestStepProps {
   onBack: () => void;
@@ -16,12 +18,39 @@ interface TestResult {
   details?: string;
 }
 
+function useWindowSize() {
+  const [size, setSize] = useState({ width: 0, height: 0 });
+
+  useEffect(() => {
+    function updateSize() {
+      setSize({ width: window.innerWidth, height: window.innerHeight });
+    }
+    updateSize();
+    window.addEventListener("resize", updateSize);
+    return () => window.removeEventListener("resize", updateSize);
+  }, []);
+
+  return size;
+}
+
 export function TestStep({ onBack, setupComplete }: TestStepProps) {
   const router = useRouter();
+  const { width, height } = useWindowSize();
   const [testing, setTesting] = useState(false);
   const [results, setResults] = useState<TestResult[]>([]);
   const [allPassed, setAllPassed] = useState(setupComplete);
   const [error, setError] = useState<string | null>(null);
+  const [showConfetti, setShowConfetti] = useState(false);
+
+  // Trigger confetti when allPassed becomes true
+  useEffect(() => {
+    if (allPassed) {
+      setShowConfetti(true);
+      // Stop confetti after 5 seconds
+      const timer = setTimeout(() => setShowConfetti(false), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [allPassed]);
 
   const handleTest = async () => {
     setTesting(true);
@@ -53,97 +82,103 @@ export function TestStep({ onBack, setupComplete }: TestStepProps) {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="text-sm text-muted-foreground">
-        Test your connections to make sure everything is configured correctly.
-      </div>
+    <>
+      {showConfetti && (
+        <Confetti
+          width={width}
+          height={height}
+          recycle={false}
+          numberOfPieces={200}
+          gravity={0.3}
+          style={{ position: "fixed", top: 0, left: 0, zIndex: 100 }}
+        />
+      )}
 
-      {results.length > 0 && (
-        <div className="space-y-3">
-          {results.map((result) => (
-            <div
-              key={result.service}
-              className={`rounded-lg border p-4 ${
-                result.success
-                  ? "border-foreground/10 bg-foreground/5"
-                  : "border-foreground/20 bg-foreground/5"
-              }`}
-            >
-              <div className="flex items-center gap-2">
-                {result.success ? (
-                  <svg
-                    aria-hidden="true"
-                    className="h-5 w-5 text-foreground"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                ) : (
-                  <svg
-                    aria-hidden="true"
-                    className="h-5 w-5 text-muted-foreground"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
+      <div className="space-y-5">
+        {/* Service status cards */}
+        {results.length > 0 && (
+          <div className="space-y-3">
+            {results.map((result, index) => (
+              <div
+                key={result.service}
+                className={`
+                  rounded-lg border p-4 transition-all duration-300
+                  ${result.success
+                    ? "border-emerald-500/30 bg-emerald-500/5"
+                    : "border-red-500/30 bg-red-500/5"
+                  }
+                `}
+                style={{ animationDelay: `${index * 100}ms` }}
+              >
+                <div className="flex items-center gap-3">
+                  {result.success ? (
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-500/20">
+                      <CheckCircle2 className="h-5 w-5 text-emerald-500" />
+                    </div>
+                  ) : (
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-red-500/20">
+                      <XCircle className="h-5 w-5 text-red-500" />
+                    </div>
+                  )}
+                  <div className="flex-1">
+                    <span className={`font-medium ${result.success ? "text-foreground" : "text-muted-foreground"}`}>
+                      {result.service}
+                    </span>
+                    <span className="text-muted-foreground">: {result.message}</span>
+                  </div>
+                </div>
+                {result.details && (
+                  <p className="mt-2 pl-11 text-sm text-muted-foreground">{result.details}</p>
                 )}
-                <span
-                  className={`font-medium ${
-                    result.success ? "text-foreground" : "text-muted-foreground"
-                  }`}
-                >
-                  {result.service}: {result.message}
-                </span>
               </div>
-              {result.details && (
-                <p className="mt-1 text-sm text-muted-foreground">{result.details}</p>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
-
-      {allPassed && (
-        <div className="rounded-lg border border-foreground/10 bg-foreground/5 p-4">
-          <div className="flex items-center gap-2 text-foreground">
-            <svg aria-hidden="true" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-              <path
-                fillRule="evenodd"
-                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                clipRule="evenodd"
-              />
-            </svg>
-            <span className="font-medium">Setup Complete!</span>
+            ))}
           </div>
-          <p className="mt-1 text-sm text-muted-foreground">Your calendar sync is ready to use.</p>
-        </div>
-      )}
+        )}
 
-      {error && (
-        <div className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive">{error}</div>
-      )}
+        {/* Setup Complete celebration card */}
+        {allPassed && (
+          <div className="relative overflow-hidden rounded-xl border border-emerald-500/30 bg-gradient-to-br from-emerald-500/10 via-emerald-500/5 to-transparent p-6">
+            {/* Subtle glow effect */}
+            <div className="absolute -top-12 -right-12 h-32 w-32 rounded-full bg-emerald-500/10 blur-3xl" />
 
-      <div className="flex justify-between">
-        <Button variant="outline" onClick={onBack}>
-          Back
-        </Button>
-        <div className="flex gap-2">
-          <Button onClick={handleTest} disabled={testing} variant="outline">
-            {testing ? "Testing..." : "Test Connections"}
+            <div className="relative flex items-start gap-4">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-emerald-500/20">
+                <PartyPopper className="h-6 w-6 text-emerald-500" />
+              </div>
+              <div className="space-y-1">
+                <h3 className="text-lg font-semibold text-foreground">Setup Complete!</h3>
+                <p className="text-sm text-muted-foreground">
+                  Your calendar sync is ready to use. Events will now sync between Google Calendar and Notion.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Error display */}
+        {error && (
+          <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-500">
+            {error}
+          </div>
+        )}
+
+        {/* Action buttons */}
+        <div className="flex items-center justify-between pt-2">
+          <Button variant="outline" onClick={onBack}>
+            Back
           </Button>
-          {allPassed && <Button onClick={handleGoToDashboard}>Go to Dashboard</Button>}
+          <div className="flex gap-3">
+            <Button onClick={handleTest} disabled={testing} variant="outline">
+              {testing ? "Testing..." : "Test Connections"}
+            </Button>
+            {allPassed && (
+              <Button onClick={handleGoToDashboard}>
+                Go to Dashboard
+              </Button>
+            )}
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
