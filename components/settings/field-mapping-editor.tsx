@@ -3,6 +3,7 @@
 import { Button } from "@/shared/ui";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui";
+import { ArrowRight } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 
 interface FieldMapping {
@@ -165,13 +166,29 @@ export function FieldMappingEditor({ initialMapping, onSave }: FieldMappingEdito
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
+        {/* Service Headers */}
+        <div className="flex items-center justify-between py-4 px-3 rounded-lg bg-muted/30 border border-border">
+          <div className="flex items-center gap-3">
+            <img
+              src="/icons/google-calendar.png"
+              alt="Google Calendar"
+              className="w-7 h-7"
+            />
+            <span className="text-base font-medium">Google Calendar</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <img src="/icons/notion.png" alt="Notion" className="w-7 h-7" />
+            <span className="text-base font-medium">Notion</span>
+          </div>
+        </div>
+
         <div className="space-y-4">
           {(Object.keys(FIELD_LABELS) as Array<keyof FieldMapping>).map((field) => {
             const { label, description, required } = FIELD_LABELS[field];
             const currentValue = mapping[field] || EMPTY_VALUE;
 
             return (
-              <div key={field} className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+              <div key={field} className="grid grid-cols-1 md:grid-cols-[1fr,auto,1fr] gap-4 items-center">
                 <div>
                   <div className="flex items-center gap-1">
                     <span className="text-sm font-medium">{label}</span>
@@ -179,6 +196,7 @@ export function FieldMappingEditor({ initialMapping, onSave }: FieldMappingEdito
                   </div>
                   <p className="text-xs text-muted-foreground">{description}</p>
                 </div>
+                <ArrowRight className="hidden md:block w-4 h-4 text-muted-foreground" />
                 <div>
                   {properties.length > 0 ? (
                     <Select value={currentValue} onValueChange={(val) => handleChange(field, val)}>

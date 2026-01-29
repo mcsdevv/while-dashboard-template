@@ -9,6 +9,7 @@ import {
   SelectValue,
   Switch,
 } from "@/shared/ui";
+import { ArrowRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { ExtendedFieldMapping, FieldConfig } from "@/lib/settings/types";
 import { DEFAULT_EXTENDED_FIELD_MAPPING } from "@/lib/settings/types";
@@ -135,14 +136,11 @@ export function FieldMappingStep({ onBack, onNext }: FieldMappingStepProps) {
       <div key={field} className="flex items-center gap-4 py-2">
         {/* Toggle */}
         <div className="w-12 flex justify-center">
-          {isRequired ? (
-            <div className="text-xs text-muted-foreground">Required</div>
-          ) : (
-            <Switch
-              checked={config.enabled}
-              onCheckedChange={(checked) => handleToggle(field, checked)}
-            />
-          )}
+          <Switch
+            checked={isRequired ? true : config.enabled}
+            onCheckedChange={(checked) => handleToggle(field, checked)}
+            disabled={isRequired}
+          />
         </div>
 
         {/* Label and description */}
@@ -153,6 +151,11 @@ export function FieldMappingStep({ onBack, onNext }: FieldMappingStepProps) {
           </div>
           <p className="text-xs text-muted-foreground truncate">{FIELD_DESCRIPTIONS[field]}</p>
         </div>
+
+        {/* Flow arrow */}
+        <ArrowRight
+          className={`w-4 h-4 flex-shrink-0 ${!isRequired && !config.enabled ? "text-muted-foreground/30" : "text-muted-foreground"}`}
+        />
 
         {/* Property selector */}
         <div className="w-48">
@@ -209,6 +212,22 @@ export function FieldMappingStep({ onBack, onNext }: FieldMappingStepProps) {
       <div className="text-sm text-muted-foreground">
         Configure which Google Calendar fields sync to your Notion database. Toggle fields on/off
         and map them to your Notion properties.
+      </div>
+
+      {/* Service Headers */}
+      <div className="flex items-center justify-between py-4 px-3 rounded-lg bg-muted/30 border border-border">
+        <div className="flex items-center gap-3">
+          <img
+            src="/icons/google-calendar.png"
+            alt="Google Calendar"
+            className="w-7 h-7"
+          />
+          <span className="text-base font-medium">Google Calendar</span>
+        </div>
+        <div className="flex items-center gap-3">
+          <img src="/icons/notion.png" alt="Notion" className="w-7 h-7" />
+          <span className="text-base font-medium">Notion</span>
+        </div>
       </div>
 
       {/* Required Fields Section */}
