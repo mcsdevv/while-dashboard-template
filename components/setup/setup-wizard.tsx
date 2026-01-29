@@ -9,9 +9,10 @@ import {
   CardTitle,
   SkeletonSetupWizard,
 } from "@/shared/ui";
+import confetti from "canvas-confetti";
 import { Calendar, Check, Database, GitBranch, Sparkles, TestTube } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { FieldMappingStep } from "./field-mapping-step";
 import { GoogleStep } from "./google-step";
 import { NotionStep } from "./notion-step";
@@ -56,6 +57,7 @@ export function SetupWizard({ currentStep }: SetupWizardProps) {
   const router = useRouter();
   const [status, setStatus] = useState<SetupStatus | null>(null);
   const [loading, setLoading] = useState(true);
+  const confettiTriggeredRef = useRef(false);
 
   const fetchStatus = useCallback(async () => {
     try {
@@ -74,6 +76,45 @@ export function SetupWizard({ currentStep }: SetupWizardProps) {
   useEffect(() => {
     fetchStatus();
   }, [fetchStatus]);
+
+  // Fire confetti celebration
+  const fireConfetti = useCallback(() => {
+    if (confettiTriggeredRef.current) return;
+    confettiTriggeredRef.current = true;
+
+    // Fire multiple bursts for a fuller effect
+    const duration = 3000;
+    const end = Date.now() + duration;
+
+    const frame = () => {
+      confetti({
+        particleCount: 3,
+        angle: 60,
+        spread: 55,
+        origin: { x: 0, y: 0.6 },
+        colors: ["#10b981", "#34d399", "#6ee7b7", "#a7f3d0"],
+      });
+      confetti({
+        particleCount: 3,
+        angle: 120,
+        spread: 55,
+        origin: { x: 1, y: 0.6 },
+        colors: ["#10b981", "#34d399", "#6ee7b7", "#a7f3d0"],
+      });
+
+      if (Date.now() < end) {
+        requestAnimationFrame(frame);
+      }
+    };
+    frame();
+  }, []);
+
+  // Trigger confetti when arriving at step 5 with setup already complete
+  useEffect(() => {
+    if (!loading && currentStep === 5 && status?.setupComplete && !confettiTriggeredRef.current) {
+      fireConfetti();
+    }
+  }, [loading, currentStep, status?.setupComplete, fireConfetti]);
 
   const goToStep = (step: number) => {
     if (step >= 1 && step <= 5) {
@@ -239,7 +280,11 @@ export function SetupWizard({ currentStep }: SetupWizardProps) {
               <FieldMappingStep onBack={() => goToStep(3)} onNext={handleStepComplete} />
             )}
             {currentStep === 5 && (
-              <TestStep onBack={() => goToStep(4)} setupComplete={status?.setupComplete || false} />
+              <TestStep
+                onBack={() => goToStep(4)}
+                setupComplete={status?.setupComplete || false}
+                onConfetti={fireConfetti}
+              />
             )}
           </CardContent>
         </Card>
