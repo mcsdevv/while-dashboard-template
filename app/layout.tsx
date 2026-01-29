@@ -1,7 +1,7 @@
 import { Providers } from "@/components/providers";
 import { auth } from "@/lib/auth";
 import { isAuthConfigured } from "@/lib/env";
-import { Footer } from "@/shared/ui";
+import { FooterWrapper } from "@/components/footer-wrapper";
 import { GeistSans } from "geist/font/sans";
 import type { Metadata } from "next";
 import "./globals.css";
@@ -26,7 +26,7 @@ export default async function RootLayout({
       <body className={`${GeistSans.className} antialiased`}>
         <Providers session={session}>
           <div className="min-h-screen">{children}</div>
-          <Footer />
+          <FooterWrapper />
         </Providers>
       </body>
     </html>

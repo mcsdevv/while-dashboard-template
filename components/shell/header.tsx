@@ -2,7 +2,7 @@
 
 import { UserMenu } from "@/components/auth/user-menu";
 import { cn } from "@/lib/utils";
-import { ThemeToggle } from "@/shared/ui";
+import { ThemeToggleWrapper } from "@/components/theme-toggle-wrapper";
 import { Menu } from "lucide-react";
 import Link from "next/link";
 import { useSidebar } from "./sidebar-context";
@@ -42,7 +42,7 @@ export function AppHeader() {
       <div className="flex items-center gap-3">
         {/* Theme toggle (mobile only, desktop is in sidebar) */}
         <div className="lg:hidden">
-          <ThemeToggle />
+          <ThemeToggleWrapper />
         </div>
         <UserMenu />
       </div>

@@ -16,7 +16,13 @@ const links = {
   ],
 };
 
-export function Footer() {
+interface FooterProps {
+  theme?: string;
+  setTheme?: (theme: string) => void;
+  resolvedTheme?: string;
+}
+
+export function Footer({ theme, setTheme = () => {}, resolvedTheme }: FooterProps) {
   return (
     <footer className="border-t border-border bg-muted/50">
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
@@ -89,7 +95,7 @@ export function Footer() {
             </a>
             .
           </p>
-          <ThemeToggle />
+          <ThemeToggle theme={theme} setTheme={setTheme} resolvedTheme={resolvedTheme} />
           <p className="text-sm text-muted-foreground">
             Released under the{" "}
             <a

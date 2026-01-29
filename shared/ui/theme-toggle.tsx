@@ -1,13 +1,11 @@
 "use client";
 
-import { Monitor, Moon, Sun } from "lucide-react";
-import { useTheme } from "next-themes";
+import { Check, Monitor, Moon, Sun } from "lucide-react";
 import { useEffect, useState } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
+  DropdownMenuItem,
   DropdownMenuTrigger,
 } from "./dropdown-menu";
 
@@ -17,8 +15,13 @@ const themes = [
   { value: "system", label: "System", icon: Monitor },
 ] as const;
 
-export function ThemeToggle() {
-  const { theme, setTheme, resolvedTheme } = useTheme();
+interface ThemeToggleProps {
+  theme?: string;
+  setTheme: (theme: string) => void;
+  resolvedTheme?: string;
+}
+
+export function ThemeToggle({ theme, setTheme, resolvedTheme }: ThemeToggleProps) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -37,7 +40,8 @@ export function ThemeToggle() {
 
   const currentValue = theme ?? "system";
   const currentTheme = themes.find((t) => t.value === currentValue) ?? themes[2];
-  const Icon = resolvedTheme === "dark" ? Moon : Sun;
+  // Use the selected theme's icon (Monitor for System, Sun for Light, Moon for Dark)
+  const Icon = currentTheme.icon;
 
   return (
     <DropdownMenu>
@@ -46,14 +50,19 @@ export function ThemeToggle() {
         <span>{currentTheme.label}</span>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="center">
-        <DropdownMenuRadioGroup value={currentValue} onValueChange={setTheme}>
-          {themes.map(({ value, label, icon: ThemeIcon }) => (
-            <DropdownMenuRadioItem key={value} value={value}>
-              <ThemeIcon aria-hidden="true" className="size-4 mr-2" />
-              {label}
-            </DropdownMenuRadioItem>
-          ))}
-        </DropdownMenuRadioGroup>
+        {themes.map(({ value, label, icon: ThemeIcon }) => (
+          <DropdownMenuItem
+            key={value}
+            onClick={() => setTheme(value)}
+            className="flex items-center gap-2"
+          >
+            <ThemeIcon aria-hidden="true" className="size-4" />
+            <span className="flex-1">{label}</span>
+            {currentValue === value && (
+              <Check aria-hidden="true" className="size-4" />
+            )}
+          </DropdownMenuItem>
+        ))}
       </DropdownMenuContent>
     </DropdownMenu>
   );
