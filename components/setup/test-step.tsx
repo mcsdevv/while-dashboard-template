@@ -59,7 +59,7 @@ export function TestStep({ onBack, setupComplete, onConfetti }: TestStepProps) {
   };
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4">
       {/* Service status cards */}
       {results.length > 0 && (
         <div className="space-y-4">
