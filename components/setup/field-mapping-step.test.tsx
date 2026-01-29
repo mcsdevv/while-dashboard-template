@@ -132,6 +132,11 @@ describe("FieldMappingStep", () => {
 
     fireEvent.click(screen.getByRole("button", { name: /Continue/i }));
 
+    expect(screen.getByText(/Confirm Notion Changes/i)).toBeInTheDocument();
+    expect(screen.getByText(/Location/i)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /Confirm/i }));
+
     await waitFor(() =>
       expect(fetchMock).toHaveBeenCalledWith(
         "/api/setup/notion/property",
@@ -152,6 +157,52 @@ describe("FieldMappingStep", () => {
       ),
     );
     await waitFor(() => expect(onNext).toHaveBeenCalledTimes(1));
+  });
+
+  it("shows incompatible defaults in the confirmation dialog and blocks saving", async () => {
+    const mapping = {
+      ...DEFAULT_EXTENDED_FIELD_MAPPING,
+      reminders: { ...DEFAULT_EXTENDED_FIELD_MAPPING.reminders, enabled: true },
+    };
+
+    const fetchMock = vi.fn(async (input: RequestInfo, init?: RequestInit) => {
+      const url = String(input);
+      const method = init?.method ?? "GET";
+
+      if (url === "/api/setup/field-mapping" && method === "GET") {
+        return {
+          ok: true,
+          json: async () => ({
+            fieldMapping: mapping,
+            notionProperties: [
+              { id: "title", name: "Title", type: "title" },
+              { id: "date", name: "Date", type: "date" },
+              { id: "reminders", name: "Reminders", type: "rich_text" },
+            ],
+          }),
+        } as Response;
+      }
+
+      throw new Error(`Unexpected fetch call: ${url}`);
+    });
+
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<FieldMappingStep onBack={() => {}} onNext={() => {}} />);
+
+    await screen.findByText(/Configure which Google Calendar fields sync/i);
+
+    fireEvent.click(screen.getByRole("button", { name: /Continue/i }));
+
+    expect(screen.getByText(/Confirm Notion Changes/i)).toBeInTheDocument();
+    expect(screen.getByText(/Incompatible existing properties/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/default field names require specific Notion property types/i),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/Expected Number, found Text/i)).toBeInTheDocument();
+
+    const resolveButton = screen.getByRole("button", { name: /Resolve issues/i });
+    expect(resolveButton).toBeDisabled();
   });
 
   it("shows incompatible existing property in the list", async () => {

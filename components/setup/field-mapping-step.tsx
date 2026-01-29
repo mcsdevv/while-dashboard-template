@@ -2,6 +2,12 @@
 
 import {
   Button,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
   Select,
   SelectContent,
   SelectItem,
@@ -30,6 +36,13 @@ interface NotionProperty {
 }
 
 type FieldKey = keyof ExtendedFieldMapping;
+type PendingCreation = { field: FieldKey; propertyName: string; propertyType: string };
+type PendingConflict = {
+  field: FieldKey;
+  propertyName: string;
+  expectedType: string;
+  actualType: string;
+};
 
 const REQUIRED_FIELDS: FieldKey[] = ["title", "date"];
 const OPTIONAL_FIELDS: FieldKey[] = [
@@ -112,6 +125,12 @@ export function FieldMappingStep({ onBack, onNext }: FieldMappingStepProps) {
   const [dialogMode, setDialogMode] = useState<"create" | "rename">("create");
   const [dialogFieldFor, setDialogFieldFor] = useState<FieldKey | null>(null);
 
+  // Confirmation dialog state
+  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
+  const [pendingChanges, setPendingChanges] = useState<{
+    toCreate: PendingCreation[];
+    conflicts: PendingConflict[];
+  }>({ toCreate: [], conflicts: [] });
   useEffect(() => {
     if (!loadError) {
       lastLoadError.current = null;
@@ -138,6 +157,73 @@ export function FieldMappingStep({ onBack, onNext }: FieldMappingStepProps) {
   const isCompatiblePropertyType = (field: FieldKey, type: string) => {
     const compatibleTypes = PROPERTY_TYPE_COMPATIBILITY[field];
     return compatibleTypes.includes(type as NotionPropertyType);
+  };
+
+  const formatConflictSummary = (conflicts: PendingConflict[]) =>
+    conflicts
+      .map(
+        (conflict) =>
+          `${conflict.propertyName} (found ${conflict.actualType}, expected ${conflict.expectedType})`,
+      )
+      .join("; ");
+
+  const buildDefaultPropertyPlan = (
+    currentMapping: ExtendedFieldMapping,
+    currentProperties: NotionProperty[],
+  ) => {
+    let updatedMapping = currentMapping;
+    const toCreate: PendingCreation[] = [];
+    const conflicts: PendingConflict[] = [];
+
+    const fieldsToCheck = [...REQUIRED_FIELDS, ...OPTIONAL_FIELDS];
+    for (const field of fieldsToCheck) {
+      const config = updatedMapping[field];
+      const isEnabled = REQUIRED_FIELDS.includes(field) || config.enabled;
+      if (!isEnabled) continue;
+
+      const defaultName = DEFAULT_EXTENDED_FIELD_MAPPING[field].notionPropertyName;
+      // Only auto-create properties when user keeps the default name.
+      // If user cleared it or chose a different name, skip auto-creation.
+      if (!config.notionPropertyName || config.notionPropertyName !== defaultName) continue;
+
+      // Check if property already exists in Notion
+      const existing = currentProperties.find((prop) => prop.name === defaultName);
+      if (existing) {
+        if (!isCompatiblePropertyType(field, existing.type)) {
+          const expectedType =
+            TYPE_DISPLAY_NAMES[config.propertyType] || String(config.propertyType);
+          const actualType = TYPE_DISPLAY_NAMES[existing.type] || String(existing.type);
+          conflicts.push({
+            field,
+            propertyName: defaultName,
+            expectedType,
+            actualType,
+          });
+          continue;
+        }
+
+        if (existing.type !== config.propertyType) {
+          updatedMapping = {
+            ...updatedMapping,
+            [field]: {
+              ...config,
+              propertyType: existing.type as NotionPropertyType,
+            },
+          };
+        }
+
+        continue;
+      }
+
+      const typeDisplayName = TYPE_DISPLAY_NAMES[config.propertyType] || config.propertyType;
+      toCreate.push({
+        field,
+        propertyName: defaultName,
+        propertyType: typeDisplayName,
+      });
+    }
+
+    return { toCreate, conflicts, updatedMapping };
   };
 
   // Get compatible properties for a field
@@ -197,13 +283,36 @@ export function FieldMappingStep({ onBack, onNext }: FieldMappingStepProps) {
     }));
   };
 
-  const handleSave = async () => {
+  const handleSave = () => {
     // Validate required fields
     if (!mapping.title.notionPropertyName || !mapping.date.notionPropertyName) {
       setError("Title and Date fields require Notion property names");
       return;
     }
 
+    // Calculate what changes will be made
+    const plan = buildDefaultPropertyPlan(mapping, properties);
+
+    if (plan.conflicts.length > 0) {
+      setError(
+        "Some default Notion properties already exist with incompatible types. Resolve them before continuing.",
+      );
+    } else {
+      setError(null);
+    }
+
+    if (plan.conflicts.length > 0 || plan.toCreate.length > 0) {
+      // Show confirmation dialog
+      setPendingChanges({ toCreate: plan.toCreate, conflicts: plan.conflicts });
+      setConfirmDialogOpen(true);
+      return;
+    }
+
+    // No properties to create or conflicts to resolve, proceed directly
+    performSave();
+  };
+
+  const performSave = async () => {
     setSaving(true);
     setError(null);
 
@@ -215,51 +324,31 @@ export function FieldMappingStep({ onBack, onNext }: FieldMappingStepProps) {
         const createdProperties: NotionProperty[] = [];
         const knownProperties = [...properties];
 
-        const fieldsToCheck = [...REQUIRED_FIELDS, ...OPTIONAL_FIELDS];
-        for (const field of fieldsToCheck) {
-          const config = updatedMapping[field];
-          const isEnabled = REQUIRED_FIELDS.includes(field) || config.enabled;
-          if (!isEnabled) continue;
+        const plan = buildDefaultPropertyPlan(updatedMapping, knownProperties);
 
-          const defaultName = DEFAULT_EXTENDED_FIELD_MAPPING[field].notionPropertyName;
-          if (!config.notionPropertyName || config.notionPropertyName !== defaultName) continue;
+        if (plan.conflicts.length > 0) {
+          const summary = formatConflictSummary(plan.conflicts);
+          throw new Error(
+            `Cannot continue because these Notion properties already exist with incompatible types: ${summary}. Rename them in Notion or select compatible properties.`,
+          );
+        }
 
-          const existing = knownProperties.find((prop) => prop.name === defaultName);
-          if (existing) {
-            if (!isCompatiblePropertyType(field, existing.type)) {
-              const expectedLabel =
-                TYPE_DISPLAY_NAMES[config.propertyType] || String(config.propertyType);
-              const actualLabel = TYPE_DISPLAY_NAMES[existing.type] || String(existing.type);
-              throw new Error(
-                `"${defaultName}" exists as ${actualLabel}. Select a ${expectedLabel} property or rename it in Notion.`,
-              );
-            }
+        updatedMapping = plan.updatedMapping;
 
-            if (existing.type !== config.propertyType) {
-              updatedMapping = {
-                ...updatedMapping,
-                [field]: {
-                  ...config,
-                  propertyType: existing.type as NotionPropertyType,
-                },
-              };
-            }
-
-            continue;
-          }
-
+        for (const change of plan.toCreate) {
+          const config = updatedMapping[change.field];
           const response = await fetch("/api/setup/notion/property", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-              name: defaultName,
+              name: change.propertyName,
               type: config.propertyType,
             }),
           });
 
           if (!response.ok) {
             const data = await response.json();
-            throw new Error(data.error || `Failed to create ${defaultName} property`);
+            throw new Error(data.error || `Failed to create ${change.propertyName} property`);
           }
 
           const data = await response.json();
@@ -273,7 +362,7 @@ export function FieldMappingStep({ onBack, onNext }: FieldMappingStepProps) {
           createdProperties.push(createdProperty);
           updatedMapping = {
             ...updatedMapping,
-            [field]: {
+            [change.field]: {
               ...config,
               notionPropertyName: createdProperty.name,
               propertyType: createdProperty.type as NotionPropertyType,
@@ -311,6 +400,11 @@ export function FieldMappingStep({ onBack, onNext }: FieldMappingStepProps) {
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleConfirmSave = async () => {
+    setConfirmDialogOpen(false);
+    await performSave();
   };
 
   const renderFieldRow = (field: FieldKey, config: FieldConfig) => {
@@ -529,6 +623,78 @@ export function FieldMappingStep({ onBack, onNext }: FieldMappingStepProps) {
           onError={(err) => setError(err)}
         />
       )}
+      {/* Confirmation Dialog */}
+      <Dialog open={confirmDialogOpen} onOpenChange={setConfirmDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirm Notion Changes</DialogTitle>
+            <DialogDescription>
+              {pendingChanges.conflicts.length > 0
+                ? "Some default property names already exist in your Notion database with incompatible types. This happens because default field names require specific Notion property types."
+                : "The following properties will be created in your Notion database."}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4 space-y-4">
+            {pendingChanges.conflicts.length > 0 && (
+              <div className="space-y-2">
+                <p className="text-sm font-medium text-destructive">
+                  Incompatible existing properties
+                </p>
+                <ul className="space-y-2">
+                  {pendingChanges.conflicts.map(
+                    ({ field, propertyName, expectedType, actualType }) => (
+                      <li
+                        key={field}
+                        className="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm"
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="font-medium">{propertyName}</span>
+                          <span className="text-xs text-destructive">
+                            Expected {expectedType}, found {actualType}
+                          </span>
+                        </div>
+                      </li>
+                    ),
+                  )}
+                </ul>
+                <p className="text-xs text-muted-foreground">
+                  Rename these properties in Notion or choose a compatible property in the
+                  dropdown to continue.
+                </p>
+              </div>
+            )}
+            {pendingChanges.toCreate.length > 0 && (
+              <div className="space-y-2">
+                <p className="text-sm font-medium text-muted-foreground">
+                  Properties to be created
+                </p>
+                <ul className="space-y-2">
+                  {pendingChanges.toCreate.map(({ field, propertyName, propertyType }) => (
+                    <li
+                      key={field}
+                      className="flex items-center justify-between text-sm rounded-md bg-muted/50 px-3 py-2"
+                    >
+                      <span className="font-medium">{propertyName}</span>
+                      <span className="text-xs text-muted-foreground">{propertyType}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setConfirmDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleConfirmSave}
+              disabled={saving || pendingChanges.conflicts.length > 0}
+            >
+              {pendingChanges.conflicts.length > 0 ? "Resolve issues" : "Confirm"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
