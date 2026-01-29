@@ -132,6 +132,27 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Validate no duplicate Notion property mappings
+    const propertyUsage = new Map<string, string[]>();
+    for (const [fieldKey, config] of Object.entries(fieldMapping)) {
+      const fieldConfig = config as FieldConfig;
+      const isEnabled = fieldConfig.enabled || fieldConfig.required;
+      if (!isEnabled || !fieldConfig.notionPropertyName) continue;
+
+      const propName = fieldConfig.notionPropertyName;
+      const existing = propertyUsage.get(propName) || [];
+      propertyUsage.set(propName, [...existing, fieldConfig.displayLabel]);
+    }
+
+    const duplicates = [...propertyUsage.entries()].filter(([_, fields]) => fields.length > 1);
+    if (duplicates.length > 0) {
+      const [propName, fields] = duplicates[0];
+      return NextResponse.json(
+        { error: `Cannot map multiple fields to the same Notion property. "${propName}" is used by: ${fields.join(", ")}` },
+        { status: 400 },
+      );
+    }
+
     let warning: string | undefined;
     try {
       await updateSettings({

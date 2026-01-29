@@ -149,6 +149,19 @@ export function FieldMappingEditor({ initialMapping, onSave }: FieldMappingEdito
     setError(null);
   };
 
+  // Get Notion properties already in use by other fields
+  const getUsedNotionProperties = (currentField: keyof FieldMapping): Map<string, string> => {
+    const used = new Map<string, string>();
+    for (const [field, propName] of Object.entries(mapping)) {
+      if (field === currentField || !propName) continue;
+      const fieldInfo = FIELD_LABELS[field as keyof FieldMapping];
+      if (fieldInfo) {
+        used.set(propName, fieldInfo.label);
+      }
+    }
+    return used;
+  };
+
   const handleSave = async () => {
     if (!mapping.title || !mapping.date) {
       setError("Title and Date fields are required");
@@ -227,6 +240,7 @@ export function FieldMappingEditor({ initialMapping, onSave }: FieldMappingEdito
             const currentValue = mapping[field] || EMPTY_VALUE;
             const hasMissingCurrent =
               mapping[field] && !properties.find((p) => p.name === mapping[field]);
+            const usedProperties = getUsedNotionProperties(field);
 
             return (
               <div key={field} className="grid grid-cols-1 md:grid-cols-[1fr,auto,1fr] gap-4 items-center">
@@ -264,14 +278,35 @@ export function FieldMappingEditor({ initialMapping, onSave }: FieldMappingEdito
                             <span className="text-muted-foreground">None</span>
                           </SelectItem>
                         )}
-                        {properties.map((prop) => (
-                          <SelectItem key={prop.id} value={prop.name}>
-                            <div className="flex items-center gap-2">
-                              <span>{prop.name}</span>
-                              <span className="text-xs text-muted-foreground">({prop.type})</span>
-                            </div>
-                          </SelectItem>
-                        ))}
+                        {properties.map((prop) => {
+                          const usedByLabel = usedProperties.get(prop.name);
+                          const isUsedElsewhere = usedByLabel !== undefined;
+
+                          if (isUsedElsewhere) {
+                            return (
+                              <SelectItem
+                                key={prop.id}
+                                value={prop.name}
+                                disabled
+                                title={`Mapped to "${usedByLabel}". Remove that mapping first.`}
+                              >
+                                <div className="flex items-center gap-2 text-muted-foreground">
+                                  <span>{prop.name}</span>
+                                  <span className="text-xs">(In use)</span>
+                                </div>
+                              </SelectItem>
+                            );
+                          }
+
+                          return (
+                            <SelectItem key={prop.id} value={prop.name}>
+                              <div className="flex items-center gap-2">
+                                <span>{prop.name}</span>
+                                <span className="text-xs text-muted-foreground">({prop.type})</span>
+                              </div>
+                            </SelectItem>
+                          );
+                        })}
                       </SelectContent>
                     </Select>
                   ) : (

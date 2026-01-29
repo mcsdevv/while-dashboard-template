@@ -104,5 +104,8 @@ export { Toast, ToastProvider, useToast, type ToastProps } from "./toast";
 // Toaster
 export { Toaster } from "./toaster";
 
+// Tooltip
+export { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "./tooltip";
+
 // Utils
 export { cn } from "./utils";

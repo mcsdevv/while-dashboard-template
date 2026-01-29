@@ -231,6 +231,22 @@ export function FieldMappingStep({ onBack, onNext }: FieldMappingStepProps) {
     return properties.filter((prop) => isCompatiblePropertyType(field, prop.type));
   };
 
+  // Get Notion properties already in use by other enabled fields
+  const getUsedNotionProperties = (currentField: FieldKey): Map<string, FieldKey> => {
+    const used = new Map<string, FieldKey>();
+    const allFields = [...REQUIRED_FIELDS, ...OPTIONAL_FIELDS];
+
+    for (const field of allFields) {
+      if (field === currentField) continue;
+      const config = mapping[field];
+      const isEnabled = REQUIRED_FIELDS.includes(field) || config.enabled;
+      if (isEnabled && config.notionPropertyName) {
+        used.set(config.notionPropertyName, field);
+      }
+    }
+    return used;
+  };
+
   // Open property dialog for create or rename
   const openPropertyDialog = (field: FieldKey, mode: "create" | "rename") => {
     setDialogFieldFor(field);
@@ -411,6 +427,7 @@ export function FieldMappingStep({ onBack, onNext }: FieldMappingStepProps) {
     const isRequired = REQUIRED_FIELDS.includes(field);
     const currentValue = config.notionPropertyName || EMPTY_VALUE;
     const compatibleProperties = getCompatibleProperties(field);
+    const usedProperties = getUsedNotionProperties(field);
     const expectedType = config.propertyType;
     const typeDisplayName = TYPE_DISPLAY_NAMES[expectedType] || expectedType;
     const currentProperty = config.notionPropertyName
@@ -496,14 +513,36 @@ export function FieldMappingStep({ onBack, onNext }: FieldMappingStepProps) {
                   </>
                 )}
                 {compatibleProperties.length > 0 ? (
-                  compatibleProperties.map((prop) => (
-                    <SelectItem key={prop.id} value={prop.name}>
-                      <div className="flex items-center gap-2">
-                        <span>{prop.name}</span>
-                        <span className="text-xs text-muted-foreground">({prop.type})</span>
-                      </div>
-                    </SelectItem>
-                  ))
+                  compatibleProperties.map((prop) => {
+                    const usedByField = usedProperties.get(prop.name);
+                    const isUsedElsewhere = usedByField !== undefined;
+
+                    if (isUsedElsewhere) {
+                      const usedByLabel = mapping[usedByField].displayLabel;
+                      return (
+                        <SelectItem
+                          key={prop.id}
+                          value={prop.name}
+                          disabled
+                          title={`Mapped to "${usedByLabel}". Remove that mapping first.`}
+                        >
+                          <div className="flex items-center gap-2 text-muted-foreground">
+                            <span>{prop.name}</span>
+                            <span className="text-xs">(In use)</span>
+                          </div>
+                        </SelectItem>
+                      );
+                    }
+
+                    return (
+                      <SelectItem key={prop.id} value={prop.name}>
+                        <div className="flex items-center gap-2">
+                          <span>{prop.name}</span>
+                          <span className="text-xs text-muted-foreground">({prop.type})</span>
+                        </div>
+                      </SelectItem>
+                    );
+                  })
                 ) : (
                   <div className="px-2 py-1.5 text-xs text-muted-foreground">
                     No {typeDisplayName.toLowerCase()} fields available
