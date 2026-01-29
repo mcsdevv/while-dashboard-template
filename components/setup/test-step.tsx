@@ -94,15 +94,15 @@ export function TestStep({ onBack, setupComplete }: TestStepProps) {
         />
       )}
 
-      <div className="space-y-5">
+      <div className="space-y-4">
         {/* Service status cards */}
         {results.length > 0 && (
-          <div className="space-y-3">
+          <div className="space-y-4">
             {results.map((result, index) => (
               <div
                 key={result.service}
                 className={`
-                  rounded-lg border p-4 transition-all duration-300
+                  border p-4 transition-all duration-300
                   ${result.success
                     ? "border-emerald-500/30 bg-emerald-500/5"
                     : "border-red-500/30 bg-red-500/5"
@@ -112,11 +112,11 @@ export function TestStep({ onBack, setupComplete }: TestStepProps) {
               >
                 <div className="flex items-center gap-3">
                   {result.success ? (
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-500/20">
+                    <div className="flex h-8 w-8 items-center justify-center bg-emerald-500/20">
                       <CheckCircle2 className="h-5 w-5 text-emerald-500" />
                     </div>
                   ) : (
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-red-500/20">
+                    <div className="flex h-8 w-8 items-center justify-center bg-red-500/20">
                       <XCircle className="h-5 w-5 text-red-500" />
                     </div>
                   )}
@@ -137,12 +137,12 @@ export function TestStep({ onBack, setupComplete }: TestStepProps) {
 
         {/* Setup Complete celebration card */}
         {allPassed && (
-          <div className="relative overflow-hidden rounded-xl border border-emerald-500/30 bg-gradient-to-br from-emerald-500/10 via-emerald-500/5 to-transparent p-6">
+          <div className="relative overflow-hidden border border-emerald-500/30 bg-gradient-to-br from-emerald-500/10 via-emerald-500/5 to-transparent p-6">
             {/* Subtle glow effect */}
-            <div className="absolute -top-12 -right-12 h-32 w-32 rounded-full bg-emerald-500/10 blur-3xl" />
+            <div className="absolute -top-12 -right-12 h-32 w-32 bg-emerald-500/10 blur-3xl" />
 
             <div className="relative flex items-start gap-4">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-emerald-500/20">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center bg-emerald-500/20">
                 <PartyPopper className="h-6 w-6 text-emerald-500" />
               </div>
               <div className="space-y-1">
@@ -157,7 +157,7 @@ export function TestStep({ onBack, setupComplete }: TestStepProps) {
 
         {/* Error display */}
         {error && (
-          <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-500">
+          <div className="border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-500">
             {error}
           </div>
         )}
