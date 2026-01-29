@@ -42,16 +42,6 @@ export function TestStep({ onBack, setupComplete }: TestStepProps) {
   const [error, setError] = useState<string | null>(null);
   const [showConfetti, setShowConfetti] = useState(false);
 
-  // Trigger confetti when allPassed becomes true
-  useEffect(() => {
-    if (allPassed) {
-      setShowConfetti(true);
-      // Stop confetti after 5 seconds
-      const timer = setTimeout(() => setShowConfetti(false), 5000);
-      return () => clearTimeout(timer);
-    }
-  }, [allPassed]);
-
   const handleTest = async () => {
     setTesting(true);
     setError(null);
@@ -70,6 +60,12 @@ export function TestStep({ onBack, setupComplete }: TestStepProps) {
 
       setResults(data.results);
       setAllPassed(data.allPassed);
+
+      // Trigger confetti on every successful test
+      if (data.allPassed) {
+        setShowConfetti(true);
+        setTimeout(() => setShowConfetti(false), 5000);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to test connections");
     } finally {
@@ -103,9 +99,10 @@ export function TestStep({ onBack, setupComplete }: TestStepProps) {
                 key={result.service}
                 className={`
                   border p-4 transition-all duration-300
-                  ${result.success
-                    ? "border-emerald-500/30 bg-emerald-500/5"
-                    : "border-red-500/30 bg-red-500/5"
+                  ${
+                    result.success
+                      ? "border-emerald-500/30 bg-emerald-500/5"
+                      : "border-red-500/30 bg-red-500/5"
                   }
                 `}
                 style={{ animationDelay: `${index * 100}ms` }}
@@ -121,7 +118,9 @@ export function TestStep({ onBack, setupComplete }: TestStepProps) {
                     </div>
                   )}
                   <div className="flex-1">
-                    <span className={`font-medium ${result.success ? "text-foreground" : "text-muted-foreground"}`}>
+                    <span
+                      className={`font-medium ${result.success ? "text-foreground" : "text-muted-foreground"}`}
+                    >
                       {result.service}
                     </span>
                     <span className="text-muted-foreground">: {result.message}</span>
@@ -148,7 +147,8 @@ export function TestStep({ onBack, setupComplete }: TestStepProps) {
               <div className="space-y-1">
                 <h3 className="text-lg font-semibold text-foreground">Setup Complete!</h3>
                 <p className="text-sm text-muted-foreground">
-                  Your calendar sync is ready to use. Events will now sync between Google Calendar and Notion.
+                  Your calendar sync is ready to use. Events will now sync between Google Calendar
+                  and Notion.
                 </p>
               </div>
             </div>
@@ -171,11 +171,7 @@ export function TestStep({ onBack, setupComplete }: TestStepProps) {
             <Button onClick={handleTest} disabled={testing} variant="outline">
               {testing ? "Testing..." : "Test Connections"}
             </Button>
-            {allPassed && (
-              <Button onClick={handleGoToDashboard}>
-                Go to Dashboard
-              </Button>
-            )}
+            {allPassed && <Button onClick={handleGoToDashboard}>Go to Dashboard</Button>}
           </div>
         </div>
       </div>
