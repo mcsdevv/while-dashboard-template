@@ -595,9 +595,28 @@ export function FieldMappingStep({ onBack, onNext }: FieldMappingStepProps) {
         Configure which Google Calendar fields sync to your Notion database. Toggle fields on/off
         and map them to your Notion properties.
       </div>
-      <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 text-xs text-amber-200">
-        Warning: Default Notion property names are prefilled. If a field is toggled on and its
-        default property doesn&apos;t exist yet, we&apos;ll create it in Notion before saving.
+      <div className="rounded-lg border border-amber-500/50 bg-amber-500/10 p-3">
+        <div className="flex items-start gap-2">
+          <svg
+            aria-hidden="true"
+            className="h-5 w-5 text-amber-600 shrink-0 mt-0.5"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+          >
+            <path
+              fillRule="evenodd"
+              d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+              clipRule="evenodd"
+            />
+          </svg>
+          <p className="text-sm text-amber-600 dark:text-amber-400">
+            <span className="font-medium text-amber-700 dark:text-amber-500">
+              Warning:
+            </span>{" "}
+            Default Notion property names are prefilled. If a field is toggled on and its default
+            property doesn&apos;t exist yet, we&apos;ll create it in Notion before saving.
+          </p>
+        </div>
       </div>
 
       {/* Service Headers */}

@@ -4,6 +4,7 @@ import { Button } from "@/shared/ui";
 import { CheckCircle2, PartyPopper, XCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { StatusCard } from "./status-card";
 
 interface TestStepProps {
   onBack: () => void;
@@ -63,65 +64,27 @@ export function TestStep({ onBack, setupComplete, onConfetti }: TestStepProps) {
       {/* Service status cards */}
       {results.length > 0 && (
         <div className="space-y-4">
-          {results.map((result, index) => (
-            <div
+          {results.map((result) => (
+            <StatusCard
               key={result.service}
-              className={`
-                border p-4 transition-all duration-300
-                ${
-                  result.success
-                    ? "border-emerald-500/30 bg-emerald-500/5"
-                    : "border-red-500/30 bg-red-500/5"
-                }
-              `}
-              style={{ animationDelay: `${index * 100}ms` }}
-            >
-              <div className="flex items-center gap-3">
-                {result.success ? (
-                  <div className="flex h-8 w-8 items-center justify-center bg-emerald-500/20">
-                    <CheckCircle2 className="h-5 w-5 text-emerald-500" />
-                  </div>
-                ) : (
-                  <div className="flex h-8 w-8 items-center justify-center bg-red-500/20">
-                    <XCircle className="h-5 w-5 text-red-500" />
-                  </div>
-                )}
-                <div className="flex-1">
-                  <span
-                    className={`font-medium ${result.success ? "text-foreground" : "text-muted-foreground"}`}
-                  >
-                    {result.service}
-                  </span>
-                  <span className="text-muted-foreground">: {result.message}</span>
-                </div>
-              </div>
-              {result.details && (
-                <p className="mt-2 pl-11 text-sm text-muted-foreground">{result.details}</p>
-              )}
-            </div>
+              icon={result.success ? CheckCircle2 : XCircle}
+              title={result.service}
+              message={result.message}
+              details={result.details}
+              variant={result.success ? "success" : "error"}
+            />
           ))}
         </div>
       )}
 
-      {/* Setup Complete celebration card */}
+      {/* Setup Complete card - uses same StatusCard for consistency */}
       {allPassed && (
-        <div className="relative overflow-hidden border border-emerald-500/30 bg-gradient-to-br from-emerald-500/10 via-emerald-500/5 to-transparent p-6">
-          {/* Subtle glow effect */}
-          <div className="absolute -top-12 -right-12 h-32 w-32 bg-emerald-500/10 blur-3xl" />
-
-          <div className="relative flex items-start gap-4">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center bg-emerald-500/20">
-              <PartyPopper className="h-6 w-6 text-emerald-500" />
-            </div>
-            <div className="space-y-1">
-              <h3 className="text-lg font-semibold text-foreground">Setup Complete!</h3>
-              <p className="text-sm text-muted-foreground">
-                Your calendar sync is ready to use. Events will now sync between Google Calendar
-                and Notion.
-              </p>
-            </div>
-          </div>
-        </div>
+        <StatusCard
+          icon={PartyPopper}
+          title="Setup Complete!"
+          message="Your calendar sync is ready to use. Events will now sync between Google Calendar and Notion"
+          variant="success"
+        />
       )}
 
       {/* Error display */}
