@@ -4,6 +4,8 @@ import { DEFAULT_EXTENDED_FIELD_MAPPING } from "@/lib/settings/types";
 import { FieldMappingStep } from "./field-mapping-step";
 
 vi.mock("lucide-react", () => ({
+  ArrowRight: () => <span aria-hidden="true">→</span>,
+  Pencil: () => <span aria-hidden="true">✎</span>,
   Plus: () => <span aria-hidden="true">+</span>,
 }));
 
