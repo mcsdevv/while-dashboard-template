@@ -7,7 +7,6 @@
  */
 
 import { Client } from "@notionhq/client";
-import type { DatabaseObjectResponse } from "@notionhq/client/build/src/api-endpoints";
 import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
@@ -61,8 +60,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<Validatio
 
       canRead = true;
       databaseCount = response.results.filter(
-        (result): result is DatabaseObjectResponse =>
-          result.object === "database" && "title" in result,
+        (result) => result.object === "database",
       ).length;
 
       if (databaseCount === 0) {

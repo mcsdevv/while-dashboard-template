@@ -6,7 +6,6 @@
 import { env } from "@/lib/env";
 import { updateSettings } from "@/lib/settings";
 import { Client } from "@notionhq/client";
-import type { DatabaseObjectResponse } from "@notionhq/client/build/src/api-endpoints";
 import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
@@ -49,14 +48,11 @@ export async function POST(request: NextRequest) {
       });
 
       const databases = response.results
-        .filter(
-          (result): result is DatabaseObjectResponse =>
-            result.object === "database" && "title" in result,
-        )
+        .filter((result) => result.object === "database")
         .map((db) => ({
           id: db.id,
-          name: db.title?.[0]?.plain_text || "Untitled",
-          url: db.url,
+          name: "title" in db ? (db.title?.[0]?.plain_text || "Untitled") : "Untitled",
+          url: "url" in db ? db.url : undefined,
         }));
 
       // Get integration info
