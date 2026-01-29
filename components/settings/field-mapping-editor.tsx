@@ -245,10 +245,7 @@ export function FieldMappingEditor({ initialMapping, onSave }: FieldMappingEdito
             return (
               <div key={field} className="grid grid-cols-1 md:grid-cols-[1fr,auto,1fr] gap-4 items-center">
                 <div>
-                  <div className="flex items-center gap-1">
-                    <span className="text-sm font-medium">{label}</span>
-                    {required && <span className="text-xs text-destructive">*</span>}
-                  </div>
+                  <span className="text-sm font-medium">{label}</span>
                   <p className="text-xs text-muted-foreground">{description}</p>
                 </div>
                 <ArrowRight className="hidden md:block w-4 h-4 text-muted-foreground" />
