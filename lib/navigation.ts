@@ -8,6 +8,7 @@ import {
   Home,
   Link2,
   Settings,
+  Sparkles,
 } from "lucide-react";
 
 export interface NavItem {
@@ -56,6 +57,11 @@ export const navigation: NavItem[] = [
     title: "Settings",
     href: "/settings",
     icon: Settings,
+  },
+  {
+    title: "Setup Wizard",
+    href: "/setup/1",
+    icon: Sparkles,
   },
   {
     title: "Help",
