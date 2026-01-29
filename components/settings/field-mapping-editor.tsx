@@ -2,9 +2,18 @@
 
 import { Button } from "@/shared/ui";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectSeparator,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/ui";
 import { ArrowRight } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useNotionProperties } from "@/hooks/use-notion-properties";
+import { useToast } from "@/lib/toast";
 
 interface FieldMapping {
   title: string;
@@ -65,6 +74,17 @@ const FIELD_LABELS: Record<
 const EMPTY_VALUE = "__none__";
 
 export function FieldMappingEditor({ initialMapping, onSave }: FieldMappingEditorProps) {
+  const {
+    properties,
+    fieldMapping: loadedMapping,
+    isLoading: loading,
+    error: loadError,
+    refresh,
+  } = useNotionProperties("/api/settings/field-mapping");
+
+  const { addToast } = useToast();
+  const lastLoadError = useRef<string | null>(null);
+
   const [mapping, setMapping] = useState<FieldMapping>(
     initialMapping || {
       title: "Title",
@@ -75,32 +95,51 @@ export function FieldMappingEditor({ initialMapping, onSave }: FieldMappingEdito
       reminders: "",
     },
   );
-  const [properties, setProperties] = useState<NotionProperty[]>([]);
-  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
 
-  const loadFieldMapping = useCallback(async () => {
-    try {
-      const response = await fetch("/api/settings/field-mapping");
-      if (response.ok) {
-        const data = await response.json();
-        setMapping(data.mapping);
-        setProperties(data.notionProperties || []);
-      }
-    } catch (err) {
-      console.error("Failed to load field mapping:", err);
-      setError("Failed to load field mapping");
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
   useEffect(() => {
-    loadFieldMapping();
-  }, [loadFieldMapping]);
+    if (!loadError) {
+      lastLoadError.current = null;
+      return;
+    }
+    const message =
+      loadError instanceof Error ? loadError.message : "Failed to load Notion fields";
+    if (lastLoadError.current === message) return;
+    lastLoadError.current = message;
+    addToast({
+      title: "Unable to load Notion fields",
+      description: message,
+      variant: "destructive",
+    });
+  }, [loadError, addToast]);
+
+  // Sync mapping state when data loads
+  // Handle both simple FieldMapping and ExtendedFieldMapping formats
+  useEffect(() => {
+    if (loadedMapping) {
+      const loaded = loadedMapping as Record<string, unknown>;
+      // Check if it's ExtendedFieldMapping (has FieldConfig objects) or simple FieldMapping (has strings)
+      const firstValue = loaded.title;
+      if (typeof firstValue === "object" && firstValue !== null && "notionPropertyName" in firstValue) {
+        // ExtendedFieldMapping format - extract notionPropertyName from each field
+        const simpleMapping: FieldMapping = {
+          title: (loaded.title as { notionPropertyName: string }).notionPropertyName || "",
+          date: (loaded.date as { notionPropertyName: string }).notionPropertyName || "",
+          description: (loaded.description as { notionPropertyName: string })?.notionPropertyName || "",
+          location: (loaded.location as { notionPropertyName: string })?.notionPropertyName || "",
+          gcalEventId: (loaded.gcalEventId as { notionPropertyName: string })?.notionPropertyName || "",
+          reminders: (loaded.reminders as { notionPropertyName: string })?.notionPropertyName || "",
+        };
+        setMapping(simpleMapping);
+      } else {
+        // Simple FieldMapping format
+        setMapping(loaded as unknown as FieldMapping);
+      }
+    }
+  }, [loadedMapping]);
 
   const handleChange = (field: keyof FieldMapping, value: string) => {
     const actualValue = value === EMPTY_VALUE ? "" : value;
@@ -186,6 +225,8 @@ export function FieldMappingEditor({ initialMapping, onSave }: FieldMappingEdito
           {(Object.keys(FIELD_LABELS) as Array<keyof FieldMapping>).map((field) => {
             const { label, description, required } = FIELD_LABELS[field];
             const currentValue = mapping[field] || EMPTY_VALUE;
+            const hasMissingCurrent =
+              mapping[field] && !properties.find((p) => p.name === mapping[field]);
 
             return (
               <div key={field} className="grid grid-cols-1 md:grid-cols-[1fr,auto,1fr] gap-4 items-center">
@@ -199,11 +240,25 @@ export function FieldMappingEditor({ initialMapping, onSave }: FieldMappingEdito
                 <ArrowRight className="hidden md:block w-4 h-4 text-muted-foreground" />
                 <div>
                   {properties.length > 0 ? (
-                    <Select value={currentValue} onValueChange={(val) => handleChange(field, val)}>
+                    <Select
+                      value={currentValue}
+                      onOpenChange={(open) => open && refresh()}
+                      onValueChange={(val) => handleChange(field, val)}
+                    >
                       <SelectTrigger>
                         <SelectValue placeholder="Select a property…" />
                       </SelectTrigger>
                       <SelectContent>
+                        {hasMissingCurrent && (
+                          <>
+                            <SelectItem value={mapping[field]} disabled>
+                              <span className="text-destructive">
+                                {mapping[field]} <span className="text-xs">(missing)</span>
+                              </span>
+                            </SelectItem>
+                            <SelectSeparator />
+                          </>
+                        )}
                         {!required && (
                           <SelectItem value={EMPTY_VALUE}>
                             <span className="text-muted-foreground">None</span>

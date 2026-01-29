@@ -12,7 +12,9 @@ import {
 } from "@/shared/ui";
 import { ArrowRight, Pencil, Plus } from "lucide-react";
 import { PropertyDialog } from "@/components/notion/property-dialog";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useNotionProperties } from "@/hooks/use-notion-properties";
+import { useToast } from "@/lib/toast";
 import type { ExtendedFieldMapping, FieldConfig, NotionPropertyType } from "@/lib/settings/types";
 import { DEFAULT_EXTENDED_FIELD_MAPPING } from "@/lib/settings/types";
 
@@ -90,9 +92,18 @@ const CREATE_FIELD_VALUE = "__create__";
 const RENAME_FIELD_VALUE = "__rename__";
 
 export function FieldMappingStep({ onBack, onNext }: FieldMappingStepProps) {
+  const {
+    properties,
+    fieldMapping: initialMapping,
+    isLoading: loading,
+    error: loadError,
+    refresh,
+  } = useNotionProperties("/api/setup/field-mapping");
+
+  const { addToast } = useToast();
+  const lastLoadError = useRef<string | null>(null);
+
   const [mapping, setMapping] = useState<ExtendedFieldMapping>(DEFAULT_EXTENDED_FIELD_MAPPING);
-  const [properties, setProperties] = useState<NotionProperty[]>([]);
-  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -101,24 +112,28 @@ export function FieldMappingStep({ onBack, onNext }: FieldMappingStepProps) {
   const [dialogMode, setDialogMode] = useState<"create" | "rename">("create");
   const [dialogFieldFor, setDialogFieldFor] = useState<FieldKey | null>(null);
 
-  const loadMapping = useCallback(async () => {
-    try {
-      const response = await fetch("/api/setup/field-mapping");
-      if (response.ok) {
-        const data = await response.json();
-        setMapping(data.fieldMapping);
-        setProperties(data.notionProperties || []);
-      }
-    } catch (err) {
-      console.error("Failed to load field mapping:", err);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
   useEffect(() => {
-    loadMapping();
-  }, [loadMapping]);
+    if (!loadError) {
+      lastLoadError.current = null;
+      return;
+    }
+    const message =
+      loadError instanceof Error ? loadError.message : "Failed to load Notion fields";
+    if (lastLoadError.current === message) return;
+    lastLoadError.current = message;
+    addToast({
+      title: "Unable to load Notion fields",
+      description: message,
+      variant: "destructive",
+    });
+  }, [loadError, addToast]);
+
+  // Sync mapping state when initial data loads
+  useEffect(() => {
+    if (initialMapping) {
+      setMapping(initialMapping as ExtendedFieldMapping);
+    }
+  }, [initialMapping]);
 
   const isCompatiblePropertyType = (field: FieldKey, type: string) => {
     const compatibleTypes = PROPERTY_TYPE_COMPATIBILITY[field];
@@ -141,20 +156,6 @@ export function FieldMappingStep({ onBack, onNext }: FieldMappingStepProps) {
   const handlePropertyDialogSuccess = (property: { id: string; name: string; type: string }) => {
     if (!dialogFieldFor) return;
 
-    if (dialogMode === "rename") {
-      // Update existing property in the list
-      setProperties((prev) =>
-        prev.map((p) =>
-          p.name === mapping[dialogFieldFor].notionPropertyName
-            ? { ...p, name: property.name }
-            : p,
-        ),
-      );
-    } else {
-      // Add new property to the list
-      setProperties((prev) => [...prev, property]);
-    }
-
     // Update mapping to use the new/renamed property
     setMapping((prev) => ({
       ...prev,
@@ -167,6 +168,7 @@ export function FieldMappingStep({ onBack, onNext }: FieldMappingStepProps) {
 
     setDialogOpen(false);
     setDialogFieldFor(null);
+    void refresh();
   };
 
   const handleToggle = (field: FieldKey, enabled: boolean) => {
@@ -280,7 +282,7 @@ export function FieldMappingStep({ onBack, onNext }: FieldMappingStepProps) {
         }
 
         if (createdProperties.length > 0) {
-          setProperties((prev) => [...prev, ...createdProperties]);
+          await refresh();
         }
 
         if (updatedMapping !== currentMapping) {
@@ -354,6 +356,7 @@ export function FieldMappingStep({ onBack, onNext }: FieldMappingStepProps) {
           {properties.length > 0 ? (
             <Select
               value={currentValue}
+              onOpenChange={(open) => open && refresh()}
               onValueChange={(val) => {
                 if (val === CREATE_FIELD_VALUE) {
                   openPropertyDialog(field, "create");

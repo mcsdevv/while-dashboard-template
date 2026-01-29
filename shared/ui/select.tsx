@@ -10,13 +10,15 @@ import { cn } from "./utils";
 interface SelectProps
   extends Omit<React.ComponentPropsWithoutRef<typeof SelectPrimitive.Root>, "onValueChange"> {
   onValueChange?: (value: string) => void;
+  onOpenChange?: (open: boolean) => void;
 }
 
 const Select = React.forwardRef<HTMLButtonElement, SelectProps>(
-  ({ onValueChange, ...props }, ref) => (
+  ({ onValueChange, onOpenChange, ...props }, ref) => (
     <SelectPrimitive.Root
       {...props}
       onValueChange={onValueChange ? (value) => onValueChange(value as string) : undefined}
+      onOpenChange={onOpenChange}
     />
   ),
 );
