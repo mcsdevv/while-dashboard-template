@@ -97,7 +97,7 @@ export function Toast({ id, title, description, variant = "default" }: ToastProp
         type="button"
         onClick={() => removeToast(id)}
         aria-label="Dismiss notification"
-        className="inline-flex h-6 w-6 items-center justify-center rounded-none text-muted-foreground hover:text-foreground"
+        className="inline-flex cursor-pointer h-6 w-6 items-center justify-center rounded-none text-muted-foreground hover:text-foreground"
       >
         <svg
           aria-hidden="true"
