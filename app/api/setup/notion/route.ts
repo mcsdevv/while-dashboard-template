@@ -4,22 +4,19 @@
  */
 
 import { env } from "@/lib/env";
-import { updateSettings } from "@/lib/settings";
+import { getSettings, updateSettings } from "@/lib/settings";
 import { Client } from "@notionhq/client";
 import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
-const notionTokenSchema = z
-  .object({
-    apiToken: z.string().optional(),
-    useEnvToken: z.boolean().optional(),
-  })
-  .refine((data) => data.apiToken || data.useEnvToken, {
-    message: "Either apiToken or useEnvToken is required",
-  });
+const notionTokenSchema = z.object({
+  apiToken: z.string().optional(),
+  useEnvToken: z.boolean().optional(),
+});
 
 /**
  * POST - Validate Notion API token and list databases
+ * Can use: provided apiToken, env token (useEnvToken: true), or saved settings token (empty body)
  */
 export async function POST(request: NextRequest) {
   try {
@@ -32,10 +29,21 @@ export async function POST(request: NextRequest) {
     }
 
     const { apiToken: providedToken, useEnvToken } = result.data;
-    const apiToken = useEnvToken ? env.NOTION_API_TOKEN : providedToken;
+
+    // Determine which token to use: provided > env > saved settings
+    let apiToken: string | undefined;
+    if (providedToken) {
+      apiToken = providedToken;
+    } else if (useEnvToken) {
+      apiToken = env.NOTION_API_TOKEN;
+    } else {
+      // Use saved settings token
+      const settings = await getSettings();
+      apiToken = settings?.notion?.apiToken;
+    }
 
     if (!apiToken) {
-      return NextResponse.json({ error: "No token provided" }, { status: 400 });
+      return NextResponse.json({ error: "No token available" }, { status: 400 });
     }
 
     // Test the token by listing databases
@@ -51,7 +59,7 @@ export async function POST(request: NextRequest) {
         .filter((result) => result.object === "database")
         .map((db) => ({
           id: db.id,
-          name: "title" in db ? (db.title?.[0]?.plain_text || "Untitled") : "Untitled",
+          name: "title" in db ? db.title?.[0]?.plain_text || "Untitled" : "Untitled",
           url: "url" in db ? db.url : undefined,
         }));
 
@@ -71,28 +79,32 @@ export async function POST(request: NextRequest) {
         // Non-critical, continue without bot info
       }
 
-      // Save the token (will be encrypted)
+      // Save the token only if a new one was provided (not when using existing saved token)
       let warning: string | undefined;
-      try {
-        await updateSettings({
-          notion: {
-            apiToken,
-            databaseId: "", // Will be set when user selects database
-            databaseName: undefined,
-          },
-        });
-      } catch (settingsError) {
-        console.error("Failed to save settings:", settingsError);
-        const isRedisError =
-          settingsError instanceof Error && settingsError.message.includes("Redis is not configured");
-        if (!isRedisError) {
-          return NextResponse.json(
-            { error: "Failed to save settings. Please try again." },
-            { status: 500 },
-          );
+      const isNewToken = !!providedToken || useEnvToken;
+      if (isNewToken) {
+        try {
+          await updateSettings({
+            notion: {
+              apiToken,
+              databaseId: "", // Will be set when user selects database
+              databaseName: undefined,
+            },
+          });
+        } catch (settingsError) {
+          console.error("Failed to save settings:", settingsError);
+          const isRedisError =
+            settingsError instanceof Error &&
+            settingsError.message.includes("Redis is not configured");
+          if (!isRedisError) {
+            return NextResponse.json(
+              { error: "Failed to save settings. Please try again." },
+              { status: 500 },
+            );
+          }
+          warning =
+            "Storage not configured. Token validated, but settings won't be saved until storage is set up.";
         }
-        warning =
-          "Storage not configured. Token validated, but settings won't be saved until storage is set up.";
       }
 
       return NextResponse.json({

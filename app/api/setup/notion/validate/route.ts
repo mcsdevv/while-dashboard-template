@@ -59,9 +59,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<Validatio
       });
 
       canRead = true;
-      databaseCount = response.results.filter(
-        (result) => result.object === "database",
-      ).length;
+      databaseCount = response.results.filter((result) => result.object === "database").length;
 
       if (databaseCount === 0) {
         errors.push("No databases shared with integration");

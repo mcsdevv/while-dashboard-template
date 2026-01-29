@@ -21,6 +21,7 @@ export async function GET() {
     const hasSettingsDatabase = !!settings?.notion?.databaseId;
     const hasEnvToken = !!env.NOTION_API_TOKEN;
     const hasEnvDatabase = !!env.NOTION_DATABASE_ID;
+
     const notionConfigured = hasSettingsToken || hasEnvToken;
     const notionDatabaseSelected =
       (hasSettingsToken && hasSettingsDatabase) || (hasEnvToken && hasEnvDatabase);

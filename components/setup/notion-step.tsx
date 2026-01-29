@@ -147,8 +147,8 @@ export function NotionStep({ status, onBack, onNext }: NotionStepProps) {
     };
   }, []);
 
-  // Auto-validate if env token exists
-  const handleValidateWithEnvToken = useCallback(async () => {
+  // Fetch databases using saved or env token
+  const handleFetchDatabases = useCallback(async (useEnv: boolean) => {
     setValidating(true);
     setError(null);
     setNotice(null);
@@ -158,7 +158,7 @@ export function NotionStep({ status, onBack, onNext }: NotionStepProps) {
       const response = await fetch("/api/setup/notion", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ useEnvToken: true }),
+        body: JSON.stringify(useEnv ? { useEnvToken: true } : {}),
       });
 
       const data = await response.json();
@@ -184,13 +184,15 @@ export function NotionStep({ status, onBack, onNext }: NotionStepProps) {
     }
   }, []);
 
+  // Auto-fetch databases if token is configured but no database selected
   useEffect(() => {
-    if (status?.hasEnvToken && !validated && !hasTriedEnvToken.current) {
+    if (status?.configured && !status?.databaseSelected && !hasTriedEnvToken.current) {
       hasTriedEnvToken.current = true;
       setApiToken("••••••••••••••••");
-      handleValidateWithEnvToken();
+      // Use env token if available (no saved token), otherwise use saved token
+      handleFetchDatabases(!!status?.hasEnvToken);
     }
-  }, [status?.hasEnvToken, validated, handleValidateWithEnvToken]);
+  }, [status?.configured, status?.databaseSelected, status?.hasEnvToken, handleFetchDatabases]);
 
   // Handle token input change
   const handleTokenChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -351,11 +353,11 @@ export function NotionStep({ status, onBack, onNext }: NotionStepProps) {
           </span>
           {validationStatus.integrationName &&
             (validationStatus.status === "valid" || validationStatus.status === "warning") && (
-            <span className="ml-1 text-muted-foreground">
-              ({validationStatus.integrationName}
-              {validationStatus.workspaceName && ` in ${validationStatus.workspaceName}`})
-            </span>
-          )}
+              <span className="ml-1 text-muted-foreground">
+                ({validationStatus.integrationName}
+                {validationStatus.workspaceName && ` in ${validationStatus.workspaceName}`})
+              </span>
+            )}
           {validationStatus.status === "warning" && (
             <p className="mt-1 text-xs text-muted-foreground">
               Share a database with your integration:{" "}
