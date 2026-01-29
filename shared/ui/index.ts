@@ -21,6 +21,9 @@ export {
 // Card
 export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent } from "./card";
 
+// Connection Status Card
+export { ConnectionStatusCard, type ConnectionStatusCardProps } from "./connection-status-card";
+
 // Footer
 export { Footer } from "./footer";
 
