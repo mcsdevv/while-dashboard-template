@@ -387,7 +387,7 @@ export function NotionStep({ status, onBack, onNext }: NotionStepProps) {
   };
 
   // If already configured with a database, show success state
-  if (status?.databaseSelected && status?.databaseName) {
+  if (status?.databaseSelected) {
     return (
       <div className="space-y-6">
         <div className="rounded-lg border border-foreground/10 bg-foreground/5 p-4">
@@ -401,7 +401,9 @@ export function NotionStep({ status, onBack, onNext }: NotionStepProps) {
             </svg>
             <span className="font-medium">Notion connected</span>
           </div>
-          <p className="mt-1 text-sm text-muted-foreground">Database: {status.databaseName}</p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Database: {status.databaseName || "Configured via environment"}
+          </p>
         </div>
 
         <div className="flex justify-between">

@@ -10,6 +10,7 @@ import {
   getSettings,
   updateSettings,
 } from "@/lib/settings";
+import { env } from "@/lib/env";
 import type { ExtendedFieldMapping, FieldConfig } from "@/lib/settings/types";
 import { Client } from "@notionhq/client";
 import { type NextRequest, NextResponse } from "next/server";
@@ -55,11 +56,27 @@ export async function GET() {
     // Fetch Notion properties if connected
     let notionProperties: Array<{ id: string; name: string; type: string }> = [];
 
-    if (settings?.notion?.apiToken && settings?.notion?.databaseId) {
+    const settingsToken = settings?.notion?.apiToken;
+    const settingsDatabaseId = settings?.notion?.databaseId;
+    const envToken = env.NOTION_API_TOKEN;
+    const envDatabaseId = env.NOTION_DATABASE_ID;
+
+    let notionToken: string | undefined;
+    let notionDatabaseId: string | undefined;
+
+    if (settingsToken && settingsDatabaseId) {
+      notionToken = settingsToken;
+      notionDatabaseId = settingsDatabaseId;
+    } else if (envToken && envDatabaseId) {
+      notionToken = envToken;
+      notionDatabaseId = envDatabaseId;
+    }
+
+    if (notionToken && notionDatabaseId) {
       try {
-        const notion = new Client({ auth: settings.notion.apiToken });
+        const notion = new Client({ auth: notionToken });
         const database = await notion.databases.retrieve({
-          database_id: settings.notion.databaseId,
+          database_id: notionDatabaseId,
         });
 
         notionProperties = Object.entries(database.properties).map(([name, prop]) => ({

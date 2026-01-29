@@ -17,6 +17,14 @@ export async function GET() {
     const setupComplete = await isSetupComplete();
     const googleClientConfig = getGoogleClientConfig();
 
+    const hasSettingsToken = !!settings?.notion?.apiToken;
+    const hasSettingsDatabase = !!settings?.notion?.databaseId;
+    const hasEnvToken = !!env.NOTION_API_TOKEN;
+    const hasEnvDatabase = !!env.NOTION_DATABASE_ID;
+    const notionConfigured = hasSettingsToken || hasEnvToken;
+    const notionDatabaseSelected =
+      (hasSettingsToken && hasSettingsDatabase) || (hasEnvToken && hasEnvDatabase);
+
     return NextResponse.json({
       setupComplete,
       storage: {
@@ -31,10 +39,10 @@ export async function GET() {
         connectedAt: settings?.google?.connectedAt || null,
       },
       notion: {
-        configured: !!settings?.notion?.apiToken,
-        databaseSelected: !!settings?.notion?.databaseId,
+        configured: notionConfigured,
+        databaseSelected: notionDatabaseSelected,
         databaseName: settings?.notion?.databaseName || null,
-        hasEnvToken: !!env.NOTION_API_TOKEN && !settings?.notion?.apiToken,
+        hasEnvToken: hasEnvToken && !hasSettingsToken,
       },
       fieldMapping: {
         configured: !!settings?.fieldMapping,
