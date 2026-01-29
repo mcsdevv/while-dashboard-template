@@ -78,8 +78,8 @@ export function SetupWizard({ currentStep }: SetupWizardProps) {
   }, [fetchStatus]);
 
   // Fire confetti celebration
-  const fireConfetti = useCallback(() => {
-    if (confettiTriggeredRef.current) return;
+  const fireConfetti = useCallback((force?: boolean) => {
+    if (!force && confettiTriggeredRef.current) return;
     confettiTriggeredRef.current = true;
 
     // Fire multiple bursts for a fuller effect
@@ -283,7 +283,7 @@ export function SetupWizard({ currentStep }: SetupWizardProps) {
               <TestStep
                 onBack={() => goToStep(4)}
                 setupComplete={status?.setupComplete || false}
-                onConfetti={fireConfetti}
+                onConfetti={() => fireConfetti(true)}
               />
             )}
           </CardContent>

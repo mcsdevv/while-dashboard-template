@@ -3,7 +3,7 @@
 import { Button } from "@/shared/ui";
 import { CheckCircle2, PartyPopper, XCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 interface TestStepProps {
   onBack: () => void;
@@ -25,13 +25,6 @@ export function TestStep({ onBack, setupComplete, onConfetti }: TestStepProps) {
   const [allPassed, setAllPassed] = useState(setupComplete);
   const [error, setError] = useState<string | null>(null);
 
-  // Trigger confetti when allPassed becomes true
-  useEffect(() => {
-    if (allPassed) {
-      onConfetti?.();
-    }
-  }, [allPassed, onConfetti]);
-
   const handleTest = async () => {
     setTesting(true);
     setError(null);
@@ -50,6 +43,10 @@ export function TestStep({ onBack, setupComplete, onConfetti }: TestStepProps) {
 
       setResults(data.results);
       setAllPassed(data.allPassed);
+
+      if (data.allPassed) {
+        onConfetti?.();
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to test connections");
     } finally {
