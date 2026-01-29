@@ -53,3 +53,16 @@ export function getTokenHealth(connectedAt: string | null): TokenHealthStatus | 
     message: `Token healthy (${days} days old)`,
   };
 }
+
+/**
+ * Check if token has survived past the 7-day testing mode limit.
+ * If true, the OAuth app is likely published (or user is a test user).
+ * UI should prompt user to confirm their app is published.
+ *
+ * @param connectedAt - ISO date string of when the connection was established
+ * @returns true if token is 8+ days old, suggesting app may be published
+ */
+export function shouldPromptPublishedStatus(connectedAt: string | null): boolean {
+  const days = getDaysSinceConnection(connectedAt);
+  return days !== null && days >= 8;
+}

@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { getDaysSinceConnection, getTokenHealth } from "./token-health";
+import { getDaysSinceConnection, getTokenHealth, shouldPromptPublishedStatus } from "./token-health";
 
 describe("getDaysSinceConnection", () => {
   beforeEach(() => {
@@ -226,5 +226,40 @@ describe("getTokenHealth", () => {
       const health = getTokenHealth("2024-01-08T12:00:00Z");
       expect(health?.action).toBe("Reconnect now to restore sync");
     });
+  });
+});
+
+describe("shouldPromptPublishedStatus", () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2024-01-15T12:00:00Z"));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("returns false for null input", () => {
+    expect(shouldPromptPublishedStatus(null)).toBe(false);
+  });
+
+  it("returns false for 7 days old token", () => {
+    const sevenDaysAgo = "2024-01-08T12:00:00Z";
+    expect(shouldPromptPublishedStatus(sevenDaysAgo)).toBe(false);
+  });
+
+  it("returns true for 8 days old token", () => {
+    const eightDaysAgo = "2024-01-07T12:00:00Z";
+    expect(shouldPromptPublishedStatus(eightDaysAgo)).toBe(true);
+  });
+
+  it("returns true for 30 days old token", () => {
+    const thirtyDaysAgo = "2023-12-16T12:00:00Z";
+    expect(shouldPromptPublishedStatus(thirtyDaysAgo)).toBe(true);
+  });
+
+  it("returns false for fresh token", () => {
+    const today = "2024-01-15T08:00:00Z";
+    expect(shouldPromptPublishedStatus(today)).toBe(false);
   });
 });

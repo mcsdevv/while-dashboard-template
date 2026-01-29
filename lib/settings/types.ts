@@ -10,6 +10,7 @@ export interface GoogleSettings {
   calendarId: string;
   calendarName?: string; // Display name of the selected calendar
   connectedAt: string; // ISO timestamp
+  oauthAppPublished?: boolean; // User-confirmed: OAuth app is published (no 7-day token expiry)
 }
 
 export interface NotionSettings {

@@ -12,6 +12,7 @@ interface GoogleStatus {
   calendarId: string | null;
   calendarName: string | null;
   connectedAt: string | null;
+  oauthAppPublished?: boolean;
 }
 
 interface NotionStatus {
@@ -101,8 +102,27 @@ export function ConnectionStatus({ google, notion }: ConnectionStatusProps) {
                       : google.calendarId || "Not selected")}
                 </p>
                 <p>Connected: {formatDate(google.connectedAt)}</p>
-                {/* Token health indicator */}
+                {/* Token health indicator - only show if app not published */}
                 {(() => {
+                  if (google.oauthAppPublished) {
+                    return (
+                      <div className="mt-2 rounded px-2 py-1 text-xs bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                        <svg
+                          aria-hidden="true"
+                          className="inline h-3 w-3 mr-1"
+                          viewBox="0 0 20 20"
+                          fill="currentColor"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                        Published app (no token expiry)
+                      </div>
+                    );
+                  }
                   const health = getTokenHealth(google.connectedAt);
                   if (!health) return null;
                   return (

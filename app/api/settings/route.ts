@@ -40,6 +40,7 @@ export async function GET() {
         calendarId: settings.google?.calendarId || null,
         calendarName: settings.google?.calendarName || null,
         connectedAt: settings.google?.connectedAt || null,
+        oauthAppPublished: settings.google?.oauthAppPublished || false,
       },
       notion: settings.notion
         ? {
@@ -61,16 +62,16 @@ export async function GET() {
 }
 
 /**
- * PUT - Update settings (only field mapping allowed via this endpoint)
+ * PUT - Update settings (field mapping and oauthAppPublished allowed via this endpoint)
  */
 export async function PUT(request: Request) {
   try {
     const body = await request.json();
+    const updates: Parameters<typeof updateSettings>[0] = {};
 
-    // Only allow updating field mapping through this endpoint
-    // Credentials should be updated through the setup flow
+    // Allow updating field mapping
     if (body.fieldMapping) {
-      const fieldMapping: FieldMapping = {
+      updates.fieldMapping = {
         title: body.fieldMapping.title,
         date: body.fieldMapping.date,
         description: body.fieldMapping.description,
@@ -78,8 +79,18 @@ export async function PUT(request: Request) {
         gcalEventId: body.fieldMapping.gcalEventId,
         reminders: body.fieldMapping.reminders,
       };
+    }
 
-      await updateSettings({ fieldMapping });
+    // Allow updating oauthAppPublished flag
+    if (typeof body.oauthAppPublished === "boolean") {
+      // updateSettings does a deep merge, so we only need to provide the field to update
+      updates.google = { oauthAppPublished: body.oauthAppPublished } as Parameters<
+        typeof updateSettings
+      >[0]["google"];
+    }
+
+    if (Object.keys(updates).length > 0) {
+      await updateSettings(updates);
     }
 
     const settings = await getSettings();
@@ -87,6 +98,7 @@ export async function PUT(request: Request) {
     return NextResponse.json({
       success: true,
       fieldMapping: settings?.fieldMapping || null,
+      oauthAppPublished: settings?.google?.oauthAppPublished || false,
     });
   } catch (error) {
     console.error("Error updating settings:", error);

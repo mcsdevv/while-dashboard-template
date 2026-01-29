@@ -37,6 +37,7 @@ export async function GET() {
         connected: !!settings?.google?.refreshToken,
         calendarSelected: !!settings?.google?.calendarId,
         connectedAt: settings?.google?.connectedAt || null,
+        oauthAppPublished: settings?.google?.oauthAppPublished || false,
       },
       notion: {
         configured: notionConfigured,

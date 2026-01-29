@@ -27,6 +27,7 @@ interface SetupStatus {
     configured: boolean;
     connected: boolean;
     calendarSelected: boolean;
+    oauthAppPublished?: boolean;
   };
   notion: {
     configured: boolean;
@@ -214,7 +215,12 @@ export function SetupWizard({ currentStep }: SetupWizardProps) {
             <CardDescription>{currentStepData.description}</CardDescription>
           </CardHeader>
           <CardContent>
-            {currentStep === 1 && <WelcomeStep onNext={handleStepComplete} />}
+            {currentStep === 1 && (
+              <WelcomeStep
+                onNext={handleStepComplete}
+                oauthAppPublished={status?.google?.oauthAppPublished}
+              />
+            )}
             {currentStep === 2 && (
               <GoogleStep
                 status={status?.google}

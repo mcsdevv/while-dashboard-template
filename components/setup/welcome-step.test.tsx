@@ -34,11 +34,25 @@ describe("WelcomeStep", () => {
       ).toBeInTheDocument();
     });
 
-    it("renders the 7-day token warning", () => {
+    it("renders the 7-day token warning when oauthAppPublished is false", () => {
+      render(<WelcomeStep onNext={() => {}} oauthAppPublished={false} />);
+
+      expect(screen.getByText(/Token expiration notice:/)).toBeInTheDocument();
+      expect(screen.getByText(/OAuth tokens expire every 7 days/)).toBeInTheDocument();
+    });
+
+    it("renders the 7-day token warning when oauthAppPublished is undefined", () => {
       render(<WelcomeStep onNext={() => {}} />);
 
       expect(screen.getByText(/Token expiration notice:/)).toBeInTheDocument();
       expect(screen.getByText(/OAuth tokens expire every 7 days/)).toBeInTheDocument();
+    });
+
+    it("hides the 7-day token warning when oauthAppPublished is true", () => {
+      render(<WelcomeStep onNext={() => {}} oauthAppPublished={true} />);
+
+      expect(screen.queryByText(/Token expiration notice:/)).not.toBeInTheDocument();
+      expect(screen.queryByText(/OAuth tokens expire every 7 days/)).not.toBeInTheDocument();
     });
 
     it("renders link to publish OAuth app in warning", () => {
