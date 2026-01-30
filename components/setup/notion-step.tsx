@@ -42,12 +42,14 @@ export function NotionStep({ status, onBack, onNext }: NotionStepProps) {
   const [selectingDb, setSelectingDb] = useState(false);
   const [validationStatus, setValidationStatus] = useState<ValidationStatus>({ status: "idle" });
   const [tokenForDatabase, setTokenForDatabase] = useState<string | null>(null);
+  const [loadingDatabases, setLoadingDatabases] = useState(false);
 
   // Debounce timer ref
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const validationRequestId = useRef(0);
   const validationAbortController = useRef<AbortController | null>(null);
   const hasTriedEnvToken = useRef(false);
+  const hasLoadedConnectedDatabases = useRef(false);
 
   // Debounced validation function
   const validateTokenDebounced = useCallback((token: string) => {
@@ -193,6 +195,50 @@ export function NotionStep({ status, onBack, onNext }: NotionStepProps) {
       handleFetchDatabases(!!status?.hasEnvToken);
     }
   }, [status?.configured, status?.databaseSelected, status?.hasEnvToken, handleFetchDatabases]);
+
+  // Load databases when in connected state (to allow changing database)
+  const loadDatabasesForConnectedState = useCallback(async () => {
+    setLoadingDatabases(true);
+    setError(null);
+
+    try {
+      const response = await fetch("/api/setup/notion", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({}),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to load databases");
+      }
+
+      setDatabases(data.databases);
+
+      // Pre-select the current database by matching name or ID
+      if (status?.databaseName && data.databases.length > 0) {
+        const currentDb = data.databases.find(
+          (db: Database) => db.name === status.databaseName || db.id === status.databaseName
+        );
+        if (currentDb) {
+          setSelectedDatabase(currentDb.id);
+        }
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load databases");
+    } finally {
+      setLoadingDatabases(false);
+    }
+  }, [status?.databaseName]);
+
+  // Load databases when already connected to allow changing
+  useEffect(() => {
+    if (status?.databaseSelected && !hasLoadedConnectedDatabases.current) {
+      hasLoadedConnectedDatabases.current = true;
+      loadDatabasesForConnectedState();
+    }
+  }, [status?.databaseSelected, loadDatabasesForConnectedState]);
 
   // Handle token input change
   const handleTokenChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -388,21 +434,59 @@ export function NotionStep({ status, onBack, onNext }: NotionStepProps) {
     );
   };
 
-  // If already configured with a database, show success state
+  // If already configured with a database, show success state with option to change
   if (status?.databaseSelected) {
     return (
       <div className="space-y-6">
         <ConnectionStatusCard
           title="Notion"
-          subtitle={status.databaseName || "Configured via environment"}
+          subtitle={databases.find((d) => d.id === selectedDatabase)?.name || status.databaseName || "Configured via environment"}
           subtitleLabel="Database"
         />
+
+        <div className="space-y-2">
+          <span id="database-label-connected" className="text-sm font-medium">
+            Select Database to Sync
+          </span>
+          <p className="text-sm text-muted-foreground">
+            Choose which Notion database to sync with your Google Calendar.
+          </p>
+          <Select
+            value={selectedDatabase}
+            onValueChange={handleSelectDatabase}
+            disabled={selectingDb || loadingDatabases}
+            aria-labelledby="database-label-connected"
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select a database…">
+                {loadingDatabases
+                  ? "Loading databases…"
+                  : databases.find((d) => d.id === selectedDatabase)?.name ||
+                    status.databaseName ||
+                    "Select a database…"}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              {databases.map((db) => (
+                <SelectItem key={db.id} value={db.id}>
+                  {db.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {error && (
+          <div className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive">{error}</div>
+        )}
 
         <div className="flex justify-between">
           <Button variant="outline" onClick={onBack}>
             Back
           </Button>
-          <Button onClick={onNext}>Continue</Button>
+          <Button onClick={onNext} disabled={selectingDb}>
+            {selectingDb ? "Saving..." : "Continue"}
+          </Button>
         </div>
       </div>
     );
