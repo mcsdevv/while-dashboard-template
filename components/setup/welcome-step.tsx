@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/shared/ui";
+import { StepHeader } from "./step-header";
 
 interface WelcomeStepProps {
   onNext: () => void;
@@ -11,10 +12,10 @@ export function WelcomeStep({ onNext, oauthAppPublished }: WelcomeStepProps) {
   return (
     <div className="space-y-5">
       <div className="space-y-3">
-        <p className="text-muted-foreground">
-          This wizard will help you connect your Google Calendar and Notion database for
-          bidirectional synchronization.
-        </p>
+        <StepHeader
+          title="Welcome"
+          description="This wizard will help you connect your Google Calendar and Notion database for bidirectional synchronization."
+        />
 
         {/* 7-day token warning - hidden when OAuth app is published */}
         {!oauthAppPublished && (

@@ -1,14 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-  SkeletonSetupWizard,
-} from "@/shared/ui";
+import { Card, CardContent, SkeletonSetupWizard } from "@/shared/ui";
 import confetti from "canvas-confetti";
 import { Calendar, Check, Database, GitBranch, RefreshCw, Sparkles, TestTube } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -254,11 +247,7 @@ export function SetupWizard({ currentStep }: SetupWizardProps) {
         )}
         {/* Step content */}
         <Card className="animate-in slide-in-from-bottom duration-300">
-          <CardHeader className="pb-4">
-            <CardTitle>{currentStepData.name}</CardTitle>
-            <CardDescription>{currentStepData.description}</CardDescription>
-          </CardHeader>
-          <CardContent>
+          <CardContent className="pt-6">
             {currentStep === 1 && (
               <WelcomeStep
                 onNext={handleStepComplete}

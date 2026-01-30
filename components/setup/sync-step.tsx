@@ -4,6 +4,7 @@ import { Button } from "@/shared/ui";
 import { AlertTriangle, CheckCircle2, Loader2, XCircle } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { StatusCard } from "./status-card";
+import { StepHeader } from "./step-header";
 
 interface SyncStepProps {
   onBack: () => void;
@@ -233,10 +234,10 @@ export function SyncStep({ onBack, onNext }: SyncStepProps) {
 
   return (
     <div className="space-y-6">
-      <p className="text-sm text-muted-foreground">
-        Enable webhooks to keep Google Calendar and Notion in real-time sync. This creates
-        subscriptions for both providers.
-      </p>
+      <StepHeader
+        title="Sync"
+        description="Enable real-time synchronization between your services."
+      />
 
       {isLocalhost && (
         <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-4 text-sm text-amber-700 dark:text-amber-400">

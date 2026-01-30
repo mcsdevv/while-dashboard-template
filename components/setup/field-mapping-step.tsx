@@ -23,6 +23,7 @@ import {
 } from "@/shared/ui";
 import { ArrowRight, Pencil, Plus } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { StepHeader } from "./step-header";
 
 interface FieldMappingStepProps {
   onBack: () => void;
@@ -588,10 +589,10 @@ export function FieldMappingStep({ onBack, onNext }: FieldMappingStepProps) {
 
   return (
     <div className="space-y-6">
-      <div className="text-sm text-muted-foreground">
-        Configure which Google Calendar fields sync to your Notion database. Toggle fields on/off
-        and map them to your Notion properties.
-      </div>
+      <StepHeader
+        title="Mapping"
+        description="Configure how properties sync between Notion and Google Calendar."
+      />
       <div className="rounded-lg border border-amber-500/50 bg-amber-500/10 p-3">
         <div className="flex items-start gap-2">
           <svg

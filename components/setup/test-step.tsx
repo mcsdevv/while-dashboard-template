@@ -5,6 +5,7 @@ import { CheckCircle2, PartyPopper, XCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { StatusCard } from "./status-card";
+import { StepHeader } from "./step-header";
 
 interface TestStepProps {
   onBack: () => void;
@@ -61,6 +62,10 @@ export function TestStep({ onBack, setupComplete, onConfetti }: TestStepProps) {
 
   return (
     <div className="space-y-4">
+      <StepHeader
+        title="Test"
+        description="Test the connections to ensure everything is working correctly."
+      />
       {/* Service status cards */}
       {results.length > 0 && (
         <div className="space-y-4">

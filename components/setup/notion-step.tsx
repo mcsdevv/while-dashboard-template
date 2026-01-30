@@ -4,6 +4,7 @@ import { Button, ConnectionStatusCard } from "@/shared/ui";
 import { Input } from "@/shared/ui";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { StepHeader } from "./step-header";
 import { TemplateLink } from "./template-link";
 
 interface NotionStepProps {
@@ -438,6 +439,10 @@ export function NotionStep({ status, onBack, onNext }: NotionStepProps) {
   if (status?.databaseSelected) {
     return (
       <div className="space-y-6">
+        <StepHeader
+          title="Notion"
+          description="Connect your Notion workspace to sync events with your database."
+        />
         <ConnectionStatusCard
           title="Notion"
           subtitle={
@@ -498,6 +503,10 @@ export function NotionStep({ status, onBack, onNext }: NotionStepProps) {
 
   return (
     <div className="space-y-6">
+      <StepHeader
+        title="Notion"
+        description="Connect your Notion workspace to sync events with your database."
+      />
       {!validated ? (
         <>
           {/* Template recommendation */}
