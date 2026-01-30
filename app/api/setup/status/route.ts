@@ -37,6 +37,7 @@ export async function GET() {
         // Connected when we have a refresh token from OAuth sign-in
         connected: !!settings?.google?.refreshToken,
         calendarSelected: !!settings?.google?.calendarId,
+        calendarName: settings?.google?.calendarName || null,
         connectedAt: settings?.google?.connectedAt || null,
         oauthAppPublished: settings?.google?.oauthAppPublished || false,
       },

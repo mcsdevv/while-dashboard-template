@@ -29,6 +29,7 @@ interface SetupStatus {
     configured: boolean;
     connected: boolean;
     calendarSelected: boolean;
+    calendarName: string | null;
     oauthAppPublished?: boolean;
   };
   notion: {

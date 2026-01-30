@@ -11,6 +11,7 @@ interface GoogleStepProps {
     configured: boolean;
     connected: boolean;
     calendarSelected: boolean;
+    calendarName?: string | null;
   };
   onBack: () => void;
   onNext: () => void;
@@ -404,7 +405,11 @@ export function GoogleStep({ status, onBack, onNext }: GoogleStepProps) {
         <>
           <ConnectionStatusCard
             title="Google Calendar"
-            subtitle={calendars.find((c) => c.id === selectedCalendar)?.name || selectedCalendar}
+            subtitle={
+              calendars.find((c) => c.id === selectedCalendar)?.name ||
+              status?.calendarName ||
+              "Loading calendar..."
+            }
             subtitleLabel="Calendar"
           />
 
