@@ -1,13 +1,7 @@
 "use client";
 
 import { GoogleSettings } from "@/components/settings/google-settings";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  Skeleton,
-} from "@/shared/ui";
+import { Card, CardContent, CardHeader, CardTitle, Skeleton } from "@/shared/ui";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -64,12 +58,8 @@ export default function GoogleConnectionPage() {
 
       {/* Page Header */}
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">
-          Google Calendar
-        </h1>
-        <p className="text-muted-foreground text-sm mt-1">
-          Manage your Google Calendar connection
-        </p>
+        <h1 className="text-2xl font-semibold tracking-tight">Google Calendar</h1>
+        <p className="text-muted-foreground text-sm mt-1">Manage your Google Calendar connection</p>
       </div>
 
       {/* Settings Card */}

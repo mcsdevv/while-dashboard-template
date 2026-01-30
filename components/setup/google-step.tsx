@@ -33,7 +33,7 @@ function getActionableErrorMessage(error: string, redirectUri: string): string {
   const lowerError = error.toLowerCase();
 
   if (lowerError.includes("not configured") || lowerError.includes("client_id")) {
-    return `Missing Google credentials. Add GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in Vercel → Settings → Environment Variables, then redeploy.`;
+    return "Missing Google credentials. Add GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in Vercel → Settings → Environment Variables, then redeploy.";
   }
 
   if (lowerError.includes("redirect") || lowerError.includes("redirect_uri_mismatch")) {
@@ -41,7 +41,7 @@ function getActionableErrorMessage(error: string, redirectUri: string): string {
   }
 
   if (lowerError.includes("access_denied") || lowerError.includes("blocked")) {
-    return `Access blocked. In Google Cloud Console → OAuth consent screen → Test users, add your email address.`;
+    return "Access blocked. In Google Cloud Console → OAuth consent screen → Test users, add your email address.";
   }
 
   if (lowerError.includes("invalid_client")) {

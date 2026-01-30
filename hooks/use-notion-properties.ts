@@ -31,7 +31,7 @@ const fetcher = async (url: string) => {
   return response.json();
 };
 
-export function useNotionProperties(endpoint: string = "/api/setup/field-mapping") {
+export function useNotionProperties(endpoint = "/api/setup/field-mapping") {
   const { data, error, isLoading, mutate } = useSWR<FieldMappingResponse>(endpoint, fetcher, {
     revalidateOnFocus: false, // We'll manually revalidate on dropdown open
     dedupingInterval: 3000, // Dedupe requests within 3s
@@ -46,7 +46,7 @@ export function useNotionProperties(endpoint: string = "/api/setup/field-mapping
   useEffect(() => {
     setFieldMapping(undefined);
     setDefaults(undefined);
-  }, [endpoint]);
+  }, []);
 
   useEffect(() => {
     if (!data) return;

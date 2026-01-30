@@ -1,14 +1,14 @@
 "use client";
 
+import type { NavItem } from "@/lib/navigation";
 import { cn } from "@/lib/utils";
 import { SidebarNavItem } from "@/shared/ui";
-import { ChevronDown } from "lucide-react";
+import { AlertTriangle, ChevronDown } from "lucide-react";
+import type { Route } from "next";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
-import type { NavItem } from "@/lib/navigation";
+import { type ReactNode, useEffect, useState } from "react";
 import { useSidebar } from "./sidebar-context";
-import type { Route } from "next";
 
 interface SidebarNavProps {
   items: NavItem[];
@@ -17,6 +17,39 @@ interface SidebarNavProps {
 export function SidebarNav({ items }: SidebarNavProps) {
   const pathname = usePathname();
   const { collapsed, setMobileOpen } = useSidebar();
+  const [syncWarning, setSyncWarning] = useState(false);
+
+  useEffect(() => {
+    let isActive = true;
+    const controller = new AbortController();
+
+    const fetchSyncStatus = async () => {
+      try {
+        const response = await fetch("/api/setup/sync", { signal: controller.signal });
+        if (!response.ok) {
+          return;
+        }
+        const data = await response.json();
+        const googleActive = Boolean(data?.google?.active);
+        const notionActive = Boolean(data?.notion?.active);
+        const notionVerified = Boolean(data?.notion?.verified);
+        if (isActive) {
+          setSyncWarning(!(googleActive && notionActive && notionVerified));
+        }
+      } catch {
+        if (isActive) {
+          setSyncWarning(true);
+        }
+      }
+    };
+
+    fetchSyncStatus();
+
+    return () => {
+      isActive = false;
+      controller.abort();
+    };
+  }, []);
 
   return (
     <nav className="space-y-1 px-3">
@@ -27,6 +60,15 @@ export function SidebarNav({ items }: SidebarNavProps) {
           pathname={pathname}
           collapsed={collapsed}
           onNavigate={() => setMobileOpen(false)}
+          indicator={
+            item.href === "/setup/1" && syncWarning ? (
+              <AlertTriangle
+                aria-hidden="true"
+                className="h-3.5 w-3.5 text-amber-500"
+                title="Real-time sync needs attention"
+              />
+            ) : undefined
+          }
         />
       ))}
     </nav>
@@ -38,6 +80,7 @@ interface NavItemComponentProps {
   pathname: string;
   collapsed: boolean;
   onNavigate: () => void;
+  indicator?: ReactNode;
   depth?: number;
 }
 
@@ -46,11 +89,11 @@ function NavItemComponent({
   pathname,
   collapsed,
   onNavigate,
+  indicator,
   depth = 0,
 }: NavItemComponentProps) {
   const isActive =
-    pathname === item.href ||
-    (item.children && item.children.some((child) => pathname === child.href));
+    pathname === item.href || item.children?.some((child) => pathname === child.href);
   const [expanded, setExpanded] = useState(isActive);
 
   const hasChildren = item.children && item.children.length > 0;
@@ -60,6 +103,7 @@ function NavItemComponent({
     return (
       <div className="space-y-1">
         <button
+          type="button"
           onClick={() => setExpanded(!expanded)}
           className={cn(
             "w-full flex items-center gap-3 px-3 py-2 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
@@ -72,10 +116,7 @@ function NavItemComponent({
           <span className="flex-1 text-left truncate">{item.title}</span>
           <ChevronDown
             aria-hidden="true"
-            className={cn(
-              "w-4 h-4 transition-transform duration-200",
-              expanded && "rotate-180",
-            )}
+            className={cn("w-4 h-4 transition-transform duration-200", expanded && "rotate-180")}
           />
         </button>
         {expanded && (
@@ -102,6 +143,7 @@ function NavItemComponent({
       icon={<Icon aria-hidden="true" className="w-5 h-5" />}
       collapsed={collapsed}
       onClick={onNavigate}
+      indicator={indicator}
     >
       {item.title}
     </SidebarNavItem>
@@ -109,12 +151,7 @@ function NavItemComponent({
 
   if (item.external) {
     return (
-      <a
-        href={item.href}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="block"
-      >
+      <a href={item.href} target="_blank" rel="noopener noreferrer" className="block">
         {content}
       </a>
     );

@@ -69,7 +69,8 @@ export async function POST(request: NextRequest) {
       } catch (settingsError) {
         console.error("Failed to save settings:", settingsError);
         const isRedisError =
-          settingsError instanceof Error && settingsError.message.includes("Redis is not configured");
+          settingsError instanceof Error &&
+          settingsError.message.includes("Redis is not configured");
         if (!isRedisError) {
           throw settingsError;
         }

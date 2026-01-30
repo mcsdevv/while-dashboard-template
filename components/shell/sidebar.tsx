@@ -1,12 +1,12 @@
 "use client";
 
-import { cn } from "@/lib/utils";
-import { navigation, footerLinks } from "@/lib/navigation";
 import { ThemeToggleWrapper } from "@/components/theme-toggle-wrapper";
+import { footerLinks, navigation } from "@/lib/navigation";
+import { cn } from "@/lib/utils";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
-import { SidebarNav } from "./sidebar-nav";
 import { useSidebar } from "./sidebar-context";
+import { SidebarNav } from "./sidebar-nav";
 
 export function AppSidebar() {
   const { collapsed, toggleCollapsed } = useSidebar();
@@ -37,6 +37,7 @@ export function AppSidebar() {
           {collapsed ? "W" : "While"}
         </Link>
         <button
+          type="button"
           onClick={toggleCollapsed}
           className={cn(
             "p-1.5 hover:bg-muted transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm",
@@ -61,9 +62,7 @@ export function AppSidebar() {
       <div className="p-4 border-t border-sidebar-border space-y-4">
         <div className={cn("flex items-center", collapsed ? "justify-center" : "justify-between")}>
           <ThemeToggleWrapper />
-          {!collapsed && (
-            <span className="text-xs text-muted-foreground">v0.1.0</span>
-          )}
+          {!collapsed && <span className="text-xs text-muted-foreground">v0.1.0</span>}
         </div>
         {!collapsed && (
           <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">

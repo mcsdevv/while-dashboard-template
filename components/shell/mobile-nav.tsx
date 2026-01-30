@@ -1,11 +1,11 @@
 "use client";
 
+import { footerLinks, navigation } from "@/lib/navigation";
 import { cn } from "@/lib/utils";
-import { navigation, footerLinks } from "@/lib/navigation";
 import { X } from "lucide-react";
 import Link from "next/link";
-import { SidebarNav } from "./sidebar-nav";
 import { useSidebar } from "./sidebar-context";
+import { SidebarNav } from "./sidebar-nav";
 
 export function MobileNav() {
   const { mobileOpen, setMobileOpen } = useSidebar();
@@ -15,13 +15,14 @@ export function MobileNav() {
   return (
     <>
       {/* Backdrop */}
-      <div
+      <button
+        type="button"
         className={cn(
           "fixed inset-0 z-40 bg-background/80 lg:hidden",
           "animate-in fade-in duration-200",
         )}
         onClick={() => setMobileOpen(false)}
-        aria-hidden="true"
+        aria-label="Close menu"
       />
 
       {/* Drawer */}
@@ -42,6 +43,7 @@ export function MobileNav() {
             While
           </Link>
           <button
+            type="button"
             onClick={() => setMobileOpen(false)}
             className="p-2 hover:bg-muted transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
             aria-label="Close menu"

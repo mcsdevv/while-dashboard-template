@@ -61,7 +61,10 @@ function isPageObjectResponse(page: unknown): page is PageObjectResponse {
 }
 
 // Helper to extract property values from Notion pages
-export function getPropertyValue(properties: PageObjectResponse["properties"], key: string): unknown {
+export function getPropertyValue(
+  properties: PageObjectResponse["properties"],
+  key: string,
+): unknown {
   const prop = properties[key];
   if (!prop) return null;
 

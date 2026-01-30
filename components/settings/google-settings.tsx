@@ -1,7 +1,15 @@
 "use client";
 
-import { Badge, Button, Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui";
 import { getTokenHealth, shouldPromptPublishedStatus } from "@/lib/settings/token-health";
+import {
+  Badge,
+  Button,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/shared/ui";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 

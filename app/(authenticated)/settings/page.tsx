@@ -7,7 +7,7 @@ import { GoogleSettings } from "@/components/settings/google-settings";
 import { NotionSettings } from "@/components/settings/notion-settings";
 import { Button, Card, CardContent } from "@/shared/ui";
 import { SkeletonSettingsPage } from "@/shared/ui";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 interface Settings {
   google: {
@@ -38,7 +38,7 @@ export default function SettingsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchSettings = async () => {
+  const fetchSettings = useCallback(async () => {
     try {
       const response = await fetch("/api/settings");
       if (!response.ok) {
@@ -51,11 +51,11 @@ export default function SettingsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchSettings();
-  }, []);
+  }, [fetchSettings]);
 
   if (loading) {
     return <SkeletonSettingsPage />;
@@ -92,10 +92,7 @@ export default function SettingsPage() {
       </div>
 
       {/* Field Mapping */}
-      <FieldMappingEditor
-        initialMapping={settings?.fieldMapping ?? null}
-        onSave={fetchSettings}
-      />
+      <FieldMappingEditor initialMapping={settings?.fieldMapping ?? null} onSave={fetchSettings} />
 
       {/* Danger Zone */}
       <DangerZone />

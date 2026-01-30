@@ -305,7 +305,6 @@ describe("Authentication", () => {
 
       expect(isAuthorized).toBe(false);
     });
-
   });
 
   describe("Callback URLs", () => {

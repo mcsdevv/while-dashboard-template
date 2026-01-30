@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 
-const VALID_STEPS = ["1", "2", "3", "4", "5"] as const;
+const VALID_STEPS = ["1", "2", "3", "4", "5", "6"] as const;
 type ValidStep = (typeof VALID_STEPS)[number];
 
 interface SetupStepPageProps {
@@ -18,7 +18,7 @@ export default async function SetupStepPage({ params }: SetupStepPageProps) {
     notFound();
   }
 
-  const currentStep = Number.parseInt(step, 10) as 1 | 2 | 3 | 4 | 5;
+  const currentStep = Number.parseInt(step, 10) as 1 | 2 | 3 | 4 | 5 | 6;
 
   return <SetupWizard currentStep={currentStep} />;
 }

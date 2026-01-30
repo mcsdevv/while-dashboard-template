@@ -1,15 +1,8 @@
 "use client";
 
 import { FieldMappingEditor } from "@/components/settings/field-mapping-editor";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-  Skeleton,
-} from "@/shared/ui";
-import { useEffect, useState } from "react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, Skeleton } from "@/shared/ui";
+import { useCallback, useEffect, useState } from "react";
 
 interface FieldMapping {
   title: string;
@@ -24,7 +17,7 @@ export default function FieldMappingPage() {
   const [mapping, setMapping] = useState<FieldMapping | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchMapping = async () => {
+  const fetchMapping = useCallback(async () => {
     try {
       const response = await fetch("/api/settings");
       if (response.ok) {
@@ -36,11 +29,11 @@ export default function FieldMappingPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchMapping();
-  }, []);
+  }, [fetchMapping]);
 
   if (loading) {
     return (
@@ -71,9 +64,9 @@ export default function FieldMappingPage() {
         </CardHeader>
         <CardContent>
           <CardDescription>
-            Field mapping defines how data flows between your Notion database and
-            Google Calendar. Each Notion property can be mapped to a corresponding
-            calendar field. Changes are synchronized bidirectionally.
+            Field mapping defines how data flows between your Notion database and Google Calendar.
+            Each Notion property can be mapped to a corresponding calendar field. Changes are
+            synchronized bidirectionally.
           </CardDescription>
         </CardContent>
       </Card>

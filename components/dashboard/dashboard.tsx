@@ -4,13 +4,7 @@ import { LogsViewer } from "@/components/dashboard/logs-viewer";
 import type { SyncMetrics } from "@/lib/types";
 import { formatDate } from "@/lib/utils";
 import { Badge } from "@/shared/ui";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/shared/ui";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui";
 import { Separator } from "@/shared/ui";
 import { Skeleton } from "@/shared/ui";
@@ -123,14 +117,9 @@ export function Dashboard() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
-          <p className="text-muted-foreground text-sm mt-1">
-            Real-time synchronization overview
-          </p>
+          <p className="text-muted-foreground text-sm mt-1">Real-time synchronization overview</p>
         </div>
-        <Select
-          value={timeWindow}
-          onValueChange={(value) => setTimeWindow(value as TimeWindow)}
-        >
+        <Select value={timeWindow} onValueChange={(value) => setTimeWindow(value as TimeWindow)}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Select time range…" />
           </SelectTrigger>
@@ -231,9 +220,7 @@ export function Dashboard() {
 
         <Card className="hover:bg-muted/50 transition-colors">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Failures
-            </CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Failures</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-semibold">{metrics?.totalFailures || 0}</p>

@@ -16,6 +16,8 @@ import {
 } from "@/shared/ui";
 import { useEffect, useState } from "react";
 
+const SKELETON_ROWS = ["skeleton-1", "skeleton-2", "skeleton-3", "skeleton-4", "skeleton-5"];
+
 type TimeWindow = "24h" | "7d" | "30d" | "90d";
 
 export default function ActivityPage() {
@@ -57,14 +59,9 @@ export default function ActivityPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Activity</h1>
-          <p className="text-muted-foreground text-sm mt-1">
-            View sync history and event logs
-          </p>
+          <p className="text-muted-foreground text-sm mt-1">View sync history and event logs</p>
         </div>
-        <Select
-          value={timeWindow}
-          onValueChange={(value) => setTimeWindow(value as TimeWindow)}
-        >
+        <Select value={timeWindow} onValueChange={(value) => setTimeWindow(value as TimeWindow)}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Select time range" />
           </SelectTrigger>
@@ -85,8 +82,8 @@ export default function ActivityPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <Skeleton key={i} className="h-16 w-full" />
+              {SKELETON_ROWS.map((row) => (
+                <Skeleton key={row} className="h-16 w-full" />
               ))}
             </div>
           </CardContent>

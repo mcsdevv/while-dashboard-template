@@ -106,7 +106,7 @@ export function parseRRule(rrule: string): string {
   try {
     const parts = parseRRuleParts(rrule);
     const freq = parts.FREQ?.toUpperCase();
-    const interval = parts.INTERVAL ? parseInt(parts.INTERVAL, 10) : 1;
+    const interval = parts.INTERVAL ? Number.parseInt(parts.INTERVAL, 10) : 1;
 
     if (!freq) {
       return "Unknown recurrence";

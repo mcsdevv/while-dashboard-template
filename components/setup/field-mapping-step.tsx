@@ -1,5 +1,10 @@
 "use client";
 
+import { PropertyDialog } from "@/components/notion/property-dialog";
+import { useNotionProperties } from "@/hooks/use-notion-properties";
+import type { ExtendedFieldMapping, FieldConfig, NotionPropertyType } from "@/lib/settings/types";
+import { DEFAULT_EXTENDED_FIELD_MAPPING } from "@/lib/settings/types";
+import { useToast } from "@/lib/toast";
 import {
   Button,
   Dialog,
@@ -17,12 +22,7 @@ import {
   Switch,
 } from "@/shared/ui";
 import { ArrowRight, Pencil, Plus } from "lucide-react";
-import { PropertyDialog } from "@/components/notion/property-dialog";
 import { useEffect, useRef, useState } from "react";
-import { useNotionProperties } from "@/hooks/use-notion-properties";
-import { useToast } from "@/lib/toast";
-import type { ExtendedFieldMapping, FieldConfig, NotionPropertyType } from "@/lib/settings/types";
-import { DEFAULT_EXTENDED_FIELD_MAPPING } from "@/lib/settings/types";
 
 interface FieldMappingStepProps {
   onBack: () => void;
@@ -136,8 +136,7 @@ export function FieldMappingStep({ onBack, onNext }: FieldMappingStepProps) {
       lastLoadError.current = null;
       return;
     }
-    const message =
-      loadError instanceof Error ? loadError.message : "Failed to load Notion fields";
+    const message = loadError instanceof Error ? loadError.message : "Failed to load Notion fields";
     if (lastLoadError.current === message) return;
     lastLoadError.current = message;
     addToast({
@@ -294,7 +293,7 @@ export function FieldMappingStep({ onBack, onNext }: FieldMappingStepProps) {
         propertyType:
           propertyName === EMPTY_VALUE
             ? DEFAULT_EXTENDED_FIELD_MAPPING[field].propertyType
-            : propertyType ?? prev[field].propertyType,
+            : (propertyType ?? prev[field].propertyType),
       },
     }));
   };
@@ -504,9 +503,7 @@ export function FieldMappingStep({ onBack, onNext }: FieldMappingStepProps) {
                     <SelectItem value={config.notionPropertyName} disabled>
                       <div className="flex items-center gap-2 text-destructive">
                         <span>{config.notionPropertyName}</span>
-                        <span className="text-xs">
-                          (incompatible: {currentProperty.type})
-                        </span>
+                        <span className="text-xs">(incompatible: {currentProperty.type})</span>
                       </div>
                     </SelectItem>
                     <SelectSeparator />
@@ -610,11 +607,9 @@ export function FieldMappingStep({ onBack, onNext }: FieldMappingStepProps) {
             />
           </svg>
           <p className="text-sm text-amber-600 dark:text-amber-400">
-            <span className="font-medium text-amber-700 dark:text-amber-500">
-              Warning:
-            </span>{" "}
-            Default Notion property names are prefilled. If a field is toggled on and its default
-            property doesn&apos;t exist yet, we&apos;ll create it in Notion before saving.
+            <span className="font-medium text-amber-700 dark:text-amber-500">Warning:</span> Default
+            Notion property names are prefilled. If a field is toggled on and its default property
+            doesn&apos;t exist yet, we&apos;ll create it in Notion before saving.
           </p>
         </div>
       </div>
@@ -622,11 +617,7 @@ export function FieldMappingStep({ onBack, onNext }: FieldMappingStepProps) {
       {/* Service Headers */}
       <div className="flex items-center justify-between py-4 px-3 rounded-lg bg-muted/30 border border-border">
         <div className="flex items-center gap-3">
-          <img
-            src="/icons/google-calendar.png"
-            alt="Google Calendar"
-            className="w-7 h-7"
-          />
+          <img src="/icons/google-calendar.png" alt="Google Calendar" className="w-7 h-7" />
           <span className="text-base font-medium">Google Calendar</span>
         </div>
         <div className="flex items-center gap-3">
@@ -716,8 +707,8 @@ export function FieldMappingStep({ onBack, onNext }: FieldMappingStepProps) {
                   )}
                 </ul>
                 <p className="text-xs text-muted-foreground">
-                  Rename these properties in Notion or choose a compatible property in the
-                  dropdown to continue.
+                  Rename these properties in Notion or choose a compatible property in the dropdown
+                  to continue.
                 </p>
               </div>
             )}

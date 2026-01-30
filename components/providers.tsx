@@ -1,10 +1,9 @@
 "use client";
 
 import { SessionProvider } from "@/components/auth/session-provider";
-import { ToastProvider } from "@/shared/ui";
-import { Toaster } from "@/shared/ui";
-import { ThemeProvider } from "next-themes";
+import { ToastProvider, Toaster } from "@/shared/ui";
 import type { Session } from "next-auth";
+import { ThemeProvider } from "next-themes";
 import type { ReactNode } from "react";
 
 interface ProvidersProps {

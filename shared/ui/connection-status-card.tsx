@@ -18,10 +18,7 @@ interface ConnectionStatusCardProps {
 
 const ConnectionStatusCard = React.forwardRef<HTMLDivElement, ConnectionStatusCardProps>(
   ({ title, status = "Connected", subtitle, subtitleLabel, className }, ref) => (
-    <div
-      ref={ref}
-      className={cn("border border-emerald-500/30 bg-emerald-500/5 p-4", className)}
-    >
+    <div ref={ref} className={cn("border border-emerald-500/30 bg-emerald-500/5 p-4", className)}>
       <div className="flex items-center gap-3">
         <div className="flex h-8 w-8 shrink-0 items-center justify-center bg-emerald-500/20">
           <CheckCircle2 className="h-5 w-5 text-emerald-500" aria-hidden="true" />

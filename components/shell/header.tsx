@@ -1,8 +1,8 @@
 "use client";
 
 import { UserMenu } from "@/components/auth/user-menu";
-import { cn } from "@/lib/utils";
 import { ThemeToggleWrapper } from "@/components/theme-toggle-wrapper";
+import { cn } from "@/lib/utils";
 import { Menu } from "lucide-react";
 import Link from "next/link";
 import { useSidebar } from "./sidebar-context";
@@ -20,6 +20,7 @@ export function AppHeader() {
     >
       {/* Mobile menu trigger */}
       <button
+        type="button"
         onClick={() => setMobileOpen(true)}
         className="lg:hidden p-2 hover:bg-muted transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
         aria-label="Open menu"
@@ -28,10 +29,7 @@ export function AppHeader() {
       </button>
 
       {/* Mobile logo */}
-      <Link
-        href="/"
-        className="lg:hidden font-semibold text-xl tracking-tight"
-      >
+      <Link href="/" className="lg:hidden font-semibold text-xl tracking-tight">
         While
       </Link>
 

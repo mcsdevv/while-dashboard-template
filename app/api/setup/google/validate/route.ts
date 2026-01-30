@@ -49,7 +49,7 @@ export async function GET() {
     // Attempt to verify the client ID by checking Google's OAuth metadata
     // This doesn't require authentication, just validates the client exists
     try {
-      const tokenInfoUrl = `https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=invalid`;
+      const tokenInfoUrl = "https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=invalid";
       const response = await fetch(tokenInfoUrl);
 
       // We expect this to fail with 400 (invalid token), which is fine
@@ -71,7 +71,7 @@ export async function GET() {
     // All checks passed
     return NextResponse.json({
       valid: true,
-      clientId: clientId.substring(0, 20) + "...", // Partial for debugging
+      clientId: `${clientId.substring(0, 20)}...`, // Partial for debugging
     });
   } catch (error) {
     console.error("Error validating Google credentials:", error);

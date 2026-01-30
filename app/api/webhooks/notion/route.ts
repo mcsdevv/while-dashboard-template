@@ -67,14 +67,16 @@ export async function POST(request: NextRequest) {
         status: "success",
       });
 
-      // Get database ID from config and save the verification token for future use
+      // Preserve existing subscription metadata when possible
       const notionConfig = await getNotionConfig();
+      const existingSubscription = await getNotionWebhook();
+
       await saveNotionWebhook({
-        subscriptionId: "pending", // Will be updated later
-        databaseId: notionConfig.databaseId,
+        subscriptionId: existingSubscription?.subscriptionId || "pending",
+        databaseId: existingSubscription?.databaseId || notionConfig.databaseId,
         verificationToken: validatedBody.verification_token,
-        createdAt: new Date(),
-        verified: false,
+        createdAt: existingSubscription?.createdAt || new Date(),
+        verified: existingSubscription?.verified || false,
       });
 
       // Notion expects a 200 OK response

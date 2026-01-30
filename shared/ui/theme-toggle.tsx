@@ -58,9 +58,7 @@ export function ThemeToggle({ theme, setTheme, resolvedTheme }: ThemeToggleProps
           >
             <ThemeIcon aria-hidden="true" className="size-4" />
             <span className="flex-1">{label}</span>
-            {currentValue === value && (
-              <Check aria-hidden="true" className="size-4" />
-            )}
+            {currentValue === value && <Check aria-hidden="true" className="size-4" />}
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>

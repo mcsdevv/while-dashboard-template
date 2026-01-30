@@ -44,7 +44,9 @@ export async function POST(request: NextRequest) {
     const notion = new Client({ auth: apiToken });
 
     // Build the property schema based on type
-    const buildPropertySchema = (propType: PropertyType): UpdateDatabaseParameters["properties"] => {
+    const buildPropertySchema = (
+      propType: PropertyType,
+    ): UpdateDatabaseParameters["properties"] => {
       switch (propType) {
         case "title":
           return { [name]: { title: {} } };

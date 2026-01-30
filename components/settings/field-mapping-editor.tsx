@@ -1,5 +1,7 @@
 "use client";
 
+import { useNotionProperties } from "@/hooks/use-notion-properties";
+import { useToast } from "@/lib/toast";
 import { Button } from "@/shared/ui";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui";
 import {
@@ -12,8 +14,6 @@ import {
 } from "@/shared/ui";
 import { ArrowRight } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { useNotionProperties } from "@/hooks/use-notion-properties";
-import { useToast } from "@/lib/toast";
 
 interface FieldMapping {
   title: string;
@@ -105,8 +105,7 @@ export function FieldMappingEditor({ initialMapping, onSave }: FieldMappingEdito
       lastLoadError.current = null;
       return;
     }
-    const message =
-      loadError instanceof Error ? loadError.message : "Failed to load Notion fields";
+    const message = loadError instanceof Error ? loadError.message : "Failed to load Notion fields";
     if (lastLoadError.current === message) return;
     lastLoadError.current = message;
     addToast({
@@ -123,14 +122,20 @@ export function FieldMappingEditor({ initialMapping, onSave }: FieldMappingEdito
       const loaded = loadedMapping as Record<string, unknown>;
       // Check if it's ExtendedFieldMapping (has FieldConfig objects) or simple FieldMapping (has strings)
       const firstValue = loaded.title;
-      if (typeof firstValue === "object" && firstValue !== null && "notionPropertyName" in firstValue) {
+      if (
+        typeof firstValue === "object" &&
+        firstValue !== null &&
+        "notionPropertyName" in firstValue
+      ) {
         // ExtendedFieldMapping format - extract notionPropertyName from each field
         const simpleMapping: FieldMapping = {
           title: (loaded.title as { notionPropertyName: string }).notionPropertyName || "",
           date: (loaded.date as { notionPropertyName: string }).notionPropertyName || "",
-          description: (loaded.description as { notionPropertyName: string })?.notionPropertyName || "",
+          description:
+            (loaded.description as { notionPropertyName: string })?.notionPropertyName || "",
           location: (loaded.location as { notionPropertyName: string })?.notionPropertyName || "",
-          gcalEventId: (loaded.gcalEventId as { notionPropertyName: string })?.notionPropertyName || "",
+          gcalEventId:
+            (loaded.gcalEventId as { notionPropertyName: string })?.notionPropertyName || "",
           reminders: (loaded.reminders as { notionPropertyName: string })?.notionPropertyName || "",
         };
         setMapping(simpleMapping);
@@ -221,11 +226,7 @@ export function FieldMappingEditor({ initialMapping, onSave }: FieldMappingEdito
         {/* Service Headers */}
         <div className="flex items-center justify-between py-4 px-3 rounded-lg bg-muted/30 border border-border">
           <div className="flex items-center gap-3">
-            <img
-              src="/icons/google-calendar.png"
-              alt="Google Calendar"
-              className="w-7 h-7"
-            />
+            <img src="/icons/google-calendar.png" alt="Google Calendar" className="w-7 h-7" />
             <span className="text-base font-medium">Google Calendar</span>
           </div>
           <div className="flex items-center gap-3">
@@ -243,7 +244,10 @@ export function FieldMappingEditor({ initialMapping, onSave }: FieldMappingEdito
             const usedProperties = getUsedNotionProperties(field);
 
             return (
-              <div key={field} className="grid grid-cols-1 md:grid-cols-[1fr,auto,1fr] gap-4 items-center">
+              <div
+                key={field}
+                className="grid grid-cols-1 md:grid-cols-[1fr,auto,1fr] gap-4 items-center"
+              >
                 <div>
                   <span className="text-sm font-medium">{label}</span>
                   <p className="text-xs text-muted-foreground">{description}</p>

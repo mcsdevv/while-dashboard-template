@@ -32,9 +32,7 @@ const DropdownMenuRadioGroup = React.forwardRef<HTMLDivElement, DropdownMenuRadi
       [onValueChange],
     );
 
-    return (
-      <Menu.RadioGroup ref={ref} value={value} onValueChange={handleValueChange} {...props} />
-    );
+    return <Menu.RadioGroup ref={ref} value={value} onValueChange={handleValueChange} {...props} />;
   },
 );
 DropdownMenuRadioGroup.displayName = "DropdownMenuRadioGroup";

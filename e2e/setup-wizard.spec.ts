@@ -82,14 +82,14 @@ test.describe("Setup Wizard", () => {
   test("shows progress indicator correctly", async ({ page }) => {
     await page.goto("/setup");
 
-    // Check all 5 steps are visible
-    const stepNames = ["Welcome", "Google", "Notion", "Field Mapping", "Test"];
+    // Check all 6 steps are visible
+    const stepNames = ["Welcome", "Google", "Notion", "Mapping", "Sync", "Test"];
     for (const name of stepNames) {
       await expect(page.getByText(name, { exact: true }).first()).toBeVisible();
     }
 
     // Check step numbers are displayed
-    for (let i = 1; i <= 5; i++) {
+    for (let i = 1; i <= 6; i++) {
       await expect(page.locator(`nav button:has-text("${i}")`)).toBeVisible();
     }
   });
@@ -97,14 +97,16 @@ test.describe("Setup Wizard", () => {
   test("disables future steps until current step is completed", async ({ page }) => {
     await page.goto("/setup");
 
-    // Steps 3, 4, 5 should be disabled (can't skip ahead more than 1 step)
+    // Steps 3, 4, 5, 6 should be disabled (can't skip ahead more than 1 step)
     const step3Button = page.locator("nav ol li").nth(2).locator("button");
     const step4Button = page.locator("nav ol li").nth(3).locator("button");
     const step5Button = page.locator("nav ol li").nth(4).locator("button");
+    const step6Button = page.locator("nav ol li").nth(5).locator("button");
 
     await expect(step3Button).toBeDisabled();
     await expect(step4Button).toBeDisabled();
     await expect(step5Button).toBeDisabled();
+    await expect(step6Button).toBeDisabled();
   });
 
   test("shows loading skeleton while fetching status", async ({ page }) => {
@@ -296,7 +298,7 @@ test.describe("Setup Wizard - Field Mapping Step", () => {
     await page.goto("/setup");
 
     // Should auto-advance to Field Mapping step
-    await expect(page.getByRole("heading", { name: "Field Mapping" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Mapping" })).toBeVisible();
   });
 
   test("requires title and date fields", async ({ page }) => {
@@ -325,11 +327,8 @@ test.describe("Setup Wizard - Test Step", () => {
     });
   });
 
-  test("shows test connections button on step 5", async ({ page }) => {
-    await page.goto("/setup");
-
-    // Navigate to test step
-    await page.locator("nav ol li").nth(4).locator("button").click();
+  test("shows test connections button on step 6", async ({ page }) => {
+    await page.goto("/setup/6");
 
     await expect(page.getByRole("heading", { name: "Test" })).toBeVisible();
     await expect(page.getByRole("button", { name: /Test Connections/i })).toBeVisible();
@@ -351,8 +350,7 @@ test.describe("Setup Wizard - Test Step", () => {
       });
     });
 
-    await page.goto("/setup");
-    await page.locator("nav ol li").nth(4).locator("button").click();
+    await page.goto("/setup/6");
 
     // Run tests
     await page.getByRole("button", { name: /Test Connections/i }).click();
@@ -378,8 +376,7 @@ test.describe("Setup Wizard - Test Step", () => {
       });
     });
 
-    await page.goto("/setup");
-    await page.locator("nav ol li").nth(4).locator("button").click();
+    await page.goto("/setup/6");
 
     // Run tests
     await page.getByRole("button", { name: /Test Connections/i }).click();

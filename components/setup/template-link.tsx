@@ -1,7 +1,7 @@
 "use client";
 
-import { Button } from "@/shared/ui";
 import { TEMPLATE_URL } from "@/lib/notion/template";
+import { Button } from "@/shared/ui";
 
 interface TemplateLinkProps {
   onContinue?: () => void;

@@ -1,7 +1,7 @@
+import { FooterWrapper } from "@/components/footer-wrapper";
 import { Providers } from "@/components/providers";
 import { auth } from "@/lib/auth";
 import { isAuthConfigured } from "@/lib/env";
-import { FooterWrapper } from "@/components/footer-wrapper";
 import { GeistSans } from "geist/font/sans";
 import type { Metadata } from "next";
 import "./globals.css";

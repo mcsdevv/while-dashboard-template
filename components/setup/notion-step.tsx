@@ -219,7 +219,7 @@ export function NotionStep({ status, onBack, onNext }: NotionStepProps) {
       // Pre-select the current database by matching name or ID
       if (status?.databaseName && data.databases.length > 0) {
         const currentDb = data.databases.find(
-          (db: Database) => db.name === status.databaseName || db.id === status.databaseName
+          (db: Database) => db.name === status.databaseName || db.id === status.databaseName,
         );
         if (currentDb) {
           setSelectedDatabase(currentDb.id);
@@ -440,7 +440,11 @@ export function NotionStep({ status, onBack, onNext }: NotionStepProps) {
       <div className="space-y-6">
         <ConnectionStatusCard
           title="Notion"
-          subtitle={databases.find((d) => d.id === selectedDatabase)?.name || status.databaseName || "Configured via environment"}
+          subtitle={
+            databases.find((d) => d.id === selectedDatabase)?.name ||
+            status.databaseName ||
+            "Configured via environment"
+          }
           subtitleLabel="Database"
         />
 

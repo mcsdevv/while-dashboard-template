@@ -5,6 +5,7 @@
 
 import { getGoogleClientConfig } from "@/lib/env";
 import { getSettings, updateSettings } from "@/lib/settings";
+import { getSyncStatus } from "@/lib/webhook/status";
 import { calendar } from "@googleapis/calendar";
 import { Client } from "@notionhq/client";
 import { OAuth2Client } from "google-auth-library";
@@ -33,6 +34,10 @@ export async function POST() {
     // Test Notion
     const notionResult = await testNotionConnection(settings);
     results.push(notionResult);
+
+    // Test webhook sync status
+    const syncResults = await testSyncStatus();
+    results.push(...syncResults);
 
     // Check if all tests passed
     const allPassed = results.every((r) => r.success);
@@ -170,4 +175,67 @@ async function testNotionConnection(
       details: error instanceof Error ? error.message : "Unknown error",
     };
   }
+}
+
+async function testSyncStatus(): Promise<TestResult[]> {
+  const results: TestResult[] = [];
+
+  try {
+    const status = await getSyncStatus();
+
+    if (status.google.active) {
+      results.push({
+        service: "Google Calendar Sync",
+        success: true,
+        message: "Active",
+        details: status.google.expiresAt
+          ? `Webhook expires ${new Date(status.google.expiresAt).toLocaleString()}`
+          : undefined,
+      });
+    } else {
+      results.push({
+        service: "Google Calendar Sync",
+        success: false,
+        message: "Inactive",
+        details: status.google.reason || "Run the Sync step to enable webhooks.",
+      });
+    }
+
+    if (status.notion.active && status.notion.verified) {
+      results.push({
+        service: "Notion Sync",
+        success: true,
+        message: "Active",
+        details: status.notion.state ? `State: ${status.notion.state}` : undefined,
+      });
+    } else {
+      const verificationRequired =
+        status.notion.state === "verification_required" ||
+        (status.notion.reason?.toLowerCase().includes("verification") ?? false);
+      const message = verificationRequired ? "Verification required" : "Inactive";
+      results.push({
+        service: "Notion Sync",
+        success: false,
+        message,
+        details:
+          status.notion.reason ||
+          "Verify the webhook in Notion integration settings, then rerun the test.",
+      });
+    }
+  } catch (error) {
+    results.push({
+      service: "Google Calendar Sync",
+      success: false,
+      message: "Sync check failed",
+      details: error instanceof Error ? error.message : "Unable to verify sync status.",
+    });
+    results.push({
+      service: "Notion Sync",
+      success: false,
+      message: "Sync check failed",
+      details: error instanceof Error ? error.message : "Unable to verify sync status.",
+    });
+  }
+
+  return results;
 }

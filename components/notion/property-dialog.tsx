@@ -1,5 +1,6 @@
 "use client";
 
+import type { NotionPropertyType } from "@/lib/settings/types";
 import {
   Button,
   Dialog,
@@ -11,8 +12,7 @@ import {
   Input,
   Label,
 } from "@/shared/ui";
-import { useState, useEffect } from "react";
-import type { NotionPropertyType } from "@/lib/settings/types";
+import { useEffect, useState } from "react";
 
 const TYPE_DISPLAY_NAMES: Record<string, string> = {
   title: "Title",
@@ -136,8 +136,8 @@ export function PropertyDialog({
               </>
             ) : (
               <>
-                Create a new <span className="font-medium">{typeDisplayName}</span> property in
-                your Notion database for <span className="font-medium">{fieldLabel}</span>.
+                Create a new <span className="font-medium">{typeDisplayName}</span> property in your
+                Notion database for <span className="font-medium">{fieldLabel}</span>.
               </>
             )}
           </DialogDescription>
@@ -161,9 +161,7 @@ export function PropertyDialog({
             Type: <span className="font-medium">{typeDisplayName}</span>
             {!isRename && " (required for this field)"}
           </div>
-          {error && (
-            <div className="text-sm text-destructive">{error}</div>
-          )}
+          {error && <div className="text-sm text-destructive">{error}</div>}
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>

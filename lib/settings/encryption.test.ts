@@ -5,6 +5,10 @@ describe("Encryption", () => {
   // Store original env value
   let originalKey: string | undefined;
 
+  const unsetEncryptionKey = () => {
+    Reflect.deleteProperty(process.env, "SETTINGS_ENCRYPTION_KEY");
+  };
+
   beforeEach(() => {
     originalKey = process.env.SETTINGS_ENCRYPTION_KEY;
   });
@@ -14,7 +18,7 @@ describe("Encryption", () => {
     if (originalKey !== undefined) {
       process.env.SETTINGS_ENCRYPTION_KEY = originalKey;
     } else {
-      delete process.env.SETTINGS_ENCRYPTION_KEY;
+      unsetEncryptionKey();
     }
   });
 
@@ -86,7 +90,7 @@ describe("Encryption", () => {
 
   describe("without encryption key configured", () => {
     beforeEach(() => {
-      delete process.env.SETTINGS_ENCRYPTION_KEY;
+      unsetEncryptionKey();
     });
 
     it("should throw on encrypt when key not configured", () => {
@@ -118,7 +122,7 @@ describe("Encryption", () => {
     });
 
     it("should return plaintext when key is not configured", () => {
-      delete process.env.SETTINGS_ENCRYPTION_KEY;
+      unsetEncryptionKey();
       const result = safeEncrypt("test");
       expect(result).toBe("test");
     });

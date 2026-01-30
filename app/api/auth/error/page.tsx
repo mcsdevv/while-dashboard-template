@@ -14,7 +14,8 @@ const errorMessages: Record<string, { title: string; description: string }> = {
   },
   AccessDenied: {
     title: "Access Denied",
-    description: "You do not have permission to sign in. Your email may not be on the allowed list.",
+    description:
+      "You do not have permission to sign in. Your email may not be on the allowed list.",
   },
   Verification: {
     title: "Verification Error",

@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { isLegacyFieldMapping, migrateFieldMapping, ensureExtendedFieldMapping } from "./migration";
+import { ensureExtendedFieldMapping, isLegacyFieldMapping, migrateFieldMapping } from "./migration";
 import {
-  DEFAULT_FIELD_MAPPING,
   DEFAULT_EXTENDED_FIELD_MAPPING,
-  type FieldMapping,
+  DEFAULT_FIELD_MAPPING,
   type ExtendedFieldMapping,
+  type FieldMapping,
 } from "./types";
 
 describe("isLegacyFieldMapping", () => {
@@ -126,12 +126,12 @@ describe("migrateFieldMapping", () => {
       "visibility",
     ] as const;
 
-    newFields.forEach((field) => {
+    for (const field of newFields) {
       it(`${field} is disabled`, () => {
         const result = migrateFieldMapping(customLegacy);
         expect(result[field].enabled).toBe(false);
       });
-    });
+    }
   });
 
   describe("new fields use default property names", () => {
@@ -234,14 +234,14 @@ describe("migrateFieldMapping", () => {
 
     // Each field should have all required properties
     const fieldKeys = Object.keys(result) as Array<keyof typeof result>;
-    fieldKeys.forEach((key) => {
+    for (const key of fieldKeys) {
       const field = result[key];
       expect(field).toHaveProperty("enabled");
       expect(field).toHaveProperty("notionPropertyName");
       expect(field).toHaveProperty("displayLabel");
       expect(field).toHaveProperty("propertyType");
       expect(field).toHaveProperty("required");
-    });
+    }
   });
 });
 

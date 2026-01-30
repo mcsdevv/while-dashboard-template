@@ -1,5 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { getDaysSinceConnection, getTokenHealth, shouldPromptPublishedStatus } from "./token-health";
+import {
+  getDaysSinceConnection,
+  getTokenHealth,
+  shouldPromptPublishedStatus,
+} from "./token-health";
 
 describe("getDaysSinceConnection", () => {
   beforeEach(() => {

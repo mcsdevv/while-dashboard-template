@@ -1,12 +1,19 @@
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { afterEach, describe, expect, it, vi } from "vitest";
 import { DEFAULT_EXTENDED_FIELD_MAPPING } from "@/lib/settings/types";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { SWRConfig } from "swr";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { FieldMappingStep } from "./field-mapping-step";
 
 vi.mock("lucide-react", () => ({
   ArrowRight: () => <span aria-hidden="true">→</span>,
   Pencil: () => <span aria-hidden="true">✎</span>,
   Plus: () => <span aria-hidden="true">+</span>,
+}));
+
+vi.mock("@/lib/toast", () => ({
+  useToast: () => ({
+    addToast: vi.fn(),
+  }),
 }));
 
 // Mock the UI components
@@ -38,7 +45,10 @@ vi.mock("@/shared/ui", () => ({
   }: {
     children: React.ReactNode;
     [key: string]: unknown;
-  }) => <label {...props}>{children}</label>,
+  }) => (
+    // biome-ignore lint/a11y/noLabelWithoutControl: test stub
+    <label {...props}>{children}</label>
+  ),
   Select: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   SelectContent: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   SelectItem: ({
@@ -73,6 +83,9 @@ vi.mock("@/shared/ui", () => ({
 }));
 
 describe("FieldMappingStep", () => {
+  const renderWithSWR = (ui: React.ReactElement) =>
+    render(<SWRConfig value={{ provider: () => new Map() }}>{ui}</SWRConfig>);
+
   afterEach(() => {
     cleanup();
     vi.clearAllMocks();
@@ -126,14 +139,14 @@ describe("FieldMappingStep", () => {
     vi.stubGlobal("fetch", fetchMock);
 
     const onNext = vi.fn();
-    render(<FieldMappingStep onBack={() => {}} onNext={onNext} />);
+    renderWithSWR(<FieldMappingStep onBack={() => {}} onNext={onNext} />);
 
     await screen.findByText(/Configure which Google Calendar fields sync/i);
 
     fireEvent.click(screen.getByRole("button", { name: /Continue/i }));
 
     expect(screen.getByText(/Confirm Notion Changes/i)).toBeInTheDocument();
-    expect(screen.getByText(/Location/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/^Location$/i).length).toBeGreaterThan(0);
 
     fireEvent.click(screen.getByRole("button", { name: /Confirm/i }));
 
@@ -188,14 +201,15 @@ describe("FieldMappingStep", () => {
 
     vi.stubGlobal("fetch", fetchMock);
 
-    render(<FieldMappingStep onBack={() => {}} onNext={() => {}} />);
+    renderWithSWR(<FieldMappingStep onBack={() => {}} onNext={() => {}} />);
 
     await screen.findByText(/Configure which Google Calendar fields sync/i);
+    await screen.findByText(/^Title$/);
 
     fireEvent.click(screen.getByRole("button", { name: /Continue/i }));
 
-    expect(screen.getByText(/Confirm Notion Changes/i)).toBeInTheDocument();
-    expect(screen.getByText(/Incompatible existing properties/i)).toBeInTheDocument();
+    expect(await screen.findByText(/Confirm Notion Changes/i)).toBeInTheDocument();
+    expect(await screen.findByText(/Incompatible existing properties/i)).toBeInTheDocument();
     expect(
       screen.getByText(/default field names require specific Notion property types/i),
     ).toBeInTheDocument();
@@ -234,11 +248,14 @@ describe("FieldMappingStep", () => {
 
     vi.stubGlobal("fetch", fetchMock);
 
-    render(<FieldMappingStep onBack={() => {}} onNext={() => {}} />);
+    renderWithSWR(<FieldMappingStep onBack={() => {}} onNext={() => {}} />);
 
     await screen.findByText(/Configure which Google Calendar fields sync/i);
+    await screen.findByText(/^Title$/);
 
     expect(screen.queryByText(/^None$/i)).not.toBeInTheDocument();
-    expect(screen.getByText(/incompatible: rich_text/i)).toBeInTheDocument();
+    expect(
+      await screen.findByText((content) => content.includes("incompatible: rich_text")),
+    ).toBeInTheDocument();
   });
 });

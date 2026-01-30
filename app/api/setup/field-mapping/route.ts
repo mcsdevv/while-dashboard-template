@@ -4,13 +4,13 @@
  * POST: Save field mapping configuration
  */
 
+import { env } from "@/lib/env";
 import {
   DEFAULT_EXTENDED_FIELD_MAPPING,
   ensureExtendedFieldMapping,
   getSettings,
   updateSettings,
 } from "@/lib/settings";
-import { env } from "@/lib/env";
 import type { ExtendedFieldMapping, FieldConfig } from "@/lib/settings/types";
 import { Client } from "@notionhq/client";
 import { type NextRequest, NextResponse } from "next/server";
@@ -148,7 +148,9 @@ export async function POST(request: NextRequest) {
     if (duplicates.length > 0) {
       const [propName, fields] = duplicates[0];
       return NextResponse.json(
-        { error: `Cannot map multiple fields to the same Notion property. "${propName}" is used by: ${fields.join(", ")}` },
+        {
+          error: `Cannot map multiple fields to the same Notion property. "${propName}" is used by: ${fields.join(", ")}`,
+        },
         { status: 400 },
       );
     }
@@ -165,8 +167,7 @@ export async function POST(request: NextRequest) {
       if (!isRedisError) {
         throw settingsError;
       }
-      warning =
-        "Storage not configured. Field mapping won't be saved until storage is set up.";
+      warning = "Storage not configured. Field mapping won't be saved until storage is set up.";
     }
 
     return NextResponse.json({

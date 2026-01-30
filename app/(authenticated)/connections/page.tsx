@@ -70,9 +70,7 @@ export default function ConnectionsPage() {
       {/* Page Header */}
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Connections</h1>
-        <p className="text-muted-foreground text-sm mt-1">
-          Manage your service integrations
-        </p>
+        <p className="text-muted-foreground text-sm mt-1">Manage your service integrations</p>
       </div>
 
       {/* Connection Cards */}
@@ -93,9 +91,7 @@ export default function ConnectionsPage() {
                     </CardDescription>
                   </div>
                 </div>
-                <Badge
-                  variant={status?.google?.isConnected ? "success" : "secondary"}
-                >
+                <Badge variant={status?.google?.isConnected ? "success" : "secondary"}>
                   {status?.google?.isConnected ? "Connected" : "Disconnected"}
                 </Badge>
               </div>
@@ -128,9 +124,7 @@ export default function ConnectionsPage() {
                     </CardDescription>
                   </div>
                 </div>
-                <Badge
-                  variant={status?.notion?.isConnected ? "success" : "secondary"}
-                >
+                <Badge variant={status?.notion?.isConnected ? "success" : "secondary"}>
                   {status?.notion?.isConnected ? "Connected" : "Disconnected"}
                 </Badge>
               </div>

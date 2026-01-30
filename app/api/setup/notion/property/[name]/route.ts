@@ -35,7 +35,10 @@ export async function PATCH(
 
     // Don't allow renaming to the same name
     if (newName === decodedName) {
-      return NextResponse.json({ error: "New name must be different from current name" }, { status: 400 });
+      return NextResponse.json(
+        { error: "New name must be different from current name" },
+        { status: 400 },
+      );
     }
 
     // Get saved settings
