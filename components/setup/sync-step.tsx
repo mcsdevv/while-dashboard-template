@@ -80,36 +80,55 @@ export function SyncStep({ onBack, onNext }: SyncStepProps) {
   const loadStatus = useCallback(async () => {
     setLoadingStatus(true);
     setError(null);
+    const onLocalhost =
+      typeof window !== "undefined" && LOCAL_HOSTNAMES.has(window.location.hostname);
     try {
       const response = await fetch("/api/setup/sync");
       if (!response.ok) {
         throw new Error("Failed to check sync status");
       }
       const data = (await response.json()) as SyncStatusResponse;
-      setGoogleStatus(
-        data.google.active
-          ? {
-              status: "success",
-              message: "Google Calendar webhook active",
-              details: formatExpiration(data.google.expiresAt, data.google.expiresInHours),
-            }
-          : {
-              status: data.google.reason ? "error" : "idle",
-              message: data.google.reason ? "Google Calendar webhook inactive" : undefined,
-              details: data.google.reason,
-            },
-      );
+
+      if (data.google.active) {
+        setGoogleStatus(
+          onLocalhost
+            ? {
+                status: "warning",
+                message: "Google Calendar webhook configured",
+                details: "Messages won't be received on localhost",
+              }
+            : {
+                status: "success",
+                message: "Google Calendar webhook active",
+                details: formatExpiration(data.google.expiresAt, data.google.expiresInHours),
+              },
+        );
+      } else {
+        setGoogleStatus({
+          status: data.google.reason ? "error" : "idle",
+          message: data.google.reason ? "Google Calendar webhook inactive" : undefined,
+          details: data.google.reason,
+        });
+      }
 
       const verificationRequired =
         data.notion.state === "verification_required" ||
         (data.notion.reason?.toLowerCase().includes("verification") ?? false);
 
       if (data.notion.active && data.notion.verified) {
-        setNotionStatus({
-          status: "success",
-          message: "Notion webhook active",
-          details: data.notion.state ? `State: ${data.notion.state}` : undefined,
-        });
+        setNotionStatus(
+          onLocalhost
+            ? {
+                status: "warning",
+                message: "Notion webhook configured",
+                details: "Messages won't be received on localhost",
+              }
+            : {
+                status: "success",
+                message: "Notion webhook active",
+                details: data.notion.state ? `State: ${data.notion.state}` : undefined,
+              },
+        );
       } else if (verificationRequired) {
         const verificationUrl =
           typeof window !== "undefined"
@@ -143,12 +162,8 @@ export function SyncStep({ onBack, onNext }: SyncStepProps) {
   }, []);
 
   useEffect(() => {
-    if (!isLocalhost) {
-      void loadStatus();
-    } else {
-      setLoadingStatus(false);
-    }
-  }, [isLocalhost, loadStatus]);
+    void loadStatus();
+  }, [loadStatus]);
 
   const handleEnableSync = async () => {
     setSyncing(true);
@@ -234,6 +249,10 @@ export function SyncStep({ onBack, onNext }: SyncStepProps) {
               <p className="text-amber-700/90 dark:text-amber-300">
                 Deploy to a public URL before enabling real-time sync. You can skip this step for
                 now and return after deployment.
+              </p>
+              <p className="text-amber-700/90 dark:text-amber-300">
+                Alternatively, a tunneling service (ngrok, cloudflared, etc.) can expose your local
+                server to the internet. No implementation guidance is provided.
               </p>
             </div>
           </div>
