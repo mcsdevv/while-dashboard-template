@@ -25,13 +25,43 @@ import { type NextRequest, NextResponse } from "next/server";
 
 const LOCALHOST_PATTERNS = ["localhost", "127.0.0.1", "::1"];
 
-function isLocalhostRequest(request: NextRequest): boolean {
-  const host =
+function getRequestHost(request: NextRequest): string | null {
+  return (
     request.headers.get("x-forwarded-host") ||
     request.headers.get("host") ||
-    request.nextUrl.hostname;
+    request.nextUrl.hostname ||
+    null
+  );
+}
+
+function normalizeHost(host: string | null): string | null {
+  if (!host) return null;
+  return host.split(":")[0]?.toLowerCase() ?? null;
+}
+
+function isLocalhostRequest(request: NextRequest): boolean {
+  const host = normalizeHost(getRequestHost(request));
   if (!host) return false;
   return LOCALHOST_PATTERNS.some((pattern) => host.includes(pattern));
+}
+
+function getWebhookBaseUrl(): string | null {
+  const envUrl = process.env.WEBHOOK_URL;
+  if (!envUrl) return null;
+  try {
+    const url = new URL(envUrl);
+    const marker = "/api/webhooks/";
+    const markerIndex = url.pathname.indexOf(marker);
+    if (markerIndex !== -1) {
+      url.pathname = url.pathname.slice(0, markerIndex);
+    }
+    url.search = "";
+    url.hash = "";
+    return url.toString().replace(/\/$/, "");
+  } catch (error) {
+    console.warn("Invalid WEBHOOK_URL; cannot derive base URL.", error);
+    return null;
+  }
 }
 
 function buildWebhookUrl(request: NextRequest, provider: "google" | "notion"): string {
@@ -58,8 +88,37 @@ function buildWebhookUrl(request: NextRequest, provider: "google" | "notion"): s
   return `${origin}/api/webhooks/${provider === "google" ? "google-calendar" : "notion"}`;
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    if (isLocalhostRequest(request)) {
+      const baseUrl = getWebhookBaseUrl();
+      if (baseUrl) {
+        const baseHost = normalizeHost(new URL(baseUrl).hostname);
+        const requestHost = normalizeHost(getRequestHost(request));
+        const isRemoteLocalhost =
+          baseHost && LOCALHOST_PATTERNS.some((pattern) => baseHost.includes(pattern));
+
+        if (baseHost && !isRemoteLocalhost && baseHost !== requestHost) {
+          try {
+            const remoteResponse = await fetch(`${baseUrl}/api/setup/sync`, {
+              cache: "no-store",
+            });
+            if (remoteResponse.ok) {
+              const remoteStatus = await remoteResponse.json();
+              return NextResponse.json(remoteStatus);
+            }
+            console.warn(
+              "Remote sync status check failed:",
+              remoteResponse.status,
+              await remoteResponse.text(),
+            );
+          } catch (error) {
+            console.warn("Remote sync status check error:", error);
+          }
+        }
+      }
+    }
+
     const status = await getSyncStatus();
     return NextResponse.json(status);
   } catch (error) {

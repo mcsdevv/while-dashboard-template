@@ -95,7 +95,7 @@ export function SyncStep({ onBack, onNext }: SyncStepProps) {
           onLocalhost
             ? {
                 status: "warning",
-                message: "Google Calendar webhook configured",
+                message: "Google Calendar webhook active",
                 details: "Messages won't be received on localhost",
               }
             : {
@@ -121,7 +121,7 @@ export function SyncStep({ onBack, onNext }: SyncStepProps) {
           onLocalhost
             ? {
                 status: "warning",
-                message: "Notion webhook configured",
+                message: "Notion webhook active",
                 details: "Messages won't be received on localhost",
               }
             : {
@@ -272,9 +272,11 @@ export function SyncStep({ onBack, onNext }: SyncStepProps) {
             icon={
               googleStatus.status === "pending"
                 ? Loader2
-                : googleStatus.status === "success"
-                  ? CheckCircle2
-                  : XCircle
+                : googleStatus.status === "warning"
+                  ? AlertTriangle
+                  : googleStatus.status === "success"
+                    ? CheckCircle2
+                    : XCircle
             }
             title="Google Calendar"
             message={
@@ -286,7 +288,9 @@ export function SyncStep({ onBack, onNext }: SyncStepProps) {
             variant={
               googleStatus.status === "success"
                 ? "success"
-                : googleStatus.status === "pending"
+                : googleStatus.status === "warning"
+                  ? "warning"
+                  : googleStatus.status === "pending"
                   ? "warning"
                   : "error"
             }
