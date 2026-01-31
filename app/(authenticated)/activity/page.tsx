@@ -11,7 +11,6 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
   Skeleton,
 } from "@/shared/ui";
 import { useEffect, useState } from "react";
@@ -63,7 +62,7 @@ export default function ActivityPage() {
         </div>
         <Select value={timeWindow} onValueChange={(value) => setTimeWindow(value as TimeWindow)}>
           <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Select time range" />
+            {timeWindowLabels[timeWindow]}
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="24h">{timeWindowLabels["24h"]}</SelectItem>

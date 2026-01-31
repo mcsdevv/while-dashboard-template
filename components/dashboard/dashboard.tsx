@@ -5,7 +5,7 @@ import type { SyncMetrics } from "@/lib/types";
 import { formatDate } from "@/lib/utils";
 import { Badge } from "@/shared/ui";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui";
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@/shared/ui";
 import { Separator } from "@/shared/ui";
 import { Skeleton } from "@/shared/ui";
 import dynamic from "next/dynamic";
@@ -121,7 +121,7 @@ export function Dashboard() {
         </div>
         <Select value={timeWindow} onValueChange={(value) => setTimeWindow(value as TimeWindow)}>
           <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Select time range…" />
+            {timeWindowLabels[timeWindow]}
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="24h">{timeWindowLabels["24h"]}</SelectItem>
