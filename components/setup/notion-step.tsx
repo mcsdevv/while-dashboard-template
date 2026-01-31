@@ -467,15 +467,19 @@ export function NotionStep({ status, onBack, onNext }: NotionStepProps) {
             aria-labelledby="database-label-connected"
           >
             <SelectTrigger>
-              <SelectValue placeholder="Select a database…">
-                {loadingDatabases
-                  ? "Loading databases…"
-                  : databases.find((d) => d.id === selectedDatabase)?.name ||
-                    status.databaseName ||
-                    "Select a database…"}
-              </SelectValue>
+              <SelectValue
+                placeholder={loadingDatabases ? "Loading databases…" : "Select a database…"}
+              />
             </SelectTrigger>
             <SelectContent>
+              {/* Show current database if not in list */}
+              {selectedDatabase &&
+                status.databaseName &&
+                !databases.some((d) => d.id === selectedDatabase) && (
+                  <SelectItem key={selectedDatabase} value={selectedDatabase}>
+                    {status.databaseName}
+                  </SelectItem>
+                )}
               {databases.map((db) => (
                 <SelectItem key={db.id} value={db.id}>
                   {db.name}
