@@ -61,12 +61,13 @@ export function SidebarNav({ items }: SidebarNavProps) {
           collapsed={collapsed}
           onNavigate={() => setMobileOpen(false)}
           indicator={
-            item.href === "/setup/1" && syncWarning ? (
+            item.href === "/setup/1" && syncWarning && !collapsed ? (
               <span title="Real-time sync needs attention">
                 <AlertTriangle aria-hidden="true" className="h-3.5 w-3.5 text-amber-500" />
               </span>
             ) : undefined
           }
+          iconWarning={item.href === "/setup/1" && syncWarning && collapsed}
         />
       ))}
     </nav>
@@ -79,6 +80,7 @@ interface NavItemComponentProps {
   collapsed: boolean;
   onNavigate: () => void;
   indicator?: ReactNode;
+  iconWarning?: boolean;
   depth?: number;
 }
 
@@ -88,6 +90,7 @@ function NavItemComponent({
   collapsed,
   onNavigate,
   indicator,
+  iconWarning,
   depth = 0,
 }: NavItemComponentProps) {
   const isActive =
@@ -138,7 +141,7 @@ function NavItemComponent({
   const content = (
     <SidebarNavItem
       active={pathname === item.href}
-      icon={<Icon aria-hidden="true" className="w-5 h-5" />}
+      icon={<Icon aria-hidden="true" className={cn("w-5 h-5", iconWarning && "text-amber-500")} />}
       collapsed={collapsed}
       onClick={onNavigate}
       indicator={indicator}
@@ -147,17 +150,33 @@ function NavItemComponent({
     </SidebarNavItem>
   );
 
-  if (item.external) {
-    return (
-      <a href={item.href} target="_blank" rel="noopener noreferrer" className="block">
-        {content}
-      </a>
-    );
-  }
-
-  return (
+  const linkElement = item.external ? (
+    <a href={item.href} target="_blank" rel="noopener noreferrer" className="block">
+      {content}
+    </a>
+  ) : (
     <Link href={item.href as Route} className="block">
       {content}
     </Link>
   );
+
+  if (iconWarning) {
+    return item.external ? (
+      <a
+        href={item.href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="block"
+        title="Real-time sync needs attention"
+      >
+        {content}
+      </a>
+    ) : (
+      <Link href={item.href as Route} className="block" title="Real-time sync needs attention">
+        {content}
+      </Link>
+    );
+  }
+
+  return linkElement;
 }
