@@ -1,5 +1,6 @@
 "use client";
 
+import { AlertCircle, CheckCircle2, X } from "lucide-react";
 import * as React from "react";
 import { cn } from "./utils";
 
@@ -80,40 +81,51 @@ export function useToast() {
 export function Toast({ id, title, description, variant = "default" }: ToastProps) {
   const { removeToast } = useToast();
 
+  const Icon =
+    variant === "success" ? CheckCircle2 : variant === "destructive" ? AlertCircle : null;
+
   return (
     <div
       className={cn(
-        "pointer-events-auto relative flex w-full items-center justify-between space-x-4 overflow-hidden rounded-none border p-4 shadow-lg transition-all",
-        variant === "default"
-          ? "bg-background border-border"
-          : "bg-foreground/5 border-foreground/20",
+        "pointer-events-auto relative flex w-full items-start gap-3 overflow-hidden rounded-lg border p-4 shadow-lg",
+        "animate-in slide-in-from-bottom-5 fade-in-0 duration-300",
+        variant === "success" && "border-emerald-500/50 bg-emerald-500/10 dark:bg-emerald-500/20",
+        variant === "destructive" &&
+          "border-destructive/50 bg-destructive/10 dark:bg-destructive/20",
+        variant === "default" && "bg-card border-border",
       )}
     >
+      {Icon && (
+        <Icon
+          className={cn(
+            "h-5 w-5 shrink-0 mt-0.5",
+            variant === "success" && "text-emerald-500",
+            variant === "destructive" && "text-destructive",
+          )}
+        />
+      )}
       <div className="flex-1 space-y-1">
-        {title && <p className="text-sm font-medium text-foreground">{title}</p>}
-        {description && <p className="text-sm text-muted-foreground">{description}</p>}
+        {title && (
+          <p
+            className={cn(
+              "text-sm font-semibold leading-tight",
+              variant === "success" && "text-emerald-600 dark:text-emerald-400",
+              variant === "destructive" && "text-destructive",
+              variant === "default" && "text-foreground",
+            )}
+          >
+            {title}
+          </p>
+        )}
+        {description && <p className="text-sm text-muted-foreground leading-snug">{description}</p>}
       </div>
       <button
         type="button"
         onClick={() => removeToast(id)}
         aria-label="Dismiss notification"
-        className="inline-flex cursor-pointer h-6 w-6 items-center justify-center rounded-none text-muted-foreground hover:text-foreground"
+        className="inline-flex shrink-0 cursor-pointer h-6 w-6 items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-foreground/10 transition-colors"
       >
-        <svg
-          aria-hidden="true"
-          xmlns="http://www.w3.org/2000/svg"
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <line x1="18" y1="6" x2="6" y2="18" />
-          <line x1="6" y1="6" x2="18" y2="18" />
-        </svg>
+        <X className="h-4 w-4" />
       </button>
     </div>
   );

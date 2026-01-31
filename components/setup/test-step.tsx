@@ -1,5 +1,6 @@
 "use client";
 
+import { useToast } from "@/lib/toast";
 import { Button } from "@/shared/ui";
 import { CheckCircle2, PartyPopper, XCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -22,14 +23,13 @@ interface TestResult {
 
 export function TestStep({ onBack, setupComplete, onConfetti }: TestStepProps) {
   const router = useRouter();
+  const { addToast } = useToast();
   const [testing, setTesting] = useState(false);
   const [results, setResults] = useState<TestResult[]>([]);
   const [allPassed, setAllPassed] = useState(setupComplete);
-  const [error, setError] = useState<string | null>(null);
 
   const handleTest = async () => {
     setTesting(true);
-    setError(null);
     setResults([]);
 
     try {
@@ -50,7 +50,11 @@ export function TestStep({ onBack, setupComplete, onConfetti }: TestStepProps) {
         onConfetti?.();
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to test connections");
+      addToast({
+        title: "Connection test failed",
+        description: err instanceof Error ? err.message : "Failed to test connections",
+        variant: "destructive",
+      });
     } finally {
       setTesting(false);
     }
@@ -90,13 +94,6 @@ export function TestStep({ onBack, setupComplete, onConfetti }: TestStepProps) {
           message="Your calendar sync is ready to use. Events will now sync between Google Calendar and Notion"
           variant="success"
         />
-      )}
-
-      {/* Error display */}
-      {error && (
-        <div className="border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-500">
-          {error}
-        </div>
       )}
 
       {/* Action buttons */}

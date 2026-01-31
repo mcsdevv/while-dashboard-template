@@ -70,13 +70,20 @@ export function NotionSettings({ settings }: NotionSettingsProps) {
                     type="button"
                     onClick={() => copyToClipboard(settings.databaseName!, setNameCopied)}
                     className="inline-flex items-center gap-1.5 hover:text-primary transition-colors truncate"
-                    aria-label={nameCopied ? `Copied ${settings.databaseName}` : `Copy ${settings.databaseName} to clipboard`}
+                    aria-label={
+                      nameCopied
+                        ? `Copied ${settings.databaseName}`
+                        : `Copy ${settings.databaseName} to clipboard`
+                    }
                   >
                     <span className="truncate">{settings.databaseName}</span>
                     {nameCopied ? (
                       <Check aria-hidden="true" className="h-3.5 w-3.5 text-green-500 shrink-0" />
                     ) : (
-                      <Copy aria-hidden="true" className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                      <Copy
+                        aria-hidden="true"
+                        className="h-3.5 w-3.5 text-muted-foreground shrink-0"
+                      />
                     )}
                   </button>
                 ) : (
@@ -96,7 +103,10 @@ export function NotionSettings({ settings }: NotionSettingsProps) {
                     {idCopied ? (
                       <Check aria-hidden="true" className="h-3.5 w-3.5 text-green-500 shrink-0" />
                     ) : (
-                      <Copy aria-hidden="true" className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                      <Copy
+                        aria-hidden="true"
+                        className="h-3.5 w-3.5 text-muted-foreground shrink-0"
+                      />
                     )}
                   </button>
                 ) : (

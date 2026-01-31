@@ -96,8 +96,6 @@ export function FieldMappingEditor({ initialMapping, onSave }: FieldMappingEdito
     },
   );
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
 
   useEffect(() => {
@@ -150,8 +148,6 @@ export function FieldMappingEditor({ initialMapping, onSave }: FieldMappingEdito
     const actualValue = value === EMPTY_VALUE ? "" : value;
     setMapping((prev) => ({ ...prev, [field]: actualValue }));
     setHasChanges(true);
-    setSuccess(false);
-    setError(null);
   };
 
   // Get Notion properties already in use by other fields
@@ -169,13 +165,15 @@ export function FieldMappingEditor({ initialMapping, onSave }: FieldMappingEdito
 
   const handleSave = async () => {
     if (!mapping.title || !mapping.date) {
-      setError("Title and Date fields are required");
+      addToast({
+        title: "Validation error",
+        description: "Title and Date fields are required",
+        variant: "destructive",
+      });
       return;
     }
 
     setSaving(true);
-    setError(null);
-    setSuccess(false);
 
     try {
       const response = await fetch("/api/settings/field-mapping", {
@@ -189,11 +187,18 @@ export function FieldMappingEditor({ initialMapping, onSave }: FieldMappingEdito
         throw new Error(data.error || "Failed to save field mapping");
       }
 
-      setSuccess(true);
+      addToast({
+        title: "Field mapping saved",
+        variant: "success",
+      });
       setHasChanges(false);
       onSave?.();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to save field mapping");
+      addToast({
+        title: "Failed to save",
+        description: err instanceof Error ? err.message : "Failed to save field mapping",
+        variant: "destructive",
+      });
     } finally {
       setSaving(false);
     }
@@ -324,16 +329,6 @@ export function FieldMappingEditor({ initialMapping, onSave }: FieldMappingEdito
             );
           })}
         </div>
-
-        {error && (
-          <div className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive">{error}</div>
-        )}
-
-        {success && (
-          <div className="rounded-lg border border-foreground/10 bg-foreground/5 p-3 text-sm text-foreground">
-            Field mapping saved successfully
-          </div>
-        )}
 
         <div className="flex justify-end">
           <Button onClick={handleSave} disabled={saving || !hasChanges}>

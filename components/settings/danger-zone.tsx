@@ -1,5 +1,6 @@
 "use client";
 
+import { useToast } from "@/lib/toast";
 import { Button } from "@/shared/ui";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui";
 import { useRouter } from "next/navigation";
@@ -9,22 +10,17 @@ type ResetType = "mapping" | "sync" | "all";
 
 export function DangerZone() {
   const router = useRouter();
+  const { addToast } = useToast();
   const [resetting, setResetting] = useState<ResetType | null>(null);
   const [confirmingReset, setConfirmingReset] = useState<ResetType | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
 
   const handleReset = async (type: ResetType) => {
     if (confirmingReset !== type) {
       setConfirmingReset(type);
-      setError(null);
-      setSuccess(null);
       return;
     }
 
     setResetting(type);
-    setError(null);
-    setSuccess(null);
 
     try {
       const response = await fetch("/api/settings/reset", {
@@ -39,7 +35,10 @@ export function DangerZone() {
         throw new Error(data.error || "Failed to reset");
       }
 
-      setSuccess(data.message);
+      addToast({
+        title: data.message,
+        variant: "success",
+      });
       setConfirmingReset(null);
 
       if (type === "all" && data.redirect) {
@@ -48,7 +47,11 @@ export function DangerZone() {
         }, 1500);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to reset");
+      addToast({
+        title: "Reset failed",
+        description: err instanceof Error ? err.message : "Failed to reset",
+        variant: "destructive",
+      });
     } finally {
       setResetting(null);
     }
@@ -56,7 +59,6 @@ export function DangerZone() {
 
   const handleCancel = () => {
     setConfirmingReset(null);
-    setError(null);
   };
 
   return (
@@ -187,16 +189,6 @@ export function DangerZone() {
             </Button>
           )}
         </div>
-
-        {error && (
-          <div className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive">{error}</div>
-        )}
-
-        {success && (
-          <div className="rounded-lg border border-foreground/10 bg-foreground/5 p-3 text-sm text-foreground">
-            {success}
-          </div>
-        )}
       </CardContent>
     </Card>
   );

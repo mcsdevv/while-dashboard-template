@@ -1,6 +1,7 @@
 "use client";
 
 import { getTokenHealth } from "@/lib/settings/token-health";
+import { useToast } from "@/lib/toast";
 import { Badge } from "@/shared/ui";
 import { Button } from "@/shared/ui";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui";
@@ -34,13 +35,12 @@ interface TestResult {
 }
 
 export function ConnectionStatus({ google, notion }: ConnectionStatusProps) {
+  const { addToast } = useToast();
   const [testing, setTesting] = useState(false);
   const [results, setResults] = useState<TestResult[]>([]);
-  const [error, setError] = useState<string | null>(null);
 
   const handleTest = async () => {
     setTesting(true);
-    setError(null);
     setResults([]);
 
     try {
@@ -56,7 +56,11 @@ export function ConnectionStatus({ google, notion }: ConnectionStatusProps) {
 
       setResults(data.results);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to test connections");
+      addToast({
+        title: "Connection test failed",
+        description: err instanceof Error ? err.message : "Failed to test connections",
+        variant: "destructive",
+      });
     } finally {
       setTesting(false);
     }
@@ -232,9 +236,7 @@ export function ConnectionStatus({ google, notion }: ConnectionStatusProps) {
                   )}
                   <span
                     className={`text-sm font-medium ${
-                      result.success
-                        ? "text-emerald-600 dark:text-emerald-400"
-                        : "text-destructive"
+                      result.success ? "text-emerald-600 dark:text-emerald-400" : "text-destructive"
                     }`}
                   >
                     {result.service}: {result.message}
@@ -246,10 +248,6 @@ export function ConnectionStatus({ google, notion }: ConnectionStatusProps) {
               </div>
             ))}
           </div>
-        )}
-
-        {error && (
-          <div className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive">{error}</div>
         )}
 
         <Button onClick={handleTest} disabled={testing} variant="outline" className="w-full">
