@@ -6,7 +6,6 @@ import {
   Card,
   CardContent,
   CardHeader,
-  CardTitle,
   Select,
   SelectContent,
   SelectItem,
@@ -53,7 +52,7 @@ export default function ActivityPage() {
   };
 
   return (
-    <div className="p-6 lg:p-8 space-y-6 animate-in fade-in duration-300">
+    <div className="p-6 lg:p-8 space-y-6 animate-in fade-in duration-300 motion-reduce:animate-none">
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
@@ -61,7 +60,9 @@ export default function ActivityPage() {
           <p className="text-muted-foreground text-sm mt-1">View sync history and event logs</p>
         </div>
         <Select value={timeWindow} onValueChange={(value) => setTimeWindow(value as TimeWindow)}>
-          <SelectTrigger className="w-[180px]">{timeWindowLabels[timeWindow]}</SelectTrigger>
+          <SelectTrigger className="w-[180px]" aria-label="Select time window">
+            {timeWindowLabels[timeWindow]}
+          </SelectTrigger>
           <SelectContent>
             <SelectItem value="24h">{timeWindowLabels["24h"]}</SelectItem>
             <SelectItem value="7d">{timeWindowLabels["7d"]}</SelectItem>
@@ -75,7 +76,8 @@ export default function ActivityPage() {
       {loading ? (
         <Card>
           <CardHeader>
-            <Skeleton className="h-6 w-40" />
+            <Skeleton className="h-6 w-32" />
+            <Skeleton className="h-4 w-48" />
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -86,14 +88,7 @@ export default function ActivityPage() {
           </CardContent>
         </Card>
       ) : (
-        <Card>
-          <CardHeader>
-            <CardTitle>Sync Events</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <LogsViewer logs={logs} />
-          </CardContent>
-        </Card>
+        <LogsViewer logs={logs} />
       )}
     </div>
   );

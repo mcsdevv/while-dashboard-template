@@ -107,13 +107,15 @@ export function LogsViewer({ logs }: LogsViewerProps) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Recent Sync Logs</CardTitle>
+          <CardTitle>Sync Events</CardTitle>
           <CardDescription>No sync operations recorded yet</CardDescription>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-muted-foreground text-center py-8">
-            Sync logs will appear here once operations begin
-          </p>
+          <div className="flex flex-col items-center justify-center py-12 text-center">
+            <p className="text-sm text-muted-foreground text-balance">
+              Sync logs will appear here once operations begin
+            </p>
+          </div>
         </CardContent>
       </Card>
     );
@@ -122,8 +124,8 @@ export function LogsViewer({ logs }: LogsViewerProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Sync Logs</CardTitle>
-        <CardDescription>
+        <CardTitle>Sync Events</CardTitle>
+        <CardDescription aria-live="polite">
           {filteredLogs.length} {filteredLogs.length === 1 ? "entry" : "entries"} found
           {filteredLogs.length !== logs.length && ` (filtered from ${logs.length} total)`}
         </CardDescription>
@@ -136,10 +138,13 @@ export function LogsViewer({ logs }: LogsViewerProps) {
             value={searchQuery}
             onChange={handleSearchChange}
             className="w-full"
+            name="log-search"
+            aria-label="Search sync events"
+            autoComplete="off"
           />
 
           <Select value={directionFilter} onValueChange={handleDirectionChange}>
-            <SelectTrigger>
+            <SelectTrigger aria-label="Filter by direction">
               <SelectValue placeholder="Direction…" />
             </SelectTrigger>
             <SelectContent>
@@ -150,7 +155,7 @@ export function LogsViewer({ logs }: LogsViewerProps) {
           </Select>
 
           <Select value={operationFilter} onValueChange={handleOperationChange}>
-            <SelectTrigger>
+            <SelectTrigger aria-label="Filter by operation">
               <SelectValue placeholder="Operation…" />
             </SelectTrigger>
             <SelectContent>
@@ -162,7 +167,7 @@ export function LogsViewer({ logs }: LogsViewerProps) {
           </Select>
 
           <Select value={statusFilter} onValueChange={handleStatusChange}>
-            <SelectTrigger>
+            <SelectTrigger aria-label="Filter by status">
               <SelectValue placeholder="Status…" />
             </SelectTrigger>
             <SelectContent>
