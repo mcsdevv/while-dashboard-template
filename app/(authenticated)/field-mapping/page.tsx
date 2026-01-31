@@ -72,17 +72,7 @@ export default function FieldMappingPage() {
       </Card>
 
       {/* Field Mapping Editor */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Property Mappings</CardTitle>
-          <CardDescription>
-            Select which Notion properties to use for each calendar field
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <FieldMappingEditor initialMapping={mapping} onSave={fetchMapping} />
-        </CardContent>
-      </Card>
+      <FieldMappingEditor initialMapping={mapping} onSave={fetchMapping} />
     </div>
   );
 }
