@@ -249,15 +249,7 @@ export function Dashboard() {
       <Separator />
 
       {/* Logs Viewer */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Recent Activity</CardTitle>
-          <CardDescription>Sync events from the selected time period</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <LogsViewer logs={metrics?.recentLogs || []} />
-        </CardContent>
-      </Card>
+      <LogsViewer logs={metrics?.recentLogs || []} />
     </div>
   );
 }
