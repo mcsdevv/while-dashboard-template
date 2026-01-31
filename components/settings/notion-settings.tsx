@@ -1,9 +1,17 @@
 "use client";
 
-import { Badge } from "@/shared/ui";
-import { Button } from "@/shared/ui";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui";
+import {
+  Badge,
+  Button,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/shared/ui";
+import { Check, Copy } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 interface NotionSettingsProps {
   settings: {
@@ -15,6 +23,18 @@ interface NotionSettingsProps {
 
 export function NotionSettings({ settings }: NotionSettingsProps) {
   const router = useRouter();
+  const [nameCopied, setNameCopied] = useState(false);
+  const [idCopied, setIdCopied] = useState(false);
+
+  const copyToClipboard = async (value: string, setCopied: (v: boolean) => void) => {
+    try {
+      await navigator.clipboard.writeText(value);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      // Silent fail - clipboard API may not be available
+    }
+  };
 
   const handleReconnect = () => {
     router.push("/setup?step=notion");
@@ -45,11 +65,43 @@ export function NotionSettings({ settings }: NotionSettingsProps) {
             <div className="space-y-3">
               <div className="flex flex-col sm:flex-row sm:justify-between gap-1 text-sm">
                 <span className="text-muted-foreground">Database</span>
-                <span className="truncate">{settings.databaseName || "Not selected"}</span>
+                {settings.databaseName ? (
+                  <button
+                    type="button"
+                    onClick={() => copyToClipboard(settings.databaseName!, setNameCopied)}
+                    className="inline-flex items-center gap-1.5 hover:text-primary transition-colors truncate"
+                    aria-label={nameCopied ? `Copied ${settings.databaseName}` : `Copy ${settings.databaseName} to clipboard`}
+                  >
+                    <span className="truncate">{settings.databaseName}</span>
+                    {nameCopied ? (
+                      <Check aria-hidden="true" className="h-3.5 w-3.5 text-green-500 shrink-0" />
+                    ) : (
+                      <Copy aria-hidden="true" className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                    )}
+                  </button>
+                ) : (
+                  <span className="truncate">Not selected</span>
+                )}
               </div>
               <div className="flex flex-col sm:flex-row sm:justify-between gap-1 text-sm">
                 <span className="text-muted-foreground">Database ID</span>
-                <span className="font-mono">{maskDatabaseId(settings.databaseId)}</span>
+                {settings.databaseId ? (
+                  <button
+                    type="button"
+                    onClick={() => copyToClipboard(settings.databaseId!, setIdCopied)}
+                    className="inline-flex items-center gap-1.5 hover:text-primary transition-colors font-mono"
+                    aria-label={idCopied ? "Copied database ID" : "Copy database ID to clipboard"}
+                  >
+                    <span>{maskDatabaseId(settings.databaseId)}</span>
+                    {idCopied ? (
+                      <Check aria-hidden="true" className="h-3.5 w-3.5 text-green-500 shrink-0" />
+                    ) : (
+                      <Copy aria-hidden="true" className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                    )}
+                  </button>
+                ) : (
+                  <span className="font-mono">Not selected</span>
+                )}
               </div>
               <div className="flex flex-col sm:flex-row sm:justify-between gap-1 text-sm">
                 <span className="text-muted-foreground">API Token</span>
