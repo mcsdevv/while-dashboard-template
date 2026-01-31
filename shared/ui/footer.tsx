@@ -40,9 +40,9 @@ export function Footer({ theme, setTheme = () => {}, resolvedTheme }: FooterProp
           </div>
 
           {/* Product and Resources - right aligned */}
-          <div className="flex gap-12">
+          <div className="flex flex-col gap-6 sm:flex-row sm:gap-12">
             {/* Product Links */}
-            <div>
+            <div className="min-w-0">
               <h3 className="font-medium">Product</h3>
               <ul className="mt-4 space-y-2">
                 {links.product.map((link) => (
@@ -51,7 +51,7 @@ export function Footer({ theme, setTheme = () => {}, resolvedTheme }: FooterProp
                       href={link.href}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-sm underline text-muted-foreground hover:text-foreground"
+                      className="rounded-sm text-sm underline text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                     >
                       {link.name}
                     </a>
@@ -61,7 +61,7 @@ export function Footer({ theme, setTheme = () => {}, resolvedTheme }: FooterProp
             </div>
 
             {/* Resources Links */}
-            <div>
+            <div className="min-w-0">
               <h3 className="font-medium">Resources</h3>
               <ul className="mt-4 space-y-2">
                 {links.resources.map((link) => (
@@ -70,7 +70,7 @@ export function Footer({ theme, setTheme = () => {}, resolvedTheme }: FooterProp
                       href={link.href}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-sm underline text-muted-foreground hover:text-foreground"
+                      className="rounded-sm text-sm underline text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                     >
                       {link.name}
                     </a>
@@ -89,7 +89,7 @@ export function Footer({ theme, setTheme = () => {}, resolvedTheme }: FooterProp
               href="https://mcs.dev"
               target="_blank"
               rel="noopener noreferrer"
-              className="underline hover:text-foreground"
+              className="rounded-sm underline hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             >
               Matthew Sweeney
             </a>
@@ -102,7 +102,7 @@ export function Footer({ theme, setTheme = () => {}, resolvedTheme }: FooterProp
               href="https://github.com/mcsdevv/while/blob/main/LICENSE"
               target="_blank"
               rel="noopener noreferrer"
-              className="underline hover:text-foreground"
+              className="rounded-sm underline hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             >
               MIT License
             </a>
