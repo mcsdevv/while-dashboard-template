@@ -72,7 +72,7 @@ export function MobileNav() {
               </a>
             ))}
           </div>
-          <p className="mt-2 text-xs text-muted-foreground">v0.1.0</p>
+          <p className="mt-2 text-xs text-muted-foreground">v{process.env.NEXT_PUBLIC_APP_VERSION}</p>
         </div>
       </div>
     </>

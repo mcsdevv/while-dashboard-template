@@ -62,7 +62,7 @@ export function AppSidebar() {
       <div className="p-4 border-t border-sidebar-border space-y-4">
         <div className={cn("flex items-center", collapsed ? "justify-center" : "justify-between")}>
           <ThemeToggleWrapper />
-          {!collapsed && <span className="text-xs text-muted-foreground">v0.1.0</span>}
+          {!collapsed && <span className="text-xs text-muted-foreground">v{process.env.NEXT_PUBLIC_APP_VERSION}</span>}
         </div>
         {!collapsed && (
           <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
