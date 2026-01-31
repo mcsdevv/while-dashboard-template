@@ -63,10 +63,7 @@ export function SidebarNav({ items }: SidebarNavProps) {
           indicator={
             item.href === "/setup/1" && syncWarning ? (
               <span title="Real-time sync needs attention">
-                <AlertTriangle
-                  aria-hidden="true"
-                  className="h-3.5 w-3.5 text-amber-500"
-                />
+                <AlertTriangle aria-hidden="true" className="h-3.5 w-3.5 text-amber-500" />
               </span>
             ) : undefined
           }

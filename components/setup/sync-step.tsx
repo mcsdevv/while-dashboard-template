@@ -291,8 +291,8 @@ export function SyncStep({ onBack, onNext }: SyncStepProps) {
                 : googleStatus.status === "warning"
                   ? "warning"
                   : googleStatus.status === "pending"
-                  ? "warning"
-                  : "error"
+                    ? "warning"
+                    : "error"
             }
             iconClassName={googleStatus.status === "pending" ? "animate-spin" : undefined}
             className={googleStatus.status === "pending" ? "animate-pulse" : undefined}

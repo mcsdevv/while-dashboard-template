@@ -78,6 +78,17 @@ export async function POST(request: NextRequest) {
 
     console.log(`🔧 Setting up Notion webhook to: ${webhookUrl}`);
 
+    // Validate webhook URL is publicly accessible
+    if (webhookUrl.includes("localhost") || webhookUrl.includes("127.0.0.1")) {
+      return NextResponse.json(
+        {
+          error:
+            "Webhook URL must be publicly accessible. Set WEBHOOK_URL environment variable to your public URL.",
+        },
+        { status: 400 },
+      );
+    }
+
     // Delete existing webhook if present
     const existingWebhook = await getNotionWebhook();
     if (existingWebhook) {
