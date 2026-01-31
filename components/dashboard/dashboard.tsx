@@ -91,7 +91,7 @@ export function Dashboard() {
   const successRate = successRateNumeric !== null ? successRateNumeric.toFixed(1) : "N/A";
 
   const getHealthBadgeVariant = (): "success" | "warning" | "destructive" => {
-    if (successRateNumeric === null) return "success";
+    if (successRateNumeric === null) return "warning";
     if (successRateNumeric > 99) return "success";
     if (successRateNumeric >= 90) return "warning";
     return "destructive";
@@ -136,11 +136,13 @@ export function Dashboard() {
           <div className="flex items-center justify-between">
             <CardTitle>System Status</CardTitle>
             <Badge variant={getHealthBadgeVariant()}>
-              {successRateNumeric !== null && successRateNumeric > 99
-                ? "Healthy"
-                : successRateNumeric !== null && successRateNumeric >= 90
-                  ? "Degraded"
-                  : "Issues Detected"}
+              {successRateNumeric === null
+                ? "Awaiting Data"
+                : successRateNumeric > 99
+                  ? "Healthy"
+                  : successRateNumeric >= 90
+                    ? "Degraded"
+                    : "Issues Detected"}
             </Badge>
           </div>
           <CardDescription>{status?.message}</CardDescription>

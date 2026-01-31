@@ -10,7 +10,7 @@ const badgeVariants = tv({
       destructive: "border border-red-500/30 bg-red-500/5 text-red-500 hover:bg-red-500/10",
       success:
         "border border-emerald-500/30 bg-emerald-500/5 text-emerald-500 hover:bg-emerald-500/10",
-      warning: "border border-foreground/20 bg-foreground/5 text-foreground hover:bg-foreground/10",
+      warning: "border border-amber-500/30 bg-amber-500/5 text-amber-500 hover:bg-amber-500/10",
       outline: "text-foreground border-foreground/20",
     },
   },
