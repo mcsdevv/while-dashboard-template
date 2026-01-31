@@ -1,11 +1,22 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { Card, CardContent, SkeletonSetupWizard } from "@/shared/ui";
+import {
+  Button,
+  Card,
+  CardContent,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  SkeletonSetupWizard,
+} from "@/shared/ui";
 import confetti from "canvas-confetti";
 import { Calendar, Check, Database, GitBranch, RefreshCw, Sparkles, TestTube } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FieldMappingStep } from "./field-mapping-step";
 import { GoogleStep } from "./google-step";
 import { NotionStep } from "./notion-step";
@@ -54,6 +65,11 @@ export function SetupWizard({ currentStep }: SetupWizardProps) {
   const [status, setStatus] = useState<SetupStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const confettiTriggeredRef = useRef(false);
+
+  // Unsaved changes tracking
+  const [stepDirtyState, setStepDirtyState] = useState<Record<number, boolean>>({});
+  const [pendingNavigation, setPendingNavigation] = useState<number | null>(null);
+  const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
 
   const fetchStatus = useCallback(async () => {
     try {
@@ -112,9 +128,34 @@ export function SetupWizard({ currentStep }: SetupWizardProps) {
     }
   }, [loading, currentStep, status?.setupComplete, fireConfetti]);
 
+  const navigateToStep = useCallback(
+    (step: number) => {
+      if (step >= 1 && step <= 6) {
+        router.push(`/setup/${step}`);
+      }
+    },
+    [router],
+  );
+
   const goToStep = (step: number) => {
-    if (step >= 1 && step <= 6) {
-      router.push(`/setup/${step}`);
+    if (stepDirtyState[currentStep]) {
+      setPendingNavigation(step);
+      setShowUnsavedDialog(true);
+      return;
+    }
+    navigateToStep(step);
+  };
+
+  const handleMappingDirtyChange = useCallback((dirty: boolean) => {
+    setStepDirtyState((prev) => ({ ...prev, [4]: dirty }));
+  }, []);
+
+  const handleDiscardChanges = () => {
+    setStepDirtyState((prev) => ({ ...prev, [currentStep]: false }));
+    setShowUnsavedDialog(false);
+    if (pendingNavigation !== null) {
+      navigateToStep(pendingNavigation);
+      setPendingNavigation(null);
     }
   };
 
@@ -266,7 +307,11 @@ export function SetupWizard({ currentStep }: SetupWizardProps) {
               />
             )}
             {currentStep === 4 && (
-              <FieldMappingStep onBack={() => goToStep(3)} onNext={handleStepComplete} />
+              <FieldMappingStep
+                onBack={() => goToStep(3)}
+                onNext={handleStepComplete}
+                onDirtyStateChange={handleMappingDirtyChange}
+              />
             )}
             {currentStep === 5 && (
               <SyncStep onBack={() => goToStep(4)} onNext={handleStepComplete} />
@@ -286,6 +331,26 @@ export function SetupWizard({ currentStep }: SetupWizardProps) {
           Step {currentStep} of {STEPS.length}
         </p>
       </div>
+
+      {/* Unsaved Changes Dialog */}
+      <Dialog open={showUnsavedDialog} onOpenChange={setShowUnsavedDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Unsaved Changes</DialogTitle>
+            <DialogDescription>
+              You have unsaved changes. If you leave this step, your changes will be lost.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowUnsavedDialog(false)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleDiscardChanges}>
+              Discard Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

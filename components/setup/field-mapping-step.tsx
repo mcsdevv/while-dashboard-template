@@ -28,6 +28,7 @@ import { StepHeader } from "./step-header";
 interface FieldMappingStepProps {
   onBack: () => void;
   onNext: () => void;
+  onDirtyStateChange?: (dirty: boolean) => void;
 }
 
 interface NotionProperty {
@@ -105,7 +106,7 @@ const EMPTY_VALUE = "__none__";
 const CREATE_FIELD_VALUE = "__create__";
 const RENAME_FIELD_VALUE = "__rename__";
 
-export function FieldMappingStep({ onBack, onNext }: FieldMappingStepProps) {
+export function FieldMappingStep({ onBack, onNext, onDirtyStateChange }: FieldMappingStepProps) {
   const {
     properties,
     fieldMapping: initialMapping,
@@ -120,6 +121,7 @@ export function FieldMappingStep({ onBack, onNext }: FieldMappingStepProps) {
   const [mapping, setMapping] = useState<ExtendedFieldMapping>(DEFAULT_EXTENDED_FIELD_MAPPING);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   // Property dialog state
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -154,6 +156,11 @@ export function FieldMappingStep({ onBack, onNext }: FieldMappingStepProps) {
       setMapping(initialMapping as ExtendedFieldMapping);
     }
   }, [initialMapping]);
+
+  // Notify parent when dirty state changes
+  useEffect(() => {
+    onDirtyStateChange?.(hasUnsavedChanges);
+  }, [hasUnsavedChanges, onDirtyStateChange]);
 
   const isCompatiblePropertyType = (field: FieldKey, type: string) => {
     const compatibleTypes = PROPERTY_TYPE_COMPATIBILITY[field];
@@ -268,6 +275,7 @@ export function FieldMappingStep({ onBack, onNext }: FieldMappingStepProps) {
         propertyType: property.type as NotionPropertyType,
       },
     }));
+    setHasUnsavedChanges(true);
 
     setDialogOpen(false);
     setDialogFieldFor(null);
@@ -279,6 +287,7 @@ export function FieldMappingStep({ onBack, onNext }: FieldMappingStepProps) {
       ...prev,
       [field]: { ...prev[field], enabled },
     }));
+    setHasUnsavedChanges(true);
   };
 
   const handlePropertyChange = (
@@ -298,6 +307,7 @@ export function FieldMappingStep({ onBack, onNext }: FieldMappingStepProps) {
             : (propertyType ?? prev[field].propertyType),
       },
     }));
+    setHasUnsavedChanges(true);
   };
 
   const handleSave = () => {
@@ -431,6 +441,7 @@ export function FieldMappingStep({ onBack, onNext }: FieldMappingStepProps) {
         });
       }
 
+      setHasUnsavedChanges(false);
       onNext();
       return true;
     } catch (err) {
