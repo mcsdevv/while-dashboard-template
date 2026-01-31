@@ -1,52 +1,9 @@
 "use client";
 
 import { FieldMappingEditor } from "@/components/settings/field-mapping-editor";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, Skeleton } from "@/shared/ui";
-import { useCallback, useEffect, useState } from "react";
-
-interface FieldMapping {
-  title: string;
-  date: string;
-  description: string;
-  location: string;
-  gcalEventId: string;
-  reminders: string;
-}
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui";
 
 export default function FieldMappingPage() {
-  const [mapping, setMapping] = useState<FieldMapping | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  const fetchMapping = useCallback(async () => {
-    try {
-      const response = await fetch("/api/settings");
-      if (response.ok) {
-        const data = await response.json();
-        setMapping(data.fieldMapping);
-      }
-    } catch (error) {
-      console.error("Error fetching field mapping:", error);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchMapping();
-  }, [fetchMapping]);
-
-  if (loading) {
-    return (
-      <div className="p-6 lg:p-8 space-y-6">
-        <div>
-          <Skeleton className="h-8 w-48" />
-          <Skeleton className="h-5 w-72 mt-2" />
-        </div>
-        <Skeleton className="h-96" />
-      </div>
-    );
-  }
-
   return (
     <div className="p-6 lg:p-8 space-y-6 animate-in fade-in duration-300">
       {/* Page Header */}
@@ -72,7 +29,7 @@ export default function FieldMappingPage() {
       </Card>
 
       {/* Field Mapping Editor */}
-      <FieldMappingEditor initialMapping={mapping} onSave={fetchMapping} />
+      <FieldMappingEditor />
     </div>
   );
 }

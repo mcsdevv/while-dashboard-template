@@ -296,11 +296,15 @@ export function FieldMappingStep({ onBack, onNext, onDirtyStateChange }: FieldMa
     propertyType?: NotionPropertyType,
   ) => {
     const actualValue = propertyName === EMPTY_VALUE ? "" : propertyName;
+    const normalizedValue = actualValue.trim();
+    const isRequired = REQUIRED_FIELDS.includes(field);
     setMapping((prev) => ({
       ...prev,
       [field]: {
         ...prev[field],
-        notionPropertyName: actualValue,
+        notionPropertyName: normalizedValue,
+        enabled:
+          !isRequired && normalizedValue.length === 0 ? false : prev[field].enabled,
         propertyType:
           propertyName === EMPTY_VALUE
             ? DEFAULT_EXTENDED_FIELD_MAPPING[field].propertyType
@@ -308,6 +312,18 @@ export function FieldMappingStep({ onBack, onNext, onDirtyStateChange }: FieldMa
       },
     }));
     setHasUnsavedChanges(true);
+  };
+
+  const getMissingEnabledFieldLabels = (currentMapping: ExtendedFieldMapping) => {
+    const fields = [...REQUIRED_FIELDS, ...OPTIONAL_FIELDS];
+    return fields
+      .filter((field) => {
+        const config = currentMapping[field];
+        const isRequired = REQUIRED_FIELDS.includes(field) || config.required;
+        const isEnabled = isRequired || config.enabled;
+        return isEnabled && !config.notionPropertyName.trim();
+      })
+      .map((field) => currentMapping[field].displayLabel);
   };
 
   const handleSave = () => {
@@ -319,9 +335,9 @@ export function FieldMappingStep({ onBack, onNext, onDirtyStateChange }: FieldMa
       return;
     }
 
-    // Validate required fields
-    if (!mapping.title.notionPropertyName || !mapping.date.notionPropertyName) {
-      setError("Title and Date fields require Notion property names");
+    const missingFields = getMissingEnabledFieldLabels(mapping);
+    if (missingFields.length > 0) {
+      setError(`Enabled fields require Notion property names: ${missingFields.join(", ")}`);
       return;
     }
 

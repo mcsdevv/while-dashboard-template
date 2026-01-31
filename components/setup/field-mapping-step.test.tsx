@@ -141,7 +141,7 @@ describe("FieldMappingStep", () => {
     const onNext = vi.fn();
     renderWithSWR(<FieldMappingStep onBack={() => {}} onNext={onNext} />);
 
-    await screen.findByText(/Configure which Google Calendar fields sync/i);
+    await screen.findByText(/Configure how properties sync between Notion and Google Calendar/i);
 
     fireEvent.click(screen.getByRole("button", { name: /Continue/i }));
 
@@ -203,7 +203,7 @@ describe("FieldMappingStep", () => {
 
     renderWithSWR(<FieldMappingStep onBack={() => {}} onNext={() => {}} />);
 
-    await screen.findByText(/Configure which Google Calendar fields sync/i);
+    await screen.findByText(/Configure how properties sync between Notion and Google Calendar/i);
     await screen.findByText(/^Title$/);
 
     fireEvent.click(screen.getByRole("button", { name: /Continue/i }));
@@ -250,7 +250,7 @@ describe("FieldMappingStep", () => {
 
     renderWithSWR(<FieldMappingStep onBack={() => {}} onNext={() => {}} />);
 
-    await screen.findByText(/Configure which Google Calendar fields sync/i);
+    await screen.findByText(/Configure how properties sync between Notion and Google Calendar/i);
     await screen.findByText(/^Title$/);
 
     expect(screen.queryByText(/^None$/i)).not.toBeInTheDocument();
