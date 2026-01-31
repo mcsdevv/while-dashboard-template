@@ -128,6 +128,7 @@ export function FieldMappingStep({ onBack, onNext }: FieldMappingStepProps) {
 
   // Confirmation dialog state
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
+  const [confirmDialogError, setConfirmDialogError] = useState<string | null>(null);
   const [pendingChanges, setPendingChanges] = useState<{
     toCreate: PendingCreation[];
     conflicts: PendingConflict[];
@@ -300,6 +301,14 @@ export function FieldMappingStep({ onBack, onNext }: FieldMappingStepProps) {
   };
 
   const handleSave = () => {
+    // Block if Notion properties couldn't be loaded
+    if (properties.length === 0) {
+      setError(
+        "Unable to load Notion properties. Please complete the Notion setup first (step 3), then return to this step.",
+      );
+      return;
+    }
+
     // Validate required fields
     if (!mapping.title.notionPropertyName || !mapping.date.notionPropertyName) {
       setError("Title and Date fields require Notion property names");
@@ -320,6 +329,7 @@ export function FieldMappingStep({ onBack, onNext }: FieldMappingStepProps) {
     if (plan.conflicts.length > 0 || plan.toCreate.length > 0) {
       // Show confirmation dialog
       setPendingChanges({ toCreate: plan.toCreate, conflicts: plan.conflicts });
+      setConfirmDialogError(null);
       setConfirmDialogOpen(true);
       return;
     }
@@ -328,9 +338,10 @@ export function FieldMappingStep({ onBack, onNext }: FieldMappingStepProps) {
     performSave();
   };
 
-  const performSave = async () => {
+  const performSave = async (): Promise<boolean> => {
     setSaving(true);
     setError(null);
+    setConfirmDialogError(null);
 
     try {
       const ensureDefaultProperties = async (
@@ -405,22 +416,39 @@ export function FieldMappingStep({ onBack, onNext }: FieldMappingStepProps) {
         body: JSON.stringify(mappingToSave),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        const data = await response.json();
         throw new Error(data.error || "Failed to save field mapping");
       }
 
+      // Show warning toast if storage not configured
+      if (data.warning) {
+        addToast({
+          title: "Warning",
+          description: data.warning,
+          variant: "destructive",
+        });
+      }
+
       onNext();
+      return true;
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to save field mapping");
+      const errorMessage = err instanceof Error ? err.message : "Failed to save field mapping";
+      setError(errorMessage);
+      setConfirmDialogError(errorMessage);
+      return false;
     } finally {
       setSaving(false);
     }
   };
 
   const handleConfirmSave = async () => {
-    setConfirmDialogOpen(false);
-    await performSave();
+    const success = await performSave();
+    if (success) {
+      setConfirmDialogOpen(false);
+      setConfirmDialogError(null);
+    }
   };
 
   const renderFieldRow = (field: FieldKey, config: FieldConfig) => {
@@ -684,6 +712,11 @@ export function FieldMappingStep({ onBack, onNext }: FieldMappingStepProps) {
                 : "The following properties will be created in your Notion database."}
             </DialogDescription>
           </DialogHeader>
+          {confirmDialogError && (
+            <div className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive">
+              {confirmDialogError}
+            </div>
+          )}
           <div className="py-4 space-y-4">
             {pendingChanges.conflicts.length > 0 && (
               <div className="space-y-2">
