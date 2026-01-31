@@ -2,7 +2,6 @@
 
 import { ConnectionStatus } from "@/components/settings/connection-status";
 import { DangerZone } from "@/components/settings/danger-zone";
-import { FieldMappingEditor } from "@/components/settings/field-mapping-editor";
 import { GoogleSettings } from "@/components/settings/google-settings";
 import { NotionSettings } from "@/components/settings/notion-settings";
 import { Button, Card, CardContent } from "@/shared/ui";
@@ -21,14 +20,6 @@ interface Settings {
     databaseId: string | null;
     databaseName: string | null;
     isConnected: boolean;
-  } | null;
-  fieldMapping: {
-    title: string;
-    date: string;
-    description: string;
-    location: string;
-    gcalEventId: string;
-    reminders: string;
   } | null;
   setupCompleted: boolean;
 }
@@ -90,9 +81,6 @@ export default function SettingsPage() {
         <GoogleSettings settings={settings?.google ?? null} />
         <NotionSettings settings={settings?.notion ?? null} />
       </div>
-
-      {/* Field Mapping */}
-      <FieldMappingEditor initialMapping={settings?.fieldMapping ?? null} onSave={fetchSettings} />
 
       {/* Danger Zone */}
       <DangerZone />
