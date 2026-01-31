@@ -198,15 +198,15 @@ export function ConnectionStatus({ google, notion }: ConnectionStatusProps) {
                 key={result.service}
                 className={`rounded-lg border p-3 ${
                   result.success
-                    ? "border-foreground/10 bg-foreground/5"
-                    : "border-foreground/20 bg-foreground/5"
+                    ? "border-emerald-500/30 bg-emerald-500/5"
+                    : "border-destructive/30 bg-destructive/5"
                 }`}
               >
                 <div className="flex items-center gap-2">
                   {result.success ? (
                     <svg
                       aria-hidden="true"
-                      className="h-4 w-4 text-foreground"
+                      className="h-4 w-4 text-emerald-500"
                       viewBox="0 0 20 20"
                       fill="currentColor"
                     >
@@ -219,7 +219,7 @@ export function ConnectionStatus({ google, notion }: ConnectionStatusProps) {
                   ) : (
                     <svg
                       aria-hidden="true"
-                      className="h-4 w-4 text-muted-foreground"
+                      className="h-4 w-4 text-destructive"
                       viewBox="0 0 20 20"
                       fill="currentColor"
                     >
@@ -232,7 +232,9 @@ export function ConnectionStatus({ google, notion }: ConnectionStatusProps) {
                   )}
                   <span
                     className={`text-sm font-medium ${
-                      result.success ? "text-foreground" : "text-muted-foreground"
+                      result.success
+                        ? "text-emerald-600 dark:text-emerald-400"
+                        : "text-destructive"
                     }`}
                   >
                     {result.service}: {result.message}
