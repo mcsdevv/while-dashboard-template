@@ -61,9 +61,7 @@ export default function ActivityPage() {
           <p className="text-muted-foreground text-sm mt-1">View sync history and event logs</p>
         </div>
         <Select value={timeWindow} onValueChange={(value) => setTimeWindow(value as TimeWindow)}>
-          <SelectTrigger className="w-[180px]">
-            {timeWindowLabels[timeWindow]}
-          </SelectTrigger>
+          <SelectTrigger className="w-[180px]">{timeWindowLabels[timeWindow]}</SelectTrigger>
           <SelectContent>
             <SelectItem value="24h">{timeWindowLabels["24h"]}</SelectItem>
             <SelectItem value="7d">{timeWindowLabels["7d"]}</SelectItem>

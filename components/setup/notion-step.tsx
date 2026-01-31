@@ -473,7 +473,9 @@ export function NotionStep({ status, onBack, onNext }: NotionStepProps) {
                   {databases.find((d) => d.id === selectedDatabase)?.name || status.databaseName}
                 </span>
               ) : (
-                <SelectValue placeholder={loadingDatabases ? "Loading databases…" : "Select a database…"} />
+                <SelectValue
+                  placeholder={loadingDatabases ? "Loading databases…" : "Select a database…"}
+                />
               )}
             </SelectTrigger>
             <SelectContent>

@@ -10,7 +10,7 @@ describe("getExtendedFieldMapping", () => {
     const { getSettings } = await import("./storage");
     vi.mocked(getSettings).mockResolvedValue({
       fieldMapping: DEFAULT_EXTENDED_FIELD_MAPPING,
-    } as unknown);
+    } as Awaited<ReturnType<typeof getSettings>>);
 
     const { getExtendedFieldMapping } = await import("./loader");
     const mapping = await getExtendedFieldMapping();
