@@ -27,7 +27,7 @@ export function NotionSettings({ settings }: NotionSettingsProps) {
   };
 
   return (
-    <Card>
+    <Card className="flex flex-col h-full">
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
@@ -39,9 +39,9 @@ export function NotionSettings({ settings }: NotionSettingsProps) {
           </Badge>
         </div>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="flex-1">
         {settings?.isConnected ? (
-          <>
+          <div className="flex flex-col h-full">
             <div className="space-y-3">
               <div className="flex flex-col sm:flex-row sm:justify-between gap-1 text-sm">
                 <span className="text-muted-foreground">Database</span>
@@ -56,12 +56,12 @@ export function NotionSettings({ settings }: NotionSettingsProps) {
                 <span className="text-foreground">Configured</span>
               </div>
             </div>
-            <div className="pt-2">
+            <div className="mt-auto pt-4">
               <Button variant="outline" onClick={handleReconnect} className="w-full">
                 Reconnect Notion
               </Button>
             </div>
-          </>
+          </div>
         ) : (
           <div className="text-center py-4">
             <p className="text-sm text-muted-foreground mb-4">
