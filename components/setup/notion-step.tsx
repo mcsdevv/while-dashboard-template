@@ -467,9 +467,14 @@ export function NotionStep({ status, onBack, onNext }: NotionStepProps) {
             aria-labelledby="database-label-connected"
           >
             <SelectTrigger>
-              <SelectValue
-                placeholder={loadingDatabases ? "Loading databases…" : "Select a database…"}
-              />
+              {/* Always show database name when available, bypassing SelectValue's UUID display */}
+              {databases.find((d) => d.id === selectedDatabase)?.name || status.databaseName ? (
+                <span className="text-sm">
+                  {databases.find((d) => d.id === selectedDatabase)?.name || status.databaseName}
+                </span>
+              ) : (
+                <SelectValue placeholder={loadingDatabases ? "Loading databases…" : "Select a database…"} />
+              )}
             </SelectTrigger>
             <SelectContent>
               {/* Show current database if not in list */}
@@ -613,7 +618,14 @@ export function NotionStep({ status, onBack, onNext }: NotionStepProps) {
               aria-labelledby="database-label"
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select a database…" />
+                {/* Show database name when available, bypassing SelectValue's UUID display */}
+                {databases.find((d) => d.id === selectedDatabase)?.name ? (
+                  <span className="text-sm">
+                    {databases.find((d) => d.id === selectedDatabase)?.name}
+                  </span>
+                ) : (
+                  <SelectValue placeholder="Select a database…" />
+                )}
               </SelectTrigger>
               <SelectContent>
                 {databases.map((db) => (
