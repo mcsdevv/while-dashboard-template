@@ -341,7 +341,7 @@ test.describe("Setup Wizard - Test Step", () => {
         status: 200,
         contentType: "application/json",
         body: JSON.stringify({
-          success: true,
+          allPassed: true,
           results: [
             { service: "Google Calendar", success: true, message: "Connected" },
             { service: "Notion", success: true, message: "Connected" },
@@ -352,10 +352,7 @@ test.describe("Setup Wizard - Test Step", () => {
 
     await page.goto("/setup/6");
 
-    // Run tests
-    await page.getByRole("button", { name: /Test Connections/i }).click();
-
-    // Check success indicators
+    // Tests run automatically on mount, wait for results
     await expect(page.getByText(/Google Calendar.*Connected/i)).toBeVisible();
     await expect(page.getByText(/Notion.*Connected/i)).toBeVisible();
   });
@@ -367,7 +364,7 @@ test.describe("Setup Wizard - Test Step", () => {
         status: 200,
         contentType: "application/json",
         body: JSON.stringify({
-          success: false,
+          allPassed: false,
           results: [
             { service: "Google Calendar", success: false, message: "Failed to connect" },
             { service: "Notion", success: true, message: "Connected" },
@@ -378,10 +375,7 @@ test.describe("Setup Wizard - Test Step", () => {
 
     await page.goto("/setup/6");
 
-    // Run tests
-    await page.getByRole("button", { name: /Test Connections/i }).click();
-
-    // Check failure indicator
+    // Tests run automatically on mount, wait for failure indicator
     await expect(page.getByText(/Failed to connect/i)).toBeVisible();
   });
 });

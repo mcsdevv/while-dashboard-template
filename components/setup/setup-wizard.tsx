@@ -121,12 +121,8 @@ export function SetupWizard({ currentStep }: SetupWizardProps) {
     frame();
   }, []);
 
-  // Trigger confetti when arriving at step 6 with setup already complete
-  useEffect(() => {
-    if (!loading && currentStep === 6 && status?.setupComplete && !confettiTriggeredRef.current) {
-      fireConfetti();
-    }
-  }, [loading, currentStep, status?.setupComplete, fireConfetti]);
+  // Note: Confetti is now triggered by test-step's auto-test when all tests pass.
+  // The test-step fires onConfetti() after tests complete successfully.
 
   const navigateToStep = useCallback(
     (step: number) => {
