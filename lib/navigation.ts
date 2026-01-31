@@ -7,6 +7,7 @@ import {
   HelpCircle,
   Home,
   Link2,
+  Radio,
   Settings,
   Sparkles,
 } from "lucide-react";
@@ -52,6 +53,11 @@ export const navigation: NavItem[] = [
     title: "Field Mapping",
     href: "/field-mapping",
     icon: GitBranch,
+  },
+  {
+    title: "Webhooks",
+    href: "/webhooks",
+    icon: Radio,
   },
   {
     title: "Settings",

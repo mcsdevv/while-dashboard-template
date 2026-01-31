@@ -6,7 +6,11 @@ import { getNotionConfig } from "@/lib/settings";
 import { syncNotionToGcal } from "@/lib/sync/engine";
 import { logWebhookEvent } from "@/lib/sync/logger";
 import { notionWebhookPayloadSchema, validateSafe } from "@/lib/validation";
-import { getNotionWebhook, saveNotionWebhook } from "@/lib/webhook/channel-manager";
+import {
+  getNotionWebhook,
+  markNotionWebhookVerified,
+  saveNotionWebhook,
+} from "@/lib/webhook/channel-manager";
 import { type NextRequest, NextResponse } from "next/server";
 
 /**
@@ -114,6 +118,16 @@ export async function POST(request: NextRequest) {
     }
 
     console.log("✅ Notion webhook signature validated");
+
+    // Mark webhook as verified if not already (proves it's working)
+    if (!subscription.verified) {
+      try {
+        await markNotionWebhookVerified();
+        console.log("✅ Notion webhook marked as verified (first successful event)");
+      } catch (error) {
+        console.warn("Failed to mark Notion webhook as verified:", error);
+      }
+    }
 
     // Handle event notifications
     // Notion sends events with type directly as "page.created", "page.content_updated", etc.

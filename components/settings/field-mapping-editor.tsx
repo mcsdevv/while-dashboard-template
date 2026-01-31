@@ -221,8 +221,7 @@ export function FieldMappingEditor({ initialMapping, onSave }: FieldMappingEdito
       [field]: {
         ...prev[field],
         notionPropertyName: normalizedValue,
-        enabled:
-          !isRequired && normalizedValue.length === 0 ? false : prev[field].enabled,
+        enabled: !isRequired && normalizedValue.length === 0 ? false : prev[field].enabled,
         propertyType:
           propertyName === EMPTY_VALUE
             ? DEFAULT_EXTENDED_FIELD_MAPPING[field].propertyType

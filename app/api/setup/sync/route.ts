@@ -3,19 +3,12 @@ import {
   setupGcalWebhook,
   stopGcalWebhook,
 } from "@/lib/google-calendar/client";
-import {
-  createNotionWebhook,
-  deleteNotionWebhook as deleteNotionWebhookAPI,
-  listNotionWebhooks,
-} from "@/lib/notion/client";
 import { getGoogleConfig, getNotionConfig } from "@/lib/settings";
 import {
-  deleteNotionWebhook,
   deleteWebhookChannel,
   getNotionWebhook,
   getWebhookChannel,
   isChannelExpired,
-  markNotionWebhookVerified,
   saveNotionWebhook,
   saveWebhookChannel,
   updateSyncState,
@@ -45,26 +38,62 @@ function isLocalhostRequest(request: NextRequest): boolean {
   return LOCALHOST_PATTERNS.some((pattern) => host.includes(pattern));
 }
 
+/**
+ * Gets the effective webhook base URL from environment variables.
+ * Priority: WEBHOOK_URL > VERCEL_PROJECT_PRODUCTION_URL
+ *
+ * This allows webhooks to be set up from localhost during development
+ * by pointing to the production Vercel URL.
+ */
 function getWebhookBaseUrl(): string | null {
+  // First, check explicit WEBHOOK_URL
   const envUrl = process.env.WEBHOOK_URL;
-  if (!envUrl) return null;
-  try {
-    const url = new URL(envUrl);
-    const marker = "/api/webhooks/";
-    const markerIndex = url.pathname.indexOf(marker);
-    if (markerIndex !== -1) {
-      url.pathname = url.pathname.slice(0, markerIndex);
+  if (envUrl) {
+    try {
+      const url = new URL(envUrl);
+      const marker = "/api/webhooks/";
+      const markerIndex = url.pathname.indexOf(marker);
+      if (markerIndex !== -1) {
+        url.pathname = url.pathname.slice(0, markerIndex);
+      }
+      url.search = "";
+      url.hash = "";
+      return url.toString().replace(/\/$/, "");
+    } catch (error) {
+      console.warn("Invalid WEBHOOK_URL; cannot derive base URL.", error);
     }
-    url.search = "";
-    url.hash = "";
-    return url.toString().replace(/\/$/, "");
-  } catch (error) {
-    console.warn("Invalid WEBHOOK_URL; cannot derive base URL.", error);
-    return null;
+  }
+
+  // Fallback to Vercel's production URL (automatically set on Vercel deployments)
+  const vercelProductionUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL;
+  if (vercelProductionUrl) {
+    // VERCEL_PROJECT_PRODUCTION_URL doesn't include protocol
+    return `https://${vercelProductionUrl}`;
+  }
+
+  return null;
+}
+
+/**
+ * Checks if the webhook base URL points to a valid external (non-localhost) host.
+ */
+function hasValidExternalWebhookUrl(): boolean {
+  const baseUrl = getWebhookBaseUrl();
+  if (!baseUrl) return false;
+
+  try {
+    const host = normalizeHost(new URL(baseUrl).hostname);
+    if (!host) return false;
+    return !LOCALHOST_PATTERNS.some((pattern) => host.includes(pattern));
+  } catch {
+    return false;
   }
 }
 
 function buildWebhookUrl(request: NextRequest, provider: "google" | "notion"): string {
+  const webhookPath = `/api/webhooks/${provider === "google" ? "google-calendar" : "notion"}`;
+
+  // First, check explicit WEBHOOK_URL
   const envUrl = process.env.WEBHOOK_URL;
   if (envUrl) {
     const lower = envUrl.toLowerCase();
@@ -77,15 +106,22 @@ function buildWebhookUrl(request: NextRequest, provider: "google" | "notion"): s
 
     if (!matchesGoogle && !matchesNotion) {
       const base = envUrl.replace(/\/$/, "");
-      return `${base}/api/webhooks/${provider === "google" ? "google-calendar" : "notion"}`;
+      return `${base}${webhookPath}`;
     }
   }
 
+  // Fallback to Vercel's production URL (useful for localhost development)
+  const vercelProductionUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL;
+  if (vercelProductionUrl) {
+    return `https://${vercelProductionUrl}${webhookPath}`;
+  }
+
+  // Default: use request origin
   const origin =
     request.nextUrl.origin ||
     `${request.headers.get("x-forwarded-proto") || "https"}://${request.headers.get("host")}`;
 
-  return `${origin}/api/webhooks/${provider === "google" ? "google-calendar" : "notion"}`;
+  return `${origin}${webhookPath}`;
 }
 
 export async function GET(request: NextRequest) {
@@ -105,7 +141,12 @@ export async function GET(request: NextRequest) {
             });
             if (remoteResponse.ok) {
               const remoteStatus = await remoteResponse.json();
-              return NextResponse.json(remoteStatus);
+              // Include local externalWebhookUrl so the UI knows webhooks can be set up
+              const externalWebhookUrl = hasValidExternalWebhookUrl() ? getWebhookBaseUrl() : null;
+              return NextResponse.json({
+                ...remoteStatus,
+                externalWebhookUrl,
+              });
             }
             console.warn(
               "Remote sync status check failed:",
@@ -120,7 +161,14 @@ export async function GET(request: NextRequest) {
     }
 
     const status = await getSyncStatus();
-    return NextResponse.json(status);
+
+    // Include whether external webhook URL is available (for localhost setup guidance)
+    const externalWebhookUrl = hasValidExternalWebhookUrl() ? getWebhookBaseUrl() : null;
+
+    return NextResponse.json({
+      ...status,
+      externalWebhookUrl,
+    });
   } catch (error) {
     console.error("Error fetching sync status:", error);
     return NextResponse.json(
@@ -133,11 +181,12 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  if (isLocalhostRequest(request)) {
+  // Allow localhost if WEBHOOK_URL or VERCEL_PROJECT_PRODUCTION_URL provides a valid external URL
+  if (isLocalhostRequest(request) && !hasValidExternalWebhookUrl()) {
     return NextResponse.json(
       {
         error:
-          "Webhooks require a publicly accessible URL. Deploy your app before enabling real-time sync.",
+          "Webhooks require a publicly accessible URL. Either deploy your app, or set WEBHOOK_URL or VERCEL_PROJECT_PRODUCTION_URL to point to your production deployment.",
       },
       { status: 400 },
     );
@@ -236,86 +285,37 @@ async function setupNotionWebhook(request: NextRequest): Promise<{
     const webhookUrl = buildWebhookUrl(request, "notion");
     const existingSubscription = await getNotionWebhook();
 
-    if (existingSubscription) {
-      let apiWebhooks: Awaited<ReturnType<typeof listNotionWebhooks>>;
-      try {
-        apiWebhooks = await listNotionWebhooks();
-      } catch (error) {
-        return {
-          success: false,
-          error: error instanceof Error ? error.message : "Failed to check Notion webhooks",
-        };
-      }
-
-      const matching = apiWebhooks.find(
-        (webhook) => webhook.id === existingSubscription.subscriptionId,
-      );
-
-      if (matching) {
-        if (matching.state === "active") {
-          if (!existingSubscription.verified) {
-            try {
-              await markNotionWebhookVerified();
-            } catch (error) {
-              console.warn("Failed to mark Notion webhook as verified:", error);
-            }
-          }
-          return {
-            success: true,
-            message: "Notion webhook already active",
-          };
-        }
-
-        if (matching.state === "verification_required") {
-          return {
-            success: true,
-            message: "Notion webhook created. Verification required.",
-            verificationRequired: true,
-            verificationInstructions: [
-              "Go to https://www.notion.so/my-integrations",
-              "Open your integration and select the Webhooks tab",
-              `Verify the webhook for URL: ${webhookUrl}`,
-            ],
-          };
-        }
-      }
-
-      if (
-        existingSubscription.subscriptionId &&
-        existingSubscription.subscriptionId !== "pending"
-      ) {
-        try {
-          await deleteNotionWebhookAPI(existingSubscription.subscriptionId);
-        } catch (error) {
-          console.warn("Failed to delete existing Notion webhook:", error);
-        }
-      }
-
-      await deleteNotionWebhook();
+    // If already marked as verified, return success
+    if (existingSubscription?.verified) {
+      return {
+        success: true,
+        message: "Notion webhook active",
+      };
     }
 
-    const webhookResponse = await createNotionWebhook({
-      url: webhookUrl,
-      databaseId: notionConfig.databaseId,
-      eventTypes: ["page.content_updated"],
-    });
-
-    await saveNotionWebhook({
-      subscriptionId: webhookResponse.id,
-      databaseId: notionConfig.databaseId,
-      verificationToken: "pending",
-      createdAt: new Date(),
-      verified: false,
-    });
+    // Notion webhooks must be created through the UI, not via API
+    // Save a pending record and guide users to create the webhook manually
+    if (!existingSubscription) {
+      await saveNotionWebhook({
+        subscriptionId: "pending",
+        databaseId: notionConfig.databaseId,
+        verificationToken: "pending",
+        createdAt: new Date(),
+        verified: false,
+      });
+    }
 
     return {
       success: true,
-      message: "Notion webhook created. Verification required.",
+      message: "Notion webhook setup required.",
       verificationRequired: true,
       verificationInstructions: [
         "Go to https://www.notion.so/my-integrations",
         "Open your integration and select the Webhooks tab",
-        `Verify the webhook for URL: ${webhookUrl}`,
+        "Click '+ Create a subscription'",
+        `Enter webhook URL: ${webhookUrl}`,
+        "Select events: Page content updated, Page created, Page deleted, Page properties updated",
+        "Click 'Create' then verify the endpoint when prompted",
       ],
     };
   } catch (error) {

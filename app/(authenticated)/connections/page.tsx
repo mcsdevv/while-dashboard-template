@@ -9,7 +9,8 @@ import {
   CardTitle,
   Skeleton,
 } from "@/shared/ui";
-import { Calendar, Database, ExternalLink } from "lucide-react";
+import { ExternalLink } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -82,7 +83,13 @@ export default function ConnectionsPage() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-muted flex items-center justify-center">
-                    <Calendar className="w-5 h-5" />
+                    <Image
+                      src="/icons/google-calendar.png"
+                      alt="Google Calendar"
+                      width={20}
+                      height={20}
+                      className="w-5 h-5"
+                    />
                   </div>
                   <div>
                     <CardTitle>Google Calendar</CardTitle>
@@ -115,7 +122,13 @@ export default function ConnectionsPage() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-muted flex items-center justify-center">
-                    <Database className="w-5 h-5" />
+                    <Image
+                      src="/icons/notion.png"
+                      alt="Notion"
+                      width={20}
+                      height={20}
+                      className="w-5 h-5"
+                    />
                   </div>
                   <div>
                     <CardTitle>Notion</CardTitle>

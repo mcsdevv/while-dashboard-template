@@ -35,6 +35,8 @@ interface SyncStatusResponse {
     state?: string;
     subscriptionId?: string;
   };
+  /** External webhook URL if configured (WEBHOOK_URL or VERCEL_PROJECT_PRODUCTION_URL) */
+  externalWebhookUrl?: string | null;
 }
 
 interface SyncSetupResponse {
@@ -68,6 +70,7 @@ function formatExpiration(expiresAt?: string, expiresInHours?: number): string |
 
 export function SyncStep({ onBack, onNext }: SyncStepProps) {
   const [isLocalhost, setIsLocalhost] = useState(false);
+  const [externalWebhookUrl, setExternalWebhookUrl] = useState<string | null>(null);
   const [loadingStatus, setLoadingStatus] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -77,6 +80,9 @@ export function SyncStep({ onBack, onNext }: SyncStepProps) {
   useEffect(() => {
     setIsLocalhost(typeof window !== "undefined" && LOCAL_HOSTNAMES.has(window.location.hostname));
   }, []);
+
+  // Can setup webhooks if not localhost, OR localhost with external URL configured
+  const canSetupWebhooks = !isLocalhost || !!externalWebhookUrl;
 
   const loadStatus = useCallback(async () => {
     setLoadingStatus(true);
@@ -89,6 +95,9 @@ export function SyncStep({ onBack, onNext }: SyncStepProps) {
         throw new Error("Failed to check sync status");
       }
       const data = (await response.json()) as SyncStatusResponse;
+
+      // Track if external webhook URL is available for localhost setup
+      setExternalWebhookUrl(data.externalWebhookUrl ?? null);
 
       if (data.google.active) {
         setGoogleStatus(
@@ -220,6 +229,25 @@ export function SyncStep({ onBack, onNext }: SyncStepProps) {
     }
   };
 
+  const handleMarkNotionComplete = async () => {
+    setError(null);
+    try {
+      const response = await fetch("/api/setup/sync/verify-notion", { method: "POST" });
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data?.error || "Failed to mark Notion webhook as complete");
+      }
+
+      setNotionStatus({
+        status: "success",
+        message: "Notion webhook active",
+      });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to mark Notion webhook as complete");
+    }
+  };
+
   const canContinue = useMemo(() => {
     const googleReady = googleStatus.status === "success";
     const notionReady = notionStatus.status === "success" || notionStatus.status === "warning";
@@ -239,21 +267,43 @@ export function SyncStep({ onBack, onNext }: SyncStepProps) {
         description="Enable real-time synchronization between your services."
       />
 
-      {isLocalhost && (
+      {isLocalhost && !externalWebhookUrl && (
         <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-4 text-sm text-amber-700 dark:text-amber-400">
           <div className="flex items-start gap-2">
             <AlertTriangle className="h-5 w-5 shrink-0 text-amber-600" aria-hidden="true" />
             <div className="space-y-1">
               <p className="font-medium text-amber-700 dark:text-amber-400">
-                Webhooks won&apos;t work on localhost
+                Webhooks require a production URL
               </p>
               <p className="text-amber-700/90 dark:text-amber-300">
-                Deploy to a public URL before enabling real-time sync. You can skip this step for
-                now and return after deployment.
+                Add{" "}
+                <code className="px-1 py-0.5 bg-amber-500/20 rounded font-mono text-xs">
+                  WEBHOOK_URL=https://your-app.vercel.app
+                </code>{" "}
+                to <code className="px-1 py-0.5 bg-amber-500/20 rounded font-mono text-xs">.env.local</code>,
+                then restart your dev server.
               </p>
-              <p className="text-amber-700/90 dark:text-amber-300">
-                Alternatively, a tunneling service (ngrok, cloudflared, etc.) can expose your local
-                server to the internet. No implementation guidance is provided.
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isLocalhost && externalWebhookUrl && (
+        <div className="rounded-lg border border-blue-500/40 bg-blue-500/10 p-4 text-sm text-blue-700 dark:text-blue-400">
+          <div className="flex items-start gap-2">
+            <CheckCircle2 className="h-5 w-5 shrink-0 text-blue-600" aria-hidden="true" />
+            <div className="space-y-1">
+              <p className="font-medium text-blue-700 dark:text-blue-400">
+                Production URL configured
+              </p>
+              <p className="text-blue-700/90 dark:text-blue-300">
+                Webhooks will be registered to{" "}
+                <code className="px-1 py-0.5 bg-blue-500/20 rounded font-mono text-xs break-all">
+                  {externalWebhookUrl}
+                </code>
+              </p>
+              <p className="text-blue-700/90 dark:text-blue-300">
+                Your production deployment will receive webhook events. Local changes are synced when you deploy.
               </p>
             </div>
           </div>
@@ -330,13 +380,23 @@ export function SyncStep({ onBack, onNext }: SyncStepProps) {
       )}
 
       {showVerificationInstructions && (
-        <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-4 text-sm text-amber-700 dark:text-amber-400 space-y-2">
-          <p className="font-medium">Finish Notion verification</p>
+        <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-4 text-sm text-amber-700 dark:text-amber-400 space-y-3">
+          <p className="font-medium">Finish Notion webhook setup</p>
           <ol className="list-decimal list-inside space-y-1">
             {notionStatus.instructions?.map((instruction) => (
               <li key={instruction}>{instruction}</li>
             ))}
           </ol>
+          <div className="pt-2 border-t border-amber-500/30">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleMarkNotionComplete}
+              className="bg-amber-500/20 border-amber-500/40 text-amber-700 hover:bg-amber-500/30 dark:text-amber-400"
+            >
+              I&apos;ve completed the setup
+            </Button>
+          </div>
         </div>
       )}
 
@@ -351,17 +411,17 @@ export function SyncStep({ onBack, onNext }: SyncStepProps) {
           Back
         </Button>
         <div className="flex gap-3">
-          {isLocalhost && (
+          {!canSetupWebhooks && (
             <Button variant="outline" onClick={onNext}>
               Skip for now
             </Button>
           )}
-          {!isLocalhost && (
+          {canSetupWebhooks && (
             <Button variant="outline" onClick={handleEnableSync} disabled={syncing}>
               {syncing ? "Enabling..." : "Enable Real-Time Sync"}
             </Button>
           )}
-          <Button onClick={onNext} disabled={isLocalhost || !canContinue}>
+          <Button onClick={onNext} disabled={!canSetupWebhooks || !canContinue}>
             Continue
           </Button>
         </div>

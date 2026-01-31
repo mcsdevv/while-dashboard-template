@@ -4,8 +4,10 @@ import { ConnectionStatus } from "@/components/settings/connection-status";
 import { DangerZone } from "@/components/settings/danger-zone";
 import { GoogleSettings } from "@/components/settings/google-settings";
 import { NotionSettings } from "@/components/settings/notion-settings";
-import { Button, Card, CardContent } from "@/shared/ui";
+import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui";
 import { SkeletonSettingsPage } from "@/shared/ui";
+import { Radio } from "lucide-react";
+import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 
 interface Settings {
@@ -85,6 +87,24 @@ export default function SettingsPage() {
 
       {/* Danger Zone */}
       <DangerZone />
+
+      {/* Webhook Debugging */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base flex items-center gap-2">
+            <Radio className="h-4 w-4" />
+            Webhook Debugging
+          </CardTitle>
+          <CardDescription>Advanced webhook status, logs, and debugging tools</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Link href="/webhooks">
+            <Button variant="outline" className="w-full sm:w-auto">
+              View Webhook Status & Debug Tools
+            </Button>
+          </Link>
+        </CardContent>
+      </Card>
     </div>
   );
 }
