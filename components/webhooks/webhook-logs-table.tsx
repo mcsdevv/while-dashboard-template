@@ -156,7 +156,7 @@ export function WebhookLogsTable({ logs }: WebhookLogsTableProps) {
                       {formatTimestamp(log.timestamp)}
                     </TableCell>
                     <TableCell>
-                      <Badge variant={getTypeBadgeVariant(log.type)} className="text-xs">
+                      <Badge variant={getTypeBadgeVariant(log.type)} size="fixed" className="text-xs">
                         {log.type}
                       </Badge>
                     </TableCell>
@@ -171,7 +171,7 @@ export function WebhookLogsTable({ logs }: WebhookLogsTableProps) {
                       {log.eventTitle || log.error || "-"}
                     </TableCell>
                     <TableCell>
-                      <Badge variant={getStatusBadgeVariant(log.status)} className="text-xs">
+                      <Badge variant={getStatusBadgeVariant(log.status)} size="fixed" className="text-xs">
                         {log.status}
                       </Badge>
                     </TableCell>

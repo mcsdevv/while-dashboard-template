@@ -226,6 +226,7 @@ export function LogsViewer({ logs }: LogsViewerProps) {
                                 ? "default"
                                 : "destructive"
                           }
+                          size="fixed"
                           className="text-xs"
                         >
                           {log.operation.charAt(0).toUpperCase() + log.operation.slice(1)}
@@ -240,6 +241,7 @@ export function LogsViewer({ logs }: LogsViewerProps) {
                       <TableCell>
                         <Badge
                           variant={log.status === "success" ? "success" : "destructive"}
+                          size="fixed"
                           className="text-xs"
                         >
                           {log.status.charAt(0).toUpperCase() + log.status.slice(1)}
