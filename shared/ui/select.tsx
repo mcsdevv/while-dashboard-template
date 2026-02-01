@@ -88,7 +88,7 @@ const SelectContent = React.forwardRef<HTMLDivElement, SelectContentProps>(
         <SelectPrimitive.Popup
           ref={ref}
           className={cn(
-            "relative z-50 max-h-[var(--available-height)] min-w-[8rem] overflow-y-auto overflow-x-hidden rounded-none border !bg-popover text-popover-foreground shadow-md origin-[var(--transform-origin)]",
+            "relative z-50 max-h-[var(--available-height)] min-w-[8rem] overflow-y-auto overflow-x-hidden rounded-none border bg-popover! text-popover-foreground shadow-md origin-[var(--transform-origin)]",
             "data-[starting-style]:opacity-0 data-[starting-style]:scale-95",
             "data-[ending-style]:opacity-0 data-[ending-style]:scale-95",
             "transition-[transform,opacity] duration-150",
