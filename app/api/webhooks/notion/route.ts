@@ -61,8 +61,9 @@ export async function POST(request: NextRequest) {
     const validatedBody = validation.data;
 
     // Handle verification request FIRST (before checking subscription)
-    // This is sent by Notion when you create a webhook in their UI
-    if (validatedBody.type === "verification") {
+    // This is sent by Notion when you click "Verify" in their UI
+    // Notion sends { verification_token: "..." } with no type field
+    if ("verification_token" in validatedBody) {
       console.log("🔐 Notion webhook verification request received");
       console.log("Verification token:", validatedBody.verification_token);
 

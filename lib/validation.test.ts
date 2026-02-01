@@ -49,8 +49,8 @@ test("gcalWebhookHeadersSchema - rejects invalid resource state", () => {
 
 // Notion webhook validation
 test("notionWebhookVerificationSchema - validates verification payload", () => {
+  // Notion only sends verification_token, no type field
   const verification = {
-    type: "verification",
     verification_token: "token-123",
   };
 
@@ -83,8 +83,8 @@ test("notionWebhookEventSchema - rejects invalid UUID", () => {
 });
 
 test("notionWebhookPayloadSchema - accepts verification or event", () => {
+  // Notion only sends verification_token, no type field
   const verification = {
-    type: "verification",
     verification_token: "token-123",
   };
 

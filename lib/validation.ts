@@ -24,9 +24,9 @@ export type GcalWebhookHeaders = z.infer<typeof gcalWebhookHeadersSchema>;
 
 /**
  * Notion webhook verification payload schema
+ * Note: Notion only sends verification_token, no type field
  */
 export const notionWebhookVerificationSchema = z.object({
-  type: z.literal("verification"),
   verification_token: z.string(),
 });
 
