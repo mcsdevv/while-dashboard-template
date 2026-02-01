@@ -25,8 +25,10 @@ export default async function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`${GeistSans.className} flex flex-col min-h-screen antialiased`}>
         <Providers session={session}>
-          <div className="flex-1">{children}</div>
-          <FooterWrapper />
+          <div className="flex flex-1 flex-col">
+            <div className="flex-1">{children}</div>
+            <FooterWrapper />
+          </div>
         </Providers>
       </body>
     </html>
