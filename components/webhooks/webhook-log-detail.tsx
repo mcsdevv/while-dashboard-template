@@ -91,7 +91,7 @@ function CollapsibleSection({
 
   return (
     <Card>
-      <CardHeader className="pb-0">
+      <CardHeader className={isOpen ? "pb-0" : ""}>
         <CollapsibleTrigger
           isOpen={isOpen}
           onToggle={() => setIsOpen(!isOpen)}
