@@ -18,6 +18,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/shared/ui";
+import Image from "next/image";
 import { useMemo, useState } from "react";
 
 interface WebhookLog {
@@ -71,6 +72,26 @@ function getTypeBadgeVariant(
 
 function getStatusBadgeVariant(status: WebhookLog["status"]): "success" | "destructive" {
   return status === "success" ? "success" : "destructive";
+}
+
+function SourceIcon({ source }: { source?: "notion" | "gcal" }) {
+  if (!source) return <span className="text-xs">-</span>;
+
+  const iconMap = {
+    gcal: { src: "/icons/google-calendar.png", alt: "Google Calendar" },
+    notion: { src: "/icons/notion.png", alt: "Notion" },
+  };
+
+  const icon = iconMap[source];
+  return (
+    <Image
+      src={icon.src}
+      alt={icon.alt}
+      width={20}
+      height={20}
+      className="h-5 w-5"
+    />
+  );
 }
 
 export function WebhookLogsTable({ logs }: WebhookLogsTableProps) {
@@ -160,7 +181,11 @@ export function WebhookLogsTable({ logs }: WebhookLogsTableProps) {
                         {log.type}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-xs">{log.source ?? "-"}</TableCell>
+                    <TableCell>
+                      <div className="flex justify-center">
+                        <SourceIcon source={log.source} />
+                      </div>
+                    </TableCell>
                     <TableCell className="text-xs">
                       {log.action ?? log.webhookEventType ?? "-"}
                     </TableCell>
