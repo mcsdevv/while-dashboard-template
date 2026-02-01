@@ -19,6 +19,7 @@ import {
   TableRow,
 } from "@/shared/ui";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 
 interface WebhookLog {
@@ -120,6 +121,7 @@ export function WebhookLogsTable({
   statusFilter: externalStatusFilter,
   onStatusFilterChange,
 }: WebhookLogsTableProps) {
+  const router = useRouter();
   const [internalTypeFilter, setInternalTypeFilter] = useState<string>("all");
   const [sourceFilter, setSourceFilter] = useState<string>("all");
   const [internalStatusFilter, setInternalStatusFilter] = useState<string>("all");
@@ -202,7 +204,11 @@ export function WebhookLogsTable({
               </TableHeader>
               <TableBody>
                 {filteredLogs.slice(0, 50).map((log) => (
-                  <TableRow key={log.id}>
+                  <TableRow
+                    key={log.id}
+                    className="cursor-pointer hover:bg-muted/50"
+                    onClick={() => router.push(`/webhooks/${log.id}`)}
+                  >
                     <TableCell className="text-xs font-mono">
                       {formatTimestamp(log.timestamp)}
                     </TableCell>
