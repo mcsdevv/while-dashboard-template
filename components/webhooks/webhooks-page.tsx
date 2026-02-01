@@ -116,23 +116,23 @@ export function WebhooksPage() {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [autoRefresh, setAutoRefresh] = useState(true);
-  const [logsTypeFilter, setLogsTypeFilter] = useState<string>("all");
-  const [logsStatusFilter, setLogsStatusFilter] = useState<string>("all");
+  const [logsTypeFilter, setLogsTypeFilter] = useState<string>("All Types");
+  const [logsStatusFilter, setLogsStatusFilter] = useState<string>("All Statuses");
 
   const handleViewNotifications = useCallback(() => {
     setLogsTypeFilter("notification");
-    setLogsStatusFilter("all");
+    setLogsStatusFilter("All Statuses");
     document.getElementById("webhook-logs")?.scrollIntoView({ behavior: "smooth" });
   }, []);
 
   const handleViewRenewals = useCallback(() => {
     setLogsTypeFilter("renewal");
-    setLogsStatusFilter("all");
+    setLogsStatusFilter("All Statuses");
     document.getElementById("webhook-logs")?.scrollIntoView({ behavior: "smooth" });
   }, []);
 
   const handleViewErrors = useCallback(() => {
-    setLogsTypeFilter("all");
+    setLogsTypeFilter("All Types");
     setLogsStatusFilter("failure");
     document.getElementById("webhook-logs")?.scrollIntoView({ behavior: "smooth" });
   }, []);

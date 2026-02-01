@@ -114,9 +114,9 @@ export function WebhookLogsTable({
   onStatusFilterChange,
 }: WebhookLogsTableProps) {
   const router = useRouter();
-  const [internalTypeFilter, setInternalTypeFilter] = useState<string>("all");
-  const [sourceFilter, setSourceFilter] = useState<string>("all");
-  const [internalStatusFilter, setInternalStatusFilter] = useState<string>("all");
+  const [internalTypeFilter, setInternalTypeFilter] = useState<string>("All Types");
+  const [sourceFilter, setSourceFilter] = useState<string>("All Sources");
+  const [internalStatusFilter, setInternalStatusFilter] = useState<string>("All Statuses");
 
   const typeFilter = externalTypeFilter ?? internalTypeFilter;
   const setTypeFilter = onTypeFilterChange ?? setInternalTypeFilter;
@@ -125,9 +125,9 @@ export function WebhookLogsTable({
 
   const filteredLogs = useMemo(() => {
     return logs.filter((log) => {
-      if (typeFilter !== "all" && log.type !== typeFilter) return false;
-      if (sourceFilter !== "all" && log.source !== sourceFilter) return false;
-      if (statusFilter !== "all" && log.status !== statusFilter) return false;
+      if (typeFilter !== "All Types" && log.type !== typeFilter) return false;
+      if (sourceFilter !== "All Sources" && log.source !== sourceFilter) return false;
+      if (statusFilter !== "All Statuses" && log.status !== statusFilter) return false;
       return true;
     });
   }, [logs, typeFilter, sourceFilter, statusFilter]);
@@ -139,11 +139,11 @@ export function WebhookLogsTable({
           <CardTitle className="text-base">Recent Webhook Events</CardTitle>
           <div className="flex flex-wrap gap-2">
             <Select value={typeFilter} onValueChange={setTypeFilter}>
-              <SelectTrigger className="w-[130px] h-8 text-xs">
+              <SelectTrigger className="w-[140px] h-8 text-xs" aria-label="Filter by type">
                 <SelectValue placeholder="Type" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Types</SelectItem>
+                <SelectItem value="All Types">All Types</SelectItem>
                 <SelectItem value="notification">Notification</SelectItem>
                 <SelectItem value="renewal">Renewal</SelectItem>
                 <SelectItem value="setup">Setup</SelectItem>
@@ -151,21 +151,21 @@ export function WebhookLogsTable({
               </SelectContent>
             </Select>
             <Select value={sourceFilter} onValueChange={setSourceFilter}>
-              <SelectTrigger className="w-[130px] h-8 text-xs">
+              <SelectTrigger className="w-[140px] h-8 text-xs" aria-label="Filter by source">
                 <SelectValue placeholder="Source" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Sources</SelectItem>
+                <SelectItem value="All Sources">All Sources</SelectItem>
                 <SelectItem value="gcal">Google Cal</SelectItem>
                 <SelectItem value="notion">Notion</SelectItem>
               </SelectContent>
             </Select>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-[130px] h-8 text-xs">
+              <SelectTrigger className="w-[140px] h-8 text-xs" aria-label="Filter by status">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
+                <SelectItem value="All Statuses">All Statuses</SelectItem>
                 <SelectItem value="success">Success</SelectItem>
                 <SelectItem value="failure">Failure</SelectItem>
               </SelectContent>
