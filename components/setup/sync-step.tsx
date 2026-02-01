@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/shared/ui";
-import { AlertTriangle, CheckCircle2, Loader2, XCircle } from "lucide-react";
+import { AlertTriangle, CheckCircle2, Copy, Loader2, XCircle } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { StatusCard } from "./status-card";
 import { StepHeader } from "./step-header";
@@ -34,6 +34,8 @@ interface SyncStatusResponse {
     reason?: string;
     state?: string;
     subscriptionId?: string;
+    /** Verification token for pasting into Notion UI */
+    verificationToken?: string;
   };
   /** External webhook URL if configured (WEBHOOK_URL or VERCEL_PROJECT_PRODUCTION_URL) */
   externalWebhookUrl?: string | null;
@@ -76,6 +78,8 @@ export function SyncStep({ onBack, onNext }: SyncStepProps) {
   const [error, setError] = useState<string | null>(null);
   const [googleStatus, setGoogleStatus] = useState<ProviderState>({ status: "idle" });
   const [notionStatus, setNotionStatus] = useState<ProviderState>({ status: "idle" });
+  const [notionVerificationToken, setNotionVerificationToken] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     setIsLocalhost(typeof window !== "undefined" && LOCAL_HOSTNAMES.has(window.location.hostname));
@@ -124,6 +128,11 @@ export function SyncStep({ onBack, onNext }: SyncStepProps) {
       const verificationRequired =
         data.notion.state === "verification_required" ||
         (data.notion.reason?.toLowerCase().includes("verification") ?? false);
+
+      // Store verification token if available
+      if (data.notion.verificationToken) {
+        setNotionVerificationToken(data.notion.verificationToken);
+      }
 
       if (data.notion.active && data.notion.verified) {
         setNotionStatus(
@@ -382,11 +391,80 @@ export function SyncStep({ onBack, onNext }: SyncStepProps) {
       {showVerificationInstructions && (
         <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-4 text-sm text-amber-700 dark:text-amber-400 space-y-3">
           <p className="font-medium">Finish Notion webhook setup</p>
-          <ol className="list-decimal list-inside space-y-1">
-            {notionStatus.instructions?.map((instruction) => (
-              <li key={instruction}>{instruction}</li>
-            ))}
-          </ol>
+
+          {notionVerificationToken ? (
+            <>
+              <p className="text-amber-700/90 dark:text-amber-300">
+                Copy the verification token below and paste it into the Notion verification dialog:
+              </p>
+              <div className="flex items-center gap-2">
+                <code className="flex-1 px-3 py-2 bg-amber-500/20 rounded font-mono text-xs break-all select-all">
+                  {notionVerificationToken}
+                </code>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    void navigator.clipboard.writeText(notionVerificationToken);
+                    setCopied(true);
+                    setTimeout(() => setCopied(false), 2000);
+                  }}
+                  className="shrink-0 bg-amber-500/20 border-amber-500/40 text-amber-700 hover:bg-amber-500/30 dark:text-amber-400"
+                >
+                  <Copy className="h-4 w-4 mr-1" />
+                  {copied ? "Copied!" : "Copy"}
+                </Button>
+              </div>
+              <ol className="list-decimal list-inside space-y-1 mt-3">
+                <li>
+                  Go to{" "}
+                  <a
+                    href="https://www.notion.so/my-integrations"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline hover:no-underline"
+                  >
+                    notion.so/my-integrations
+                  </a>
+                </li>
+                <li>Open your integration and select the Webhooks tab</li>
+                <li>Click &quot;Resend token&quot; if needed, then paste the token above</li>
+                <li>Click &quot;Verify subscription&quot; in Notion</li>
+              </ol>
+            </>
+          ) : (
+            <>
+              <p className="text-amber-700/90 dark:text-amber-300">
+                Waiting for verification token from Notion...
+              </p>
+              <ol className="list-decimal list-inside space-y-1">
+                <li>
+                  Go to{" "}
+                  <a
+                    href="https://www.notion.so/my-integrations"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline hover:no-underline"
+                  >
+                    notion.so/my-integrations
+                  </a>
+                </li>
+                <li>Open your integration and select the Webhooks tab</li>
+                <li>Create a webhook subscription with your webhook URL</li>
+                <li>Click &quot;Resend token&quot; - the token will appear here</li>
+              </ol>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => void loadStatus()}
+                className="mt-2 bg-amber-500/20 border-amber-500/40 text-amber-700 hover:bg-amber-500/30 dark:text-amber-400"
+              >
+                <Loader2 className="h-4 w-4 mr-1" />
+                Check for token
+              </Button>
+            </>
+          )}
+
           <div className="pt-2 border-t border-amber-500/30">
             <Button
               variant="outline"

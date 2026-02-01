@@ -22,6 +22,8 @@ export interface NotionWebhookStatus {
   reason?: string;
   state?: string;
   subscriptionId?: string;
+  /** Verification token for pasting into Notion UI (only shown when verification required) */
+  verificationToken?: string;
 }
 
 export interface SyncStatus {
@@ -125,24 +127,36 @@ export async function getNotionWebhookStatus(): Promise<NotionWebhookStatus> {
     }
 
     if (!isActive) {
+      // Include verification token when verification is required
+      const needsVerification = state === "verification_required";
+      const token =
+        needsVerification && subscription.verificationToken !== "pending"
+          ? subscription.verificationToken
+          : undefined;
+
       return {
         active: false,
         verified,
         state,
         subscriptionId: subscription.subscriptionId,
-        reason:
-          state === "verification_required"
-            ? "Notion webhook verification required."
-            : `Notion webhook state is ${state}.`,
+        verificationToken: token,
+        reason: needsVerification
+          ? "Notion webhook verification required."
+          : `Notion webhook state is ${state}.`,
       };
     }
 
     if (!verified) {
+      // Include verification token when verification is required
+      const token =
+        subscription.verificationToken !== "pending" ? subscription.verificationToken : undefined;
+
       return {
         active: false,
         verified: false,
         state,
         subscriptionId: subscription.subscriptionId,
+        verificationToken: token,
         reason: "Notion webhook verification required.",
       };
     }
