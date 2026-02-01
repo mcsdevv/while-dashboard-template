@@ -178,7 +178,7 @@ export function WebhookLogsTable({ logs }: WebhookLogsTableProps) {
                     </TableCell>
                     <TableCell>
                       <Badge variant={getTypeBadgeVariant(log.type)} size="fixed" className="text-xs">
-                        {log.type}
+                        {log.type.charAt(0).toUpperCase() + log.type.slice(1)}
                       </Badge>
                     </TableCell>
                     <TableCell>
@@ -197,7 +197,7 @@ export function WebhookLogsTable({ logs }: WebhookLogsTableProps) {
                     </TableCell>
                     <TableCell>
                       <Badge variant={getStatusBadgeVariant(log.status)} size="fixed" className="text-xs">
-                        {log.status}
+                        {log.status.charAt(0).toUpperCase() + log.status.slice(1)}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-xs text-right font-mono">

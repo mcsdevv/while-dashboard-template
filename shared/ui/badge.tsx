@@ -15,7 +15,7 @@ const badgeVariants = tv({
     },
     size: {
       default: "",
-      fixed: "min-w-[5rem]",
+      fixed: "min-w-[7rem]",
     },
   },
   defaultVariants: {
