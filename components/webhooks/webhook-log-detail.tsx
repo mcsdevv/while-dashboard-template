@@ -12,7 +12,7 @@ import {
   CollapsibleTrigger,
   Skeleton,
 } from "@/shared/ui";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Check, Copy } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 
@@ -104,17 +104,40 @@ function CollapsibleSection({
   defaultOpen?: boolean;
 }) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    const text = JSON.stringify(data, null, 2);
+    await navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   return (
     <Card>
       <CardHeader className={isOpen ? "pb-0" : ""}>
-        <CollapsibleTrigger
-          isOpen={isOpen}
-          onToggle={() => setIsOpen(!isOpen)}
-          className="text-left w-full"
-        >
-          <CardTitle className="text-sm">{title}</CardTitle>
-        </CollapsibleTrigger>
+        <div className="flex items-center justify-between w-full">
+          <CollapsibleTrigger
+            isOpen={isOpen}
+            onToggle={() => setIsOpen(!isOpen)}
+            className="text-left flex-1"
+          >
+            <CardTitle className="text-sm">{title}</CardTitle>
+          </CollapsibleTrigger>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleCopy}
+            className="shrink-0 h-8 w-8 p-0"
+            aria-label={copied ? "Copied" : "Copy to clipboard"}
+          >
+            {copied ? (
+              <Check className="h-4 w-4 text-green-600" />
+            ) : (
+              <Copy className="h-4 w-4" />
+            )}
+          </Button>
+        </div>
       </CardHeader>
       <CollapsibleContent isOpen={isOpen}>
         <CardContent className="pt-4">
