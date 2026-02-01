@@ -63,7 +63,7 @@ function DetailRow({ label, value }: { label: string; value: React.ReactNode }) 
 
 function DirectionBadge({ direction }: { direction: SyncLog["direction"] }) {
   return (
-    <Badge variant="outline" className="text-xs whitespace-nowrap">
+    <Badge variant="outline" size="fixed" className="whitespace-nowrap">
       <span className="inline-flex items-center gap-1.5">
         {direction === "notion_to_gcal" ? (
           <>
