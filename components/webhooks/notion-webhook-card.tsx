@@ -8,7 +8,6 @@ interface NotionWebhookDebugStatus {
   configured: boolean;
   active: boolean;
   verified: boolean;
-  subscriptionId?: string;
   databaseId?: string;
   verificationToken?: string;
   createdAt?: string;
@@ -122,7 +121,6 @@ export function NotionWebhookCard({ status }: NotionWebhookCardProps) {
 
         {status.configured && (
           <div className="space-y-0">
-            <DetailRow label="Subscription ID" value={status.subscriptionId ?? "N/A"} mono />
             <DetailRow label="Database ID" value={status.databaseId ?? "N/A"} mono />
             <DetailRow label="Verified" value={status.verified ? "Yes" : "No"} />
             <DetailRow label="Verification Token" value={status.verificationToken ?? "N/A"} />

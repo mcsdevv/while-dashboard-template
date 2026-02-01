@@ -4,6 +4,7 @@ import {
   getWebhookLogs,
   getWebhookMetrics,
 } from "@/lib/sync/logger";
+import { getNotionConfig } from "@/lib/settings";
 import {
   type NotionWebhookSubscription,
   type WebhookChannel,
@@ -11,6 +12,7 @@ import {
   getSyncState,
   getWebhookChannel,
   needsRenewal,
+  saveNotionWebhook,
 } from "@/lib/webhook/channel-manager";
 import { NextResponse } from "next/server";
 
@@ -33,7 +35,6 @@ export interface NotionWebhookDebugStatus {
   configured: boolean;
   active: boolean;
   verified: boolean;
-  subscriptionId?: string;
   databaseId?: string;
   verificationToken?: string;
   createdAt?: string;
@@ -114,6 +115,19 @@ async function getNotionDebugStatus(
     };
   }
 
+  // Fix databaseId if still "pending" by fetching from config
+  let databaseId = subscription.databaseId;
+  if (databaseId === "pending") {
+    try {
+      const notionConfig = await getNotionConfig();
+      databaseId = notionConfig.databaseId;
+      // Update Redis with the correct value
+      await saveNotionWebhook({ ...subscription, databaseId });
+    } catch {
+      // Config not available
+    }
+  }
+
   // Use local verified state as source of truth
   // Notion has no public API to query webhook status
   const isActive = subscription.verified;
@@ -122,8 +136,7 @@ async function getNotionDebugStatus(
     configured: true,
     active: isActive,
     verified: subscription.verified,
-    subscriptionId: subscription.subscriptionId,
-    databaseId: subscription.databaseId,
+    databaseId,
     verificationToken: subscription.verificationToken === "pending" ? "pending" : "set",
     createdAt: formatDate(subscription.createdAt),
     reason: isActive ? undefined : "Webhook verification required",

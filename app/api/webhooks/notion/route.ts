@@ -77,12 +77,10 @@ export async function POST(request: NextRequest) {
       const existingSubscription = await getNotionWebhook();
       let databaseId = existingSubscription?.databaseId || "pending";
 
-      // Try to get database ID from config if available
-      try {
-        const notionConfig = await getNotionConfig();
+      // Always try to get databaseId from config
+      const notionConfig = await getNotionConfig().catch(() => null);
+      if (notionConfig) {
         databaseId = notionConfig.databaseId;
-      } catch {
-        // Config not available yet - that's fine for verification
       }
 
       await saveNotionWebhook({

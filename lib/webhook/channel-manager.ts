@@ -169,6 +169,18 @@ export async function markNotionWebhookVerified(): Promise<void> {
   const subscription = await getNotionWebhook();
   if (subscription) {
     subscription.verified = true;
+
+    // Update databaseId from config if still "pending"
+    if (subscription.databaseId === "pending") {
+      try {
+        const { getNotionConfig } = await import("@/lib/settings");
+        const notionConfig = await getNotionConfig();
+        subscription.databaseId = notionConfig.databaseId;
+      } catch {
+        // Config not available
+      }
+    }
+
     await saveNotionWebhook(subscription);
   }
 }
