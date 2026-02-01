@@ -2,6 +2,7 @@ import type { LucideIcon } from "lucide-react";
 import {
   Activity,
   Calendar,
+  CalendarDays,
   Database,
   GitBranch,
   HelpCircle,
@@ -31,6 +32,11 @@ export const navigation: NavItem[] = [
     title: "Activity",
     href: "/activity",
     icon: Activity,
+  },
+  {
+    title: "Events",
+    href: "/events",
+    icon: CalendarDays,
   },
   {
     title: "Connections",

@@ -78,3 +78,21 @@ export interface SyncMetrics {
     };
   };
 }
+
+// Event summary for events list view
+export interface EventSummary {
+  eventId: string;
+  eventTitle: string;
+  latestTimestamp: Date | string;
+  operationCount: number;
+  latestOperation: SyncOperation;
+  latestStatus: "success" | "failure";
+  notionPageId?: string;
+  gcalEventId?: string;
+}
+
+// Event history response from API
+export interface EventHistoryResponse {
+  event: EventSummary;
+  operations: SyncLog[];
+}
