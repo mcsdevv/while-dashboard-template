@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@/shared/ui";
+import { buttonVariants } from "@/shared/ui";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,7 +23,9 @@ export function UserMenu() {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger render={<Button variant="outline" size="sm" className="gap-2" />}>
+      <DropdownMenuTrigger
+        className={buttonVariants({ variant: "outline", size: "sm", class: "gap-2" })}
+      >
         {session.user.image && (
           <img
             src={session.user.image}
