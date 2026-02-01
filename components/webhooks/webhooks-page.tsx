@@ -116,6 +116,26 @@ export function WebhooksPage() {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [autoRefresh, setAutoRefresh] = useState(true);
+  const [logsTypeFilter, setLogsTypeFilter] = useState<string>("all");
+  const [logsStatusFilter, setLogsStatusFilter] = useState<string>("all");
+
+  const handleViewNotifications = useCallback(() => {
+    setLogsTypeFilter("notification");
+    setLogsStatusFilter("all");
+    document.getElementById("webhook-logs")?.scrollIntoView({ behavior: "smooth" });
+  }, []);
+
+  const handleViewRenewals = useCallback(() => {
+    setLogsTypeFilter("renewal");
+    setLogsStatusFilter("all");
+    document.getElementById("webhook-logs")?.scrollIntoView({ behavior: "smooth" });
+  }, []);
+
+  const handleViewErrors = useCallback(() => {
+    setLogsTypeFilter("all");
+    setLogsStatusFilter("failure");
+    document.getElementById("webhook-logs")?.scrollIntoView({ behavior: "smooth" });
+  }, []);
 
   const fetchData = useCallback(async (isRefresh = false) => {
     if (isRefresh) {
@@ -223,10 +243,21 @@ export function WebhooksPage() {
       <SyncStateCard syncState={data.syncState} />
 
       {/* Metrics */}
-      <WebhookMetricsCard metrics={data.metrics} />
+      <WebhookMetricsCard
+        metrics={data.metrics}
+        onViewNotifications={handleViewNotifications}
+        onViewRenewals={handleViewRenewals}
+        onViewErrors={handleViewErrors}
+      />
 
       {/* Logs Table */}
-      <WebhookLogsTable logs={data.logs} />
+      <WebhookLogsTable
+        logs={data.logs}
+        typeFilter={logsTypeFilter}
+        onTypeFilterChange={setLogsTypeFilter}
+        statusFilter={logsStatusFilter}
+        onStatusFilterChange={setLogsStatusFilter}
+      />
 
       {/* Raw State Viewer */}
       <RawStateViewer

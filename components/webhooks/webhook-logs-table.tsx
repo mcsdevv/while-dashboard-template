@@ -40,6 +40,10 @@ interface WebhookLog {
 
 interface WebhookLogsTableProps {
   logs: WebhookLog[];
+  typeFilter?: string;
+  onTypeFilterChange?: (value: string) => void;
+  statusFilter?: string;
+  onStatusFilterChange?: (value: string) => void;
 }
 
 function formatTimestamp(timestamp: Date | string): string {
@@ -109,10 +113,21 @@ function getActionBadgeVariant(
   }
 }
 
-export function WebhookLogsTable({ logs }: WebhookLogsTableProps) {
-  const [typeFilter, setTypeFilter] = useState<string>("all");
+export function WebhookLogsTable({
+  logs,
+  typeFilter: externalTypeFilter,
+  onTypeFilterChange,
+  statusFilter: externalStatusFilter,
+  onStatusFilterChange,
+}: WebhookLogsTableProps) {
+  const [internalTypeFilter, setInternalTypeFilter] = useState<string>("all");
   const [sourceFilter, setSourceFilter] = useState<string>("all");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [internalStatusFilter, setInternalStatusFilter] = useState<string>("all");
+
+  const typeFilter = externalTypeFilter ?? internalTypeFilter;
+  const setTypeFilter = onTypeFilterChange ?? setInternalTypeFilter;
+  const statusFilter = externalStatusFilter ?? internalStatusFilter;
+  const setStatusFilter = onStatusFilterChange ?? setInternalStatusFilter;
 
   const filteredLogs = useMemo(() => {
     return logs.filter((log) => {
@@ -124,7 +139,7 @@ export function WebhookLogsTable({ logs }: WebhookLogsTableProps) {
   }, [logs, typeFilter, sourceFilter, statusFilter]);
 
   return (
-    <Card>
+    <Card id="webhook-logs">
       <CardHeader className="pb-3">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <CardTitle className="text-base">Recent Webhook Events</CardTitle>
