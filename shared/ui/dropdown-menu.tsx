@@ -66,7 +66,7 @@ const DropdownMenuSubContent = React.forwardRef<
     <Menu.Popup
       ref={ref}
       className={cn(
-        "z-50 min-w-[8rem] overflow-hidden rounded-none border bg-popover p-1 text-popover-foreground shadow-lg origin-[var(--transform-origin)]",
+        "z-50 min-w-[8rem] overflow-hidden rounded-none border !bg-popover p-1 text-popover-foreground shadow-lg origin-[var(--transform-origin)]",
         "data-[starting-style]:opacity-0 data-[starting-style]:scale-95",
         "data-[ending-style]:opacity-0 data-[ending-style]:scale-95",
         "transition-[transform,opacity] duration-150",
@@ -90,7 +90,7 @@ const DropdownMenuContent = React.forwardRef<HTMLDivElement, DropdownMenuContent
         <Menu.Popup
           ref={ref}
           className={cn(
-            "z-50 max-h-[var(--available-height)] min-w-[8rem] overflow-y-auto overflow-x-hidden rounded-none border bg-popover p-1 text-popover-foreground shadow-md origin-[var(--transform-origin)]",
+            "z-50 max-h-[var(--available-height)] min-w-[8rem] overflow-y-auto overflow-x-hidden rounded-none border !bg-popover p-1 text-popover-foreground shadow-md origin-[var(--transform-origin)]",
             "data-[starting-style]:opacity-0 data-[starting-style]:scale-95",
             "data-[ending-style]:opacity-0 data-[ending-style]:scale-95",
             "transition-[transform,opacity] duration-150",
