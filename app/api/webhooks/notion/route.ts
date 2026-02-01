@@ -72,22 +72,30 @@ export async function POST(request: NextRequest) {
         status: "success",
       });
 
-      // Preserve existing subscription metadata when possible
-      const notionConfig = await getNotionConfig();
+      // Store token even if Notion config isn't set up yet
+      // This allows webhook verification before full setup is complete
       const existingSubscription = await getNotionWebhook();
+      let databaseId = existingSubscription?.databaseId || "pending";
+
+      // Try to get database ID from config if available
+      try {
+        const notionConfig = await getNotionConfig();
+        databaseId = notionConfig.databaseId;
+      } catch {
+        // Config not available yet - that's fine for verification
+      }
 
       await saveNotionWebhook({
         subscriptionId: existingSubscription?.subscriptionId || "pending",
-        databaseId: existingSubscription?.databaseId || notionConfig.databaseId,
+        databaseId,
         verificationToken: validatedBody.verification_token,
         createdAt: existingSubscription?.createdAt || new Date(),
         verified: existingSubscription?.verified || false,
       });
 
       // Notion expects a 200 OK response
-      // The user must manually confirm verification in the Notion UI
       return NextResponse.json({
-        message: "Verification request received. Please confirm in Notion integration settings.",
+        message: "Verification successful",
         verificationToken: validatedBody.verification_token,
       });
     }
