@@ -23,9 +23,9 @@ export default async function RootLayout({
 
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${GeistSans.className} antialiased`}>
+      <body className={`${GeistSans.className} flex flex-col min-h-screen antialiased`}>
         <Providers session={session}>
-          <div className="min-h-screen">{children}</div>
+          <div className="flex-1">{children}</div>
           <FooterWrapper />
         </Providers>
       </body>

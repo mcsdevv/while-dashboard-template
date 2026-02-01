@@ -12,7 +12,7 @@ interface AppShellProps {
 export function AppShell({ children }: AppShellProps) {
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen">
+      <div className="flex flex-1">
         <AppSidebar />
         <div className="flex flex-1 flex-col">
           <AppHeader />
