@@ -1,4 +1,3 @@
-import { listNotionWebhooks } from "@/lib/notion/client";
 import {
   type WebhookLog,
   type WebhookMetrics,
@@ -37,8 +36,6 @@ export interface NotionWebhookDebugStatus {
   subscriptionId?: string;
   databaseId?: string;
   verificationToken?: string;
-  state?: string;
-  apiWebhookUrl?: string;
   createdAt?: string;
   reason?: string;
 }
@@ -58,7 +55,6 @@ export interface WebhooksStatusResponse {
   rawState: {
     googleChannel: WebhookChannel | null;
     notionSubscription: NotionWebhookSubscription | null;
-    notionApiWebhooks: Array<{ id: string; state: string; url?: string }>;
   };
 }
 
@@ -108,7 +104,6 @@ async function getGoogleDebugStatus(
 
 async function getNotionDebugStatus(
   subscription: NotionWebhookSubscription | null,
-  apiWebhooks: Array<{ id: string; state: string; url?: string }>,
 ): Promise<NotionWebhookDebugStatus> {
   if (!subscription) {
     return {
@@ -119,49 +114,36 @@ async function getNotionDebugStatus(
     };
   }
 
-  const matchingWebhook = apiWebhooks.find((w) => w.id === subscription.subscriptionId);
-  const apiState = matchingWebhook?.state;
-  const isActive = apiState === "active";
-  const needsVerification = apiState === "verification_required";
-
-  let reason: string | undefined;
-  if (!matchingWebhook) {
-    reason = "Webhook not found in Notion API (may have been deleted)";
-  } else if (needsVerification) {
-    reason = "Webhook requires verification in Notion integrations dashboard";
-  } else if (!isActive && apiState) {
-    reason = `Webhook state is: ${apiState}`;
-  }
+  // Use local verified state as source of truth
+  // Notion has no public API to query webhook status
+  const isActive = subscription.verified;
 
   return {
     configured: true,
     active: isActive,
-    verified: subscription.verified || isActive,
+    verified: subscription.verified,
     subscriptionId: subscription.subscriptionId,
     databaseId: subscription.databaseId,
     verificationToken: subscription.verificationToken === "pending" ? "pending" : "set",
-    state: apiState,
-    apiWebhookUrl: matchingWebhook?.url,
     createdAt: formatDate(subscription.createdAt),
-    reason,
+    reason: isActive ? undefined : "Webhook verification required",
   };
 }
 
 export async function GET() {
   try {
     // Fetch all data in parallel
-    const [channel, subscription, syncState, metrics, logs, apiWebhooksResult] = await Promise.all([
+    const [channel, subscription, syncState, metrics, logs] = await Promise.all([
       getWebhookChannel(),
       getNotionWebhook(),
       getSyncState(),
       getWebhookMetrics(),
       getWebhookLogs(100),
-      listNotionWebhooks().catch(() => [] as Array<{ id: string; state: string; url?: string }>),
     ]);
 
     const [googleStatus, notionStatus] = await Promise.all([
       getGoogleDebugStatus(channel),
-      getNotionDebugStatus(subscription, apiWebhooksResult),
+      getNotionDebugStatus(subscription),
     ]);
 
     const syncStateDebug: SyncStateDebug = {
@@ -179,7 +161,6 @@ export async function GET() {
       rawState: {
         googleChannel: channel,
         notionSubscription: subscription,
-        notionApiWebhooks: apiWebhooksResult,
       },
     };
 

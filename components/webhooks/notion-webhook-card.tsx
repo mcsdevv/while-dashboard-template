@@ -11,8 +11,6 @@ interface NotionWebhookDebugStatus {
   subscriptionId?: string;
   databaseId?: string;
   verificationToken?: string;
-  state?: string;
-  apiWebhookUrl?: string;
   createdAt?: string;
   reason?: string;
 }
@@ -47,11 +45,8 @@ function StatusBadge({ status }: { status: NotionWebhookDebugStatus }) {
   if (!status.configured) {
     return <Badge variant="outline">Not Configured</Badge>;
   }
-  if (!status.active && status.state === "verification_required") {
+  if (!status.verified) {
     return <Badge variant="secondary">Verification Required</Badge>;
-  }
-  if (!status.active) {
-    return <Badge variant="destructive">Inactive</Badge>;
   }
   return <Badge variant="default">Active</Badge>;
 }
@@ -72,7 +67,7 @@ function DetailRow({
 }
 
 export function NotionWebhookCard({ status }: NotionWebhookCardProps) {
-  const needsVerification = status.configured && status.state === "verification_required";
+  const needsVerification = status.configured && !status.verified;
 
   return (
     <Card>
@@ -129,13 +124,9 @@ export function NotionWebhookCard({ status }: NotionWebhookCardProps) {
           <div className="space-y-0">
             <DetailRow label="Subscription ID" value={status.subscriptionId ?? "N/A"} mono />
             <DetailRow label="Database ID" value={status.databaseId ?? "N/A"} mono />
-            <DetailRow label="API State" value={status.state ?? "Unknown"} />
             <DetailRow label="Verified" value={status.verified ? "Yes" : "No"} />
             <DetailRow label="Verification Token" value={status.verificationToken ?? "N/A"} />
             <DetailRow label="Created" value={formatDateTime(status.createdAt)} />
-            {status.apiWebhookUrl && (
-              <DetailRow label="Webhook URL" value={status.apiWebhookUrl} mono />
-            )}
           </div>
         )}
       </CardContent>
