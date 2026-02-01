@@ -55,7 +55,7 @@ export function RawStateViewer({
 
   return (
     <Card>
-      <CardHeader className="pb-3">
+      <CardHeader className="py-3">
         <CollapsibleTrigger
           isOpen={isExpanded}
           onToggle={() => setIsExpanded(!isExpanded)}
