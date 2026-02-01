@@ -80,18 +80,23 @@ function decryptSettings(stored: StoredSettings): AppSettings {
 
 /**
  * Get the current settings from Redis.
- * Returns null if no settings are stored or if Redis is not configured.
+ * Returns null if no settings are stored, Redis is not configured, or connection fails.
  */
 export async function getSettings(): Promise<AppSettings | null> {
   const redis = getRedis();
   if (!redis) {
     return null;
   }
-  const stored = await redis.get<StoredSettings>(SETTINGS_KEY);
-  if (!stored) {
+  try {
+    const stored = await redis.get<StoredSettings>(SETTINGS_KEY);
+    if (!stored) {
+      return null;
+    }
+    return decryptSettings(stored);
+  } catch (error) {
+    console.error("Failed to fetch settings from Redis:", error);
     return null;
   }
-  return decryptSettings(stored);
 }
 
 /**
