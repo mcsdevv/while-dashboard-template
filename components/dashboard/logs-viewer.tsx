@@ -18,9 +18,15 @@ const ROWS_PER_PAGE = 20;
 
 export function LogsViewer({ logs }: LogsViewerProps) {
   const [searchQuery, setSearchQuery] = useState("");
-  const [directionFilter, setDirectionFilter] = useState<SyncDirection | "all">("all");
-  const [operationFilter, setOperationFilter] = useState<SyncOperation | "all">("all");
-  const [statusFilter, setStatusFilter] = useState<"success" | "failure" | "all">("all");
+  const [directionFilter, setDirectionFilter] = useState<SyncDirection | "All Directions">(
+    "All Directions",
+  );
+  const [operationFilter, setOperationFilter] = useState<SyncOperation | "All Operations">(
+    "All Operations",
+  );
+  const [statusFilter, setStatusFilter] = useState<"success" | "failure" | "All Statuses">(
+    "All Statuses",
+  );
   const [currentPage, setCurrentPage] = useState(1);
 
   // Filter and search logs
@@ -64,13 +70,15 @@ export function LogsViewer({ logs }: LogsViewerProps) {
         log.error?.toLowerCase().includes(searchLower);
 
       // Direction filter
-      const matchesDirection = directionFilter === "all" || log.direction === directionFilter;
+      const matchesDirection =
+        directionFilter === "All Directions" || log.direction === directionFilter;
 
       // Operation filter
-      const matchesOperation = operationFilter === "all" || log.operation === operationFilter;
+      const matchesOperation =
+        operationFilter === "All Operations" || log.operation === operationFilter;
 
       // Status filter
-      const matchesStatus = statusFilter === "all" || log.status === statusFilter;
+      const matchesStatus = statusFilter === "All Statuses" || log.status === statusFilter;
 
       return matchesSearch && matchesDirection && matchesOperation && matchesStatus;
     });
@@ -84,17 +92,17 @@ export function LogsViewer({ logs }: LogsViewerProps) {
 
   // Reset to page 1 when filters change
   const handleDirectionChange = (value: string) => {
-    setDirectionFilter(value as SyncDirection | "all");
+    setDirectionFilter(value as SyncDirection | "All Directions");
     setCurrentPage(1);
   };
 
   const handleOperationChange = (value: string) => {
-    setOperationFilter(value as SyncOperation | "all");
+    setOperationFilter(value as SyncOperation | "All Operations");
     setCurrentPage(1);
   };
 
   const handleStatusChange = (value: string) => {
-    setStatusFilter(value as "success" | "failure" | "all");
+    setStatusFilter(value as "success" | "failure" | "All Statuses");
     setCurrentPage(1);
   };
 
@@ -148,7 +156,7 @@ export function LogsViewer({ logs }: LogsViewerProps) {
               <SelectValue placeholder="Direction…" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Directions</SelectItem>
+              <SelectItem value="All Directions">All Directions</SelectItem>
               <SelectItem value="notion_to_gcal">Notion → GCal</SelectItem>
               <SelectItem value="gcal_to_notion">GCal → Notion</SelectItem>
             </SelectContent>
@@ -159,7 +167,7 @@ export function LogsViewer({ logs }: LogsViewerProps) {
               <SelectValue placeholder="Operation…" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Operations</SelectItem>
+              <SelectItem value="All Operations">All Operations</SelectItem>
               <SelectItem value="create">Create</SelectItem>
               <SelectItem value="update">Update</SelectItem>
               <SelectItem value="delete">Delete</SelectItem>
@@ -171,7 +179,7 @@ export function LogsViewer({ logs }: LogsViewerProps) {
               <SelectValue placeholder="Status…" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Statuses</SelectItem>
+              <SelectItem value="All Statuses">All Statuses</SelectItem>
               <SelectItem value="success">Success</SelectItem>
               <SelectItem value="failure">Failure</SelectItem>
             </SelectContent>
