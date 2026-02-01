@@ -1,5 +1,6 @@
 "use client";
 
+import { GoogleCalendarIcon, NotionIcon } from "@/components/icons/brand-icons";
 import {
   Badge,
   Button,
@@ -67,6 +68,21 @@ function getTypeBadgeVariant(
 
 function getStatusBadgeVariant(status: WebhookLog["status"]): "success" | "destructive" {
   return status === "success" ? "success" : "destructive";
+}
+
+function getActionBadgeVariant(
+  action: WebhookLog["action"],
+): "success" | "default" | "destructive" {
+  switch (action) {
+    case "create":
+      return "success";
+    case "update":
+      return "default";
+    case "delete":
+      return "destructive";
+    default:
+      return "default";
+  }
 }
 
 function DetailRow({ label, value }: { label: string; value: React.ReactNode }) {
@@ -259,8 +275,31 @@ export function WebhookLogDetail({ logId }: WebhookLogDetailProps) {
               </Badge>
             }
           />
-          <DetailRow label="Source" value={sourceLabel} />
-          <DetailRow label="Action" value={log.action ?? log.webhookEventType ?? "-"} />
+          <DetailRow
+            label="Source"
+            value={
+              log.source ? (
+                <span className="inline-flex items-center gap-1.5">
+                  {log.source === "gcal" ? <GoogleCalendarIcon /> : <NotionIcon />}
+                  {sourceLabel}
+                </span>
+              ) : (
+                "-"
+              )
+            }
+          />
+          <DetailRow
+            label="Action"
+            value={
+              log.action ? (
+                <Badge variant={getActionBadgeVariant(log.action)} size="fixed">
+                  {log.action}
+                </Badge>
+              ) : (
+                log.webhookEventType ?? "-"
+              )
+            }
+          />
           <DetailRow
             label="Status"
             value={
