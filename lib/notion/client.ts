@@ -566,6 +566,10 @@ export async function deleteNotionWebhook(webhookId: string): Promise<void> {
 
 /**
  * List all webhook subscriptions
+ *
+ * @deprecated This function calls an undocumented Notion API endpoint that returns 400 errors.
+ * Notion webhooks are managed through the UI only - there's no public API to list subscriptions.
+ * Use local state (Redis) to track webhook status instead.
  */
 export async function listNotionWebhooks(): Promise<WebhookResponse[]> {
   try {

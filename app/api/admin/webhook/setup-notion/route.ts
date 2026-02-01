@@ -185,8 +185,15 @@ export async function GET(request: NextRequest) {
   try {
     const subscription = await getNotionWebhook();
 
-    // List all webhooks from Notion API (regardless of local state)
-    const apiWebhooks = await listNotionWebhooks();
+    // Try to list webhooks from Notion API (may fail - API not publicly documented)
+    let apiWebhooks: Array<{ id: string; url: string; state: string; event_types: string[]; created_time: string }> = [];
+    let apiError: string | null = null;
+    try {
+      apiWebhooks = await listNotionWebhooks();
+    } catch (error) {
+      apiError = error instanceof Error ? error.message : "Failed to query Notion API";
+      console.warn("Could not list Notion webhooks from API:", apiError);
+    }
 
     if (!subscription) {
       // No local subscription, but show what exists in Notion API
@@ -200,10 +207,13 @@ export async function GET(request: NextRequest) {
           eventTypes: w.event_types,
           createdTime: w.created_time,
         })),
+        apiError,
         hint:
-          apiWebhooks.length > 0
-            ? "Webhooks exist in Notion but not registered locally. Use POST with subscriptionId and verificationToken to register."
-            : "No webhooks found. Create one in Notion integration settings.",
+          apiError
+            ? "Note: Notion webhook list API may not be publicly available. Webhook status is tracked locally."
+            : apiWebhooks.length > 0
+              ? "Webhooks exist in Notion but not registered locally. Use POST with subscriptionId and verificationToken to register."
+              : "No webhooks found. Create one in Notion integration settings.",
       });
     }
 
@@ -218,13 +228,16 @@ export async function GET(request: NextRequest) {
         verified: subscription.verified,
         createdAt: subscription.createdAt,
       },
-      apiStatus: activeWebhook
-        ? {
-            state: activeWebhook.state,
-            url: activeWebhook.url,
-            eventTypes: activeWebhook.event_types,
-          }
-        : { state: "not_found_in_api", message: "Webhook not found in Notion API" },
+      apiStatus: apiError
+        ? { state: "api_unavailable", message: apiError }
+        : activeWebhook
+          ? {
+              state: activeWebhook.state,
+              url: activeWebhook.url,
+              eventTypes: activeWebhook.event_types,
+            }
+          : { state: "not_found_in_api", message: "Webhook not found in Notion API" },
+      apiError,
       allNotionWebhooks: apiWebhooks.map((w) => ({
         id: w.id,
         url: w.url,

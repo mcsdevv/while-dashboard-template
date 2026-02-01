@@ -1,10 +1,8 @@
-import { listNotionWebhooks } from "@/lib/notion/client";
 import { getGoogleConfig } from "@/lib/settings";
 import {
   getNotionWebhook,
   getWebhookChannel,
   isChannelExpired,
-  markNotionWebhookVerified,
 } from "@/lib/webhook/channel-manager";
 
 export interface GoogleWebhookStatus {
@@ -101,80 +99,29 @@ export async function getNotionWebhookStatus(): Promise<NotionWebhookStatus> {
     };
   }
 
-  try {
-    const apiWebhooks = await listNotionWebhooks();
-    const matching = apiWebhooks.find((webhook) => webhook.id === subscription.subscriptionId);
-
-    if (!matching) {
-      return {
-        active: false,
-        verified: subscription.verified,
-        subscriptionId: subscription.subscriptionId,
-        reason: "Notion webhook not found in the Notion API.",
-      };
-    }
-
-    const state = matching.state;
-    const isActive = state === "active";
-    const verified = subscription.verified || isActive;
-
-    if (isActive && !subscription.verified) {
-      try {
-        await markNotionWebhookVerified();
-      } catch (error) {
-        console.warn("Failed to mark Notion webhook as verified:", error);
-      }
-    }
-
-    if (!isActive) {
-      // Include verification token when verification is required
-      const needsVerification = state === "verification_required";
-      const token =
-        needsVerification && subscription.verificationToken !== "pending"
-          ? subscription.verificationToken
-          : undefined;
-
-      return {
-        active: false,
-        verified,
-        state,
-        subscriptionId: subscription.subscriptionId,
-        verificationToken: token,
-        reason: needsVerification
-          ? "Notion webhook verification required."
-          : `Notion webhook state is ${state}.`,
-      };
-    }
-
-    if (!verified) {
-      // Include verification token when verification is required
-      const token =
-        subscription.verificationToken !== "pending" ? subscription.verificationToken : undefined;
-
-      return {
-        active: false,
-        verified: false,
-        state,
-        subscriptionId: subscription.subscriptionId,
-        verificationToken: token,
-        reason: "Notion webhook verification required.",
-      };
-    }
-
+  // Trust local verified state - we set this when we receive valid signed events
+  // or when user clicks "I've completed the setup"
+  // Note: Notion has no public API to query webhook status, so we rely on local state
+  if (subscription.verified) {
     return {
       active: true,
       verified: true,
-      state,
       subscriptionId: subscription.subscriptionId,
-    };
-  } catch (error) {
-    return {
-      active: false,
-      verified: subscription.verified,
-      subscriptionId: subscription.subscriptionId,
-      reason: error instanceof Error ? error.message : "Unable to verify Notion webhook status.",
     };
   }
+
+  // Not verified yet - show verification instructions
+  const token =
+    subscription.verificationToken !== "pending" ? subscription.verificationToken : undefined;
+
+  return {
+    active: false,
+    verified: false,
+    state: "verification_required",
+    subscriptionId: subscription.subscriptionId,
+    verificationToken: token,
+    reason: "Notion webhook verification required.",
+  };
 }
 
 export async function getSyncStatus(): Promise<SyncStatus> {
