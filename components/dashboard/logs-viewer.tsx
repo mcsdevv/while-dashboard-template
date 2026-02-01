@@ -9,7 +9,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/sha
 import { Input } from "@/shared/ui";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/shared/ui";
-import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useCallback, useMemo, useState } from "react";
 
 interface LogsViewerProps {
   logs: SyncLog[];
@@ -18,7 +19,25 @@ interface LogsViewerProps {
 const ROWS_PER_PAGE = 20;
 
 export function LogsViewer({ logs }: LogsViewerProps) {
+  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
+
+  const handleRowClick = useCallback(
+    (id: string) => {
+      router.push(`/activity/${id}`);
+    },
+    [router],
+  );
+
+  const handleRowKeyDown = useCallback(
+    (e: React.KeyboardEvent, id: string) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        router.push(`/activity/${id}`);
+      }
+    },
+    [router],
+  );
   const [directionFilter, setDirectionFilter] = useState<SyncDirection | "All Directions">(
     "All Directions",
   );
@@ -221,7 +240,13 @@ export function LogsViewer({ logs }: LogsViewerProps) {
                 </TableHeader>
                 <TableBody>
                   {paginatedLogs.map((log) => (
-                    <TableRow key={log.id}>
+                    <TableRow
+                      key={log.id}
+                      className="cursor-pointer hover:bg-muted/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring"
+                      onClick={() => handleRowClick(log.id)}
+                      onKeyDown={(e) => handleRowKeyDown(e, log.id)}
+                      tabIndex={0}
+                    >
                       <TableCell className="text-xs text-muted-foreground whitespace-nowrap">
                         {formatDate(new Date(log.timestamp))}
                       </TableCell>

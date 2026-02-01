@@ -289,8 +289,11 @@ export function SyncStep({ onBack, onNext }: SyncStepProps) {
                 <code className="px-1 py-0.5 bg-amber-500/20 rounded font-mono text-xs">
                   WEBHOOK_URL=https://your-app.vercel.app
                 </code>{" "}
-                to <code className="px-1 py-0.5 bg-amber-500/20 rounded font-mono text-xs">.env.local</code>,
-                then restart your dev server.
+                to{" "}
+                <code className="px-1 py-0.5 bg-amber-500/20 rounded font-mono text-xs">
+                  .env.local
+                </code>
+                , then restart your dev server.
               </p>
             </div>
           </div>
@@ -312,7 +315,8 @@ export function SyncStep({ onBack, onNext }: SyncStepProps) {
                 </code>
               </p>
               <p className="text-blue-700/90 dark:text-blue-300">
-                Your production deployment will receive webhook events. Local changes are synced when you deploy.
+                Your production deployment will receive webhook events. Local changes are synced
+                when you deploy.
               </p>
             </div>
           </div>

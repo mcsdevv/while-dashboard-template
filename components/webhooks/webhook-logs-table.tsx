@@ -88,15 +88,7 @@ function SourceIcon({ source }: { source?: "notion" | "gcal" }) {
   };
 
   const icon = iconMap[source];
-  return (
-    <Image
-      src={icon.src}
-      alt={icon.alt}
-      width={20}
-      height={20}
-      className="h-5 w-5"
-    />
-  );
+  return <Image src={icon.src} alt={icon.alt} width={20} height={20} className="h-5 w-5" />;
 }
 
 function getActionBadgeVariant(
@@ -213,7 +205,11 @@ export function WebhookLogsTable({
                       {formatTimestamp(log.timestamp)}
                     </TableCell>
                     <TableCell>
-                      <Badge variant={getTypeBadgeVariant(log.type)} size="fixed" className="text-xs">
+                      <Badge
+                        variant={getTypeBadgeVariant(log.type)}
+                        size="fixed"
+                        className="text-xs"
+                      >
                         {log.type}
                       </Badge>
                     </TableCell>
@@ -224,7 +220,11 @@ export function WebhookLogsTable({
                     </TableCell>
                     <TableCell>
                       {log.action ? (
-                        <Badge variant={getActionBadgeVariant(log.action)} size="fixed" className="text-xs">
+                        <Badge
+                          variant={getActionBadgeVariant(log.action)}
+                          size="fixed"
+                          className="text-xs"
+                        >
                           {log.action}
                         </Badge>
                       ) : log.webhookEventType ? (
@@ -242,7 +242,11 @@ export function WebhookLogsTable({
                       {log.eventTitle || log.error || "-"}
                     </TableCell>
                     <TableCell>
-                      <Badge variant={getStatusBadgeVariant(log.status)} size="fixed" className="text-xs">
+                      <Badge
+                        variant={getStatusBadgeVariant(log.status)}
+                        size="fixed"
+                        className="text-xs"
+                      >
                         {log.status}
                       </Badge>
                     </TableCell>

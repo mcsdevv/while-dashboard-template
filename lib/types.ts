@@ -38,6 +38,11 @@ export interface SyncLog {
   eventTitle: string;
   status: "success" | "failure";
   error?: string;
+  // Extended fields for debugging
+  notionPageId?: string;
+  gcalEventId?: string;
+  processingTime?: number; // Operation duration in ms
+  rawPayload?: unknown; // Original event data for debugging
 }
 
 export interface SyncMetrics {

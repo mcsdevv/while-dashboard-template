@@ -186,7 +186,13 @@ export async function GET(request: NextRequest) {
     const subscription = await getNotionWebhook();
 
     // Try to list webhooks from Notion API (may fail - API not publicly documented)
-    let apiWebhooks: Array<{ id: string; url: string; state: string; event_types: string[]; created_time: string }> = [];
+    let apiWebhooks: Array<{
+      id: string;
+      url: string;
+      state: string;
+      event_types: string[];
+      created_time: string;
+    }> = [];
     let apiError: string | null = null;
     try {
       apiWebhooks = await listNotionWebhooks();
@@ -208,12 +214,11 @@ export async function GET(request: NextRequest) {
           createdTime: w.created_time,
         })),
         apiError,
-        hint:
-          apiError
-            ? "Note: Notion webhook list API may not be publicly available. Webhook status is tracked locally."
-            : apiWebhooks.length > 0
-              ? "Webhooks exist in Notion but not registered locally. Use POST with subscriptionId and verificationToken to register."
-              : "No webhooks found. Create one in Notion integration settings.",
+        hint: apiError
+          ? "Note: Notion webhook list API may not be publicly available. Webhook status is tracked locally."
+          : apiWebhooks.length > 0
+            ? "Webhooks exist in Notion but not registered locally. Use POST with subscriptionId and verificationToken to register."
+            : "No webhooks found. Create one in Notion integration settings.",
       });
     }
 

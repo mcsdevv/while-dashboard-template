@@ -1,10 +1,10 @@
+import { getNotionConfig } from "@/lib/settings";
 import {
   type WebhookLog,
   type WebhookMetrics,
   getWebhookLogs,
   getWebhookMetrics,
 } from "@/lib/sync/logger";
-import { getNotionConfig } from "@/lib/settings";
 import {
   type NotionWebhookSubscription,
   type WebhookChannel,
