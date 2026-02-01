@@ -21,6 +21,9 @@ export {
 // Card
 export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent } from "./card";
 
+// Collapsible
+export { CollapsibleTrigger, CollapsibleContent } from "./collapsible";
+
 // Connection Status Card
 export { ConnectionStatusCard, type ConnectionStatusCardProps } from "./connection-status-card";
 

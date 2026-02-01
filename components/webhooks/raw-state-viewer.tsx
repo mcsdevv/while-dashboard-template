@@ -1,7 +1,13 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui";
-import { ChevronDown, ChevronRight } from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/shared/ui";
 import { useState } from "react";
 
 interface RawStateViewerProps {
@@ -23,22 +29,19 @@ function CollapsibleSection({
 
   return (
     <div className="border rounded-lg">
-      <button
-        type="button"
-        onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center gap-2 p-3 text-left hover:bg-muted/50 transition-colors"
+      <CollapsibleTrigger
+        isOpen={isOpen}
+        onToggle={() => setIsOpen(!isOpen)}
+        className="w-full p-3 text-left hover:bg-muted/50 transition-colors"
       >
-        {isOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
         <span className="text-sm font-medium">{title}</span>
         {data === null && <span className="text-xs text-muted-foreground">(not configured)</span>}
-      </button>
-      {isOpen && (
-        <div className="border-t bg-muted/30 p-3">
-          <pre className="text-xs font-mono overflow-x-auto whitespace-pre-wrap break-all">
-            {JSON.stringify(data, null, 2)}
-          </pre>
-        </div>
-      )}
+      </CollapsibleTrigger>
+      <CollapsibleContent isOpen={isOpen} className="border-t bg-muted/30 p-3">
+        <pre className="text-xs font-mono overflow-x-auto whitespace-pre-wrap break-all">
+          {JSON.stringify(data, null, 2)}
+        </pre>
+      </CollapsibleContent>
     </div>
   );
 }
@@ -53,23 +56,22 @@ export function RawStateViewer({
   return (
     <Card>
       <CardHeader className="pb-3">
-        <button
-          type="button"
-          onClick={() => setIsExpanded(!isExpanded)}
-          className="flex items-center gap-2 text-left"
+        <CollapsibleTrigger
+          isOpen={isExpanded}
+          onToggle={() => setIsExpanded(!isExpanded)}
+          className="text-left"
         >
-          {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
           <CardTitle className="text-base">Raw Redis State</CardTitle>
           <span className="text-xs text-muted-foreground">(for debugging)</span>
-        </button>
+        </CollapsibleTrigger>
       </CardHeader>
-      {isExpanded && (
+      <CollapsibleContent isOpen={isExpanded}>
         <CardContent className="space-y-3">
           <CollapsibleSection title="Google Calendar Channel" data={googleChannel} />
           <CollapsibleSection title="Notion Subscription" data={notionSubscription} />
           <CollapsibleSection title="Notion API Webhooks" data={notionApiWebhooks} />
         </CardContent>
-      )}
+      </CollapsibleContent>
     </Card>
   );
 }

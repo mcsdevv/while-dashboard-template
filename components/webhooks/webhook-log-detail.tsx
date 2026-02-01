@@ -1,7 +1,17 @@
 "use client";
 
-import { Badge, Button, Card, CardContent, CardHeader, CardTitle, Skeleton } from "@/shared/ui";
-import { ArrowLeft, ChevronDown, ChevronRight } from "lucide-react";
+import {
+  Badge,
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CollapsibleContent,
+  CollapsibleTrigger,
+  Skeleton,
+} from "@/shared/ui";
+import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 
@@ -82,22 +92,21 @@ function CollapsibleSection({
   return (
     <Card>
       <CardHeader className="pb-0">
-        <button
-          type="button"
-          onClick={() => setIsOpen(!isOpen)}
-          className="flex items-center gap-2 text-left w-full"
+        <CollapsibleTrigger
+          isOpen={isOpen}
+          onToggle={() => setIsOpen(!isOpen)}
+          className="text-left w-full"
         >
-          {isOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
           <CardTitle className="text-sm">{title}</CardTitle>
-        </button>
+        </CollapsibleTrigger>
       </CardHeader>
-      {isOpen && (
+      <CollapsibleContent isOpen={isOpen}>
         <CardContent className="pt-4">
           <pre className="text-xs font-mono overflow-x-auto whitespace-pre-wrap break-all bg-muted/50 p-4 rounded-lg">
             {JSON.stringify(data, null, 2)}
           </pre>
         </CardContent>
-      )}
+      </CollapsibleContent>
     </Card>
   );
 }
