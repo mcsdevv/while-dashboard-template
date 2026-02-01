@@ -295,6 +295,95 @@ export function SyncLogDetail({ logId }: SyncLogDetailProps) {
             label="Title"
             value={log.eventTitle ? <span className="break-words">{log.eventTitle}</span> : "-"}
           />
+          {log.eventDescription && (
+            <DetailRow
+              label="Description"
+              value={<span className="break-words whitespace-pre-wrap">{log.eventDescription}</span>}
+            />
+          )}
+          {log.eventStartTime && (
+            <DetailRow
+              label="Start"
+              value={formatTimestamp(log.eventStartTime)}
+            />
+          )}
+          {log.eventEndTime && (
+            <DetailRow
+              label="End"
+              value={formatTimestamp(log.eventEndTime)}
+            />
+          )}
+          {log.eventLocation && (
+            <DetailRow
+              label="Location"
+              value={<span className="break-words">{log.eventLocation}</span>}
+            />
+          )}
+          {log.eventStatus && (
+            <DetailRow
+              label="Event Status"
+              value={
+                <Badge variant="outline" size="fixed" className="capitalize">
+                  {log.eventStatus}
+                </Badge>
+              }
+            />
+          )}
+          {log.eventReminders !== undefined && log.eventReminders !== null && (
+            <DetailRow
+              label="Reminders"
+              value={`${log.eventReminders} minutes before`}
+            />
+          )}
+          {log.eventAttendees && log.eventAttendees.length > 0 && (
+            <DetailRow
+              label="Attendees"
+              value={
+                <span className="break-words">
+                  {log.eventAttendees.join(", ")}
+                </span>
+              }
+            />
+          )}
+          {log.eventOrganizer && (
+            <DetailRow
+              label="Organizer"
+              value={<span className="break-words">{log.eventOrganizer}</span>}
+            />
+          )}
+          {log.eventConferenceLink && (
+            <DetailRow
+              label="Conference"
+              value={
+                <a
+                  href={log.eventConferenceLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-500 hover:underline break-all"
+                >
+                  {log.eventConferenceLink}
+                </a>
+              }
+            />
+          )}
+          {log.eventRecurrence && (
+            <DetailRow
+              label="Recurrence"
+              value={<span className="break-words">{log.eventRecurrence}</span>}
+            />
+          )}
+          {log.eventColor && (
+            <DetailRow
+              label="Color"
+              value={<span className="capitalize">{log.eventColor}</span>}
+            />
+          )}
+          {log.eventVisibility && (
+            <DetailRow
+              label="Visibility"
+              value={<span className="capitalize">{log.eventVisibility}</span>}
+            />
+          )}
           <DetailRow
             label="Event ID"
             value={
@@ -304,7 +393,16 @@ export function SyncLogDetail({ logId }: SyncLogDetailProps) {
           {log.notionPageId && (
             <DetailRow
               label="Notion Page ID"
-              value={<span className="font-mono text-xs break-all">{log.notionPageId}</span>}
+              value={
+                <a
+                  href={`https://notion.so/${log.notionPageId.replace(/-/g, "")}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-mono text-xs break-all text-blue-500 hover:underline"
+                >
+                  {log.notionPageId}
+                </a>
+              }
             />
           )}
           {log.gcalEventId && (

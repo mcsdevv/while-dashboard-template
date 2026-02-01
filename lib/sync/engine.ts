@@ -74,6 +74,20 @@ export async function syncNotionToGcal(event: Event): Promise<void> {
         eventId: event.id,
         eventTitle: event.title,
         status: "success",
+        notionPageId: event.notionPageId,
+        gcalEventId: event.gcalEventId,
+        eventDescription: event.description,
+        eventStartTime: event.startTime,
+        eventEndTime: event.endTime,
+        eventLocation: event.location,
+        eventStatus: event.status,
+        eventReminders: event.reminders,
+        eventAttendees: event.attendees,
+        eventOrganizer: event.organizer,
+        eventConferenceLink: event.conferenceLink,
+        eventRecurrence: event.recurrence,
+        eventColor: event.color,
+        eventVisibility: event.visibility,
       });
 
       console.log(`✓ Updated GCal event: ${event.title} (${event.gcalEventId})`);
@@ -111,6 +125,20 @@ export async function syncNotionToGcal(event: Event): Promise<void> {
         eventId: event.id,
         eventTitle: event.title,
         status: "success",
+        notionPageId: event.notionPageId || event.id,
+        gcalEventId: gcalEventId,
+        eventDescription: event.description,
+        eventStartTime: event.startTime,
+        eventEndTime: event.endTime,
+        eventLocation: event.location,
+        eventStatus: event.status,
+        eventReminders: event.reminders,
+        eventAttendees: event.attendees,
+        eventOrganizer: event.organizer,
+        eventConferenceLink: event.conferenceLink,
+        eventRecurrence: event.recurrence,
+        eventColor: event.color,
+        eventVisibility: event.visibility,
       });
 
       console.log(`✓ Created GCal event: ${event.title} (${gcalEventId})`);
@@ -125,6 +153,20 @@ export async function syncNotionToGcal(event: Event): Promise<void> {
       eventTitle: event.title,
       status: "failure",
       error: errorMessage,
+      notionPageId: event.notionPageId,
+      gcalEventId: event.gcalEventId,
+      eventDescription: event.description,
+      eventStartTime: event.startTime,
+      eventEndTime: event.endTime,
+      eventLocation: event.location,
+      eventStatus: event.status,
+      eventReminders: event.reminders,
+      eventAttendees: event.attendees,
+      eventOrganizer: event.organizer,
+      eventConferenceLink: event.conferenceLink,
+      eventRecurrence: event.recurrence,
+      eventColor: event.color,
+      eventVisibility: event.visibility,
     });
 
     console.error(`✗ Failed to sync Notion event to GCal: ${event.title}`, error);
@@ -180,6 +222,20 @@ export async function syncGcalToNotion(event: Event): Promise<void> {
           eventId: event.id,
           eventTitle: event.title,
           status: "success",
+          notionPageId: event.notionPageId,
+          gcalEventId: event.gcalEventId,
+          eventDescription: event.description,
+          eventStartTime: event.startTime,
+          eventEndTime: event.endTime,
+          eventLocation: event.location,
+          eventStatus: event.status,
+          eventReminders: event.reminders,
+          eventAttendees: event.attendees,
+          eventOrganizer: event.organizer,
+          eventConferenceLink: event.conferenceLink,
+          eventRecurrence: event.recurrence,
+          eventColor: event.color,
+          eventVisibility: event.visibility,
         });
 
         console.log(`✓ Updated Notion event: ${event.title} (${event.notionPageId})`);
@@ -235,6 +291,20 @@ export async function syncGcalToNotion(event: Event): Promise<void> {
             eventId: event.id,
             eventTitle: event.title,
             status: "success",
+            notionPageId: notionPageId,
+            gcalEventId: event.gcalEventId || event.id,
+            eventDescription: event.description,
+            eventStartTime: event.startTime,
+            eventEndTime: event.endTime,
+            eventLocation: event.location,
+            eventStatus: event.status,
+            eventReminders: event.reminders,
+            eventAttendees: event.attendees,
+            eventOrganizer: event.organizer,
+            eventConferenceLink: event.conferenceLink,
+            eventRecurrence: event.recurrence,
+            eventColor: event.color,
+            eventVisibility: event.visibility,
           });
 
           console.log(`✓ Created new Notion event: ${event.title} (${notionPageId})`);
@@ -278,6 +348,20 @@ export async function syncGcalToNotion(event: Event): Promise<void> {
         eventId: event.id,
         eventTitle: event.title,
         status: "success",
+        notionPageId: notionPageId,
+        gcalEventId: event.gcalEventId || event.id,
+        eventDescription: event.description,
+        eventStartTime: event.startTime,
+        eventEndTime: event.endTime,
+        eventLocation: event.location,
+        eventStatus: event.status,
+        eventReminders: event.reminders,
+        eventAttendees: event.attendees,
+        eventOrganizer: event.organizer,
+        eventConferenceLink: event.conferenceLink,
+        eventRecurrence: event.recurrence,
+        eventColor: event.color,
+        eventVisibility: event.visibility,
       });
 
       console.log(`✓ Created Notion event: ${event.title} (${notionPageId})`);
@@ -292,6 +376,20 @@ export async function syncGcalToNotion(event: Event): Promise<void> {
       eventTitle: event.title,
       status: "failure",
       error: errorMessage,
+      notionPageId: event.notionPageId,
+      gcalEventId: event.gcalEventId,
+      eventDescription: event.description,
+      eventStartTime: event.startTime,
+      eventEndTime: event.endTime,
+      eventLocation: event.location,
+      eventStatus: event.status,
+      eventReminders: event.reminders,
+      eventAttendees: event.attendees,
+      eventOrganizer: event.organizer,
+      eventConferenceLink: event.conferenceLink,
+      eventRecurrence: event.recurrence,
+      eventColor: event.color,
+      eventVisibility: event.visibility,
     });
 
     console.error(`✗ Failed to sync GCal event to Notion: ${event.title}`, error);
@@ -320,6 +418,7 @@ export async function deleteFromGcal(gcalEventId: string, eventTitle: string): P
       eventId: gcalEventId,
       eventTitle,
       status: "success",
+      gcalEventId: gcalEventId,
     });
 
     console.log(`✓ Deleted GCal event: ${eventTitle} (${gcalEventId})`);
@@ -333,6 +432,7 @@ export async function deleteFromGcal(gcalEventId: string, eventTitle: string): P
       eventTitle,
       status: "failure",
       error: errorMessage,
+      gcalEventId: gcalEventId,
     });
 
     console.error(`✗ Failed to delete GCal event: ${eventTitle}`, error);
@@ -360,6 +460,7 @@ export async function deleteFromNotion(notionPageId: string, eventTitle: string)
       eventId: notionPageId,
       eventTitle,
       status: "success",
+      notionPageId: notionPageId,
     });
 
     console.log(`✓ Deleted Notion event: ${eventTitle} (${notionPageId})`);
@@ -373,6 +474,7 @@ export async function deleteFromNotion(notionPageId: string, eventTitle: string)
       eventTitle,
       status: "failure",
       error: errorMessage,
+      notionPageId: notionPageId,
     });
 
     console.error(`✗ Failed to delete Notion event: ${eventTitle}`, error);

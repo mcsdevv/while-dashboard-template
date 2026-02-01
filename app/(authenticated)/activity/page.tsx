@@ -3,6 +3,7 @@
 import { LogsViewer } from "@/components/dashboard/logs-viewer";
 import type { SyncLog } from "@/lib/types";
 import {
+  Button,
   Card,
   CardContent,
   CardHeader,
@@ -12,7 +13,8 @@ import {
   SelectTrigger,
   Skeleton,
 } from "@/shared/ui";
-import { useEffect, useState } from "react";
+import { RefreshCw } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 
 const SKELETON_ROWS = ["skeleton-1", "skeleton-2", "skeleton-3", "skeleton-4", "skeleton-5"];
 
@@ -21,28 +23,45 @@ type TimeWindow = "24h" | "7d" | "30d" | "90d";
 export default function ActivityPage() {
   const [logs, setLogs] = useState<SyncLog[]>([]);
   const [loading, setLoading] = useState(true);
+  const [syncing, setSyncing] = useState(false);
   const [timeWindow, setTimeWindow] = useState<TimeWindow>("24h");
 
-  useEffect(() => {
-    const fetchLogs = async () => {
-      setLoading(true);
-      try {
-        const response = await fetch(`/api/metrics?window=${timeWindow}`);
-        if (response.ok) {
-          const data = await response.json();
-          setLogs(data.recentLogs || []);
-        }
-      } catch (error) {
-        console.error("Error fetching logs:", error);
-      } finally {
-        setLoading(false);
+  const fetchLogs = useCallback(async () => {
+    setLoading(true);
+    try {
+      const response = await fetch(`/api/metrics?window=${timeWindow}`);
+      if (response.ok) {
+        const data = await response.json();
+        setLogs(data.recentLogs || []);
       }
-    };
+    } catch (error) {
+      console.error("Error fetching logs:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, [timeWindow]);
 
+  const handleSyncNow = async () => {
+    setSyncing(true);
+    try {
+      const response = await fetch("/api/sync/trigger", { method: "POST" });
+      if (!response.ok) {
+        throw new Error("Sync failed");
+      }
+      // Refresh logs after sync completes
+      await fetchLogs();
+    } catch (error) {
+      console.error("Sync error:", error);
+    } finally {
+      setSyncing(false);
+    }
+  };
+
+  useEffect(() => {
     fetchLogs();
     const interval = setInterval(fetchLogs, 30000);
     return () => clearInterval(interval);
-  }, [timeWindow]);
+  }, [fetchLogs]);
 
   const timeWindowLabels: Record<TimeWindow, string> = {
     "24h": "Last 24 Hours",
@@ -59,17 +78,28 @@ export default function ActivityPage() {
           <h1 className="text-2xl font-semibold tracking-tight">Activity</h1>
           <p className="text-muted-foreground text-sm mt-1">View sync history and event logs</p>
         </div>
-        <Select value={timeWindow} onValueChange={(value) => setTimeWindow(value as TimeWindow)}>
-          <SelectTrigger className="w-[180px]" aria-label="Select time window">
-            {timeWindowLabels[timeWindow]}
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="24h">{timeWindowLabels["24h"]}</SelectItem>
-            <SelectItem value="7d">{timeWindowLabels["7d"]}</SelectItem>
-            <SelectItem value="30d">{timeWindowLabels["30d"]}</SelectItem>
-            <SelectItem value="90d">{timeWindowLabels["90d"]}</SelectItem>
-          </SelectContent>
-        </Select>
+        <div className="flex items-center gap-3">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleSyncNow}
+            disabled={syncing}
+          >
+            <RefreshCw className={`h-4 w-4 mr-2 ${syncing ? "animate-spin" : ""}`} />
+            {syncing ? "Syncing..." : "Sync Now"}
+          </Button>
+          <Select value={timeWindow} onValueChange={(value) => setTimeWindow(value as TimeWindow)}>
+            <SelectTrigger className="w-[180px]" aria-label="Select time window">
+              {timeWindowLabels[timeWindow]}
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="24h">{timeWindowLabels["24h"]}</SelectItem>
+              <SelectItem value="7d">{timeWindowLabels["7d"]}</SelectItem>
+              <SelectItem value="30d">{timeWindowLabels["30d"]}</SelectItem>
+              <SelectItem value="90d">{timeWindowLabels["90d"]}</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       {/* Logs */}

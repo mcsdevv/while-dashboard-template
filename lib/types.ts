@@ -43,6 +43,19 @@ export interface SyncLog {
   gcalEventId?: string;
   processingTime?: number; // Operation duration in ms
   rawPayload?: unknown; // Original event data for debugging
+  // Event details snapshot
+  eventDescription?: string;
+  eventStartTime?: Date | string;
+  eventEndTime?: Date | string;
+  eventLocation?: string;
+  eventStatus?: "confirmed" | "tentative" | "cancelled";
+  eventReminders?: number;
+  eventAttendees?: string[];
+  eventOrganizer?: string;
+  eventConferenceLink?: string;
+  eventRecurrence?: string;
+  eventColor?: string;
+  eventVisibility?: "public" | "private" | "default";
 }
 
 export interface SyncMetrics {
