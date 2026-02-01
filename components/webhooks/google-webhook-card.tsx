@@ -1,8 +1,8 @@
 "use client";
 
+import { GoogleCalendarIcon } from "@/components/icons/brand-icons";
 import { Badge, Card, CardContent, CardHeader, CardTitle } from "@/shared/ui";
 import { AlertTriangle, CheckCircle2, Clock, XCircle } from "lucide-react";
-import Image from "next/image";
 
 interface GoogleWebhookDebugStatus {
   configured: boolean;
@@ -82,13 +82,7 @@ export function GoogleWebhookCard({ status }: GoogleWebhookCardProps) {
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Image
-              src="/icons/google-calendar.png"
-              alt="Google Calendar"
-              width={20}
-              height={20}
-              className="h-5 w-5"
-            />
+            <GoogleCalendarIcon size="md" />
             <CardTitle className="text-base">Google Calendar</CardTitle>
           </div>
           <StatusBadge status={status} />

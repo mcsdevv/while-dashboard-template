@@ -1,5 +1,6 @@
 "use client";
 
+import { NotionIcon } from "@/components/icons/brand-icons";
 import {
   Badge,
   Button,
@@ -50,9 +51,12 @@ export function NotionSettings({ settings }: NotionSettingsProps) {
     <Card className="flex flex-col h-full">
       <CardHeader>
         <div className="flex items-center justify-between">
-          <div>
-            <CardTitle>Notion</CardTitle>
-            <CardDescription>Manage your Notion integration</CardDescription>
+          <div className="flex items-center gap-3">
+            <NotionIcon size="lg" />
+            <div>
+              <CardTitle>Notion</CardTitle>
+              <CardDescription>Manage your Notion integration</CardDescription>
+            </div>
           </div>
           <Badge variant={settings?.isConnected ? "success" : "destructive"}>
             {settings?.isConnected ? "Connected" : "Not Connected"}

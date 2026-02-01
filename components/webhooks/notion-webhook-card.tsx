@@ -1,8 +1,8 @@
 "use client";
 
+import { NotionIcon } from "@/components/icons/brand-icons";
 import { Badge, Button, Card, CardContent, CardHeader, CardTitle } from "@/shared/ui";
 import { AlertTriangle, CheckCircle2, ExternalLink, XCircle } from "lucide-react";
-import Image from "next/image";
 
 interface NotionWebhookDebugStatus {
   configured: boolean;
@@ -73,13 +73,7 @@ export function NotionWebhookCard({ status }: NotionWebhookCardProps) {
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Image
-              src="/icons/notion.png"
-              alt="Notion"
-              width={20}
-              height={20}
-              className="h-5 w-5"
-            />
+            <NotionIcon size="md" />
             <CardTitle className="text-base">Notion</CardTitle>
           </div>
           <StatusBadge status={status} />

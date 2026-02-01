@@ -1,5 +1,6 @@
 "use client";
 
+import { GoogleCalendarIcon } from "@/components/icons/brand-icons";
 import { getTokenHealth, shouldPromptPublishedStatus } from "@/lib/settings/token-health";
 import {
   Badge,
@@ -83,9 +84,12 @@ export function GoogleSettings({ settings, onSettingsChange }: GoogleSettingsPro
     <Card className="flex flex-col h-full">
       <CardHeader>
         <div className="flex items-center justify-between">
-          <div>
-            <CardTitle>Google Calendar</CardTitle>
-            <CardDescription>Manage your Google Calendar connection</CardDescription>
+          <div className="flex items-center gap-3">
+            <GoogleCalendarIcon size="lg" />
+            <div>
+              <CardTitle>Google Calendar</CardTitle>
+              <CardDescription>Manage your Google Calendar connection</CardDescription>
+            </div>
           </div>
           <Badge variant={settings?.isConnected ? "success" : "destructive"}>
             {settings?.isConnected ? "Connected" : "Not Connected"}

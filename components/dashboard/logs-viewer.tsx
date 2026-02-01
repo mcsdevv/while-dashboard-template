@@ -1,5 +1,6 @@
 "use client";
 
+import { GoogleCalendarIcon, NotionIcon } from "@/components/icons/brand-icons";
 import type { SyncDirection, SyncLog, SyncOperation } from "@/lib/types";
 import { formatDate } from "@/lib/utils";
 import { Badge } from "@/shared/ui";
@@ -157,8 +158,20 @@ export function LogsViewer({ logs }: LogsViewerProps) {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="All Directions">All Directions</SelectItem>
-              <SelectItem value="notion_to_gcal">Notion → GCal</SelectItem>
-              <SelectItem value="gcal_to_notion">GCal → Notion</SelectItem>
+              <SelectItem value="notion_to_gcal">
+                <span className="inline-flex items-center gap-1.5">
+                  <NotionIcon />
+                  <span>→</span>
+                  <GoogleCalendarIcon />
+                </span>
+              </SelectItem>
+              <SelectItem value="gcal_to_notion">
+                <span className="inline-flex items-center gap-1.5">
+                  <GoogleCalendarIcon />
+                  <span>→</span>
+                  <NotionIcon />
+                </span>
+              </SelectItem>
             </SelectContent>
           </Select>
 
@@ -214,7 +227,26 @@ export function LogsViewer({ logs }: LogsViewerProps) {
                       </TableCell>
                       <TableCell>
                         <Badge variant="outline" className="text-xs whitespace-nowrap">
-                          {log.direction === "notion_to_gcal" ? "Notion → GCal" : "GCal → Notion"}
+                          <span className="inline-flex items-center gap-1.5">
+                            {log.direction === "notion_to_gcal" ? (
+                              <>
+                                <NotionIcon />
+                                <span aria-hidden="true">→</span>
+                                <GoogleCalendarIcon />
+                              </>
+                            ) : (
+                              <>
+                                <GoogleCalendarIcon />
+                                <span aria-hidden="true">→</span>
+                                <NotionIcon />
+                              </>
+                            )}
+                            <span className="sr-only">
+                              {log.direction === "notion_to_gcal"
+                                ? "Notion to Google Calendar"
+                                : "Google Calendar to Notion"}
+                            </span>
+                          </span>
                         </Badge>
                       </TableCell>
                       <TableCell>
