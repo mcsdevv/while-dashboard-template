@@ -3,7 +3,7 @@ import * as React from "react";
 import { type VariantProps, tv } from "tailwind-variants";
 
 const buttonVariants = tv({
-  base: "inline-flex cursor-pointer items-center justify-center gap-2 whitespace-nowrap text-sm font-normal transition-colors duration-200 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  base: "inline-flex cursor-pointer items-center justify-center gap-2 whitespace-nowrap text-sm font-normal capitalize transition-colors duration-200 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
   variants: {
     variant: {
       default: "bg-foreground text-background shadow hover:bg-foreground/90",
