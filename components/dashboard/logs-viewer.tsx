@@ -212,8 +212,8 @@ export function LogsViewer({ logs }: LogsViewerProps) {
                   <TableRow>
                     <TableHead className="bg-muted">Timestamp</TableHead>
                     <TableHead className="bg-muted">Direction</TableHead>
-                    <TableHead className="bg-muted">Operation</TableHead>
-                    <TableHead className="bg-muted">Event</TableHead>
+                    <TableHead className="bg-muted w-[100px]">Operation</TableHead>
+                    <TableHead className="bg-muted">Event Title</TableHead>
                     <TableHead className="bg-muted">Event ID</TableHead>
                     <TableHead className="bg-muted">Status</TableHead>
                     <TableHead className="bg-muted">Error</TableHead>
@@ -264,7 +264,7 @@ export function LogsViewer({ logs }: LogsViewerProps) {
                           {log.operation}
                         </Badge>
                       </TableCell>
-                      <TableCell className="font-medium max-w-xs truncate">
+                      <TableCell className="font-medium max-w-md truncate">
                         {log.eventTitle}
                       </TableCell>
                       <TableCell className="text-xs text-muted-foreground font-mono max-w-[150px] truncate">
