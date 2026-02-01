@@ -1,4 +1,3 @@
-import { FooterWrapper } from "@/components/footer-wrapper";
 import { Providers } from "@/components/providers";
 import { auth } from "@/lib/auth";
 import { isAuthConfigured } from "@/lib/env";
@@ -27,7 +26,6 @@ export default async function RootLayout({
         <Providers session={session}>
           <div className="flex flex-1 flex-col">
             <div className="flex-1">{children}</div>
-            <FooterWrapper />
           </div>
         </Providers>
       </body>
