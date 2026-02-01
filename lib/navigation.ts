@@ -39,6 +39,11 @@ export const navigation: NavItem[] = [
     icon: CalendarDays,
   },
   {
+    title: "Webhooks",
+    href: "/webhooks",
+    icon: Radio,
+  },
+  {
     title: "Connections",
     href: "/connections",
     icon: Link2,
@@ -59,11 +64,6 @@ export const navigation: NavItem[] = [
     title: "Field Mapping",
     href: "/field-mapping",
     icon: GitBranch,
-  },
-  {
-    title: "Webhooks",
-    href: "/webhooks",
-    icon: Radio,
   },
   {
     title: "Settings",
