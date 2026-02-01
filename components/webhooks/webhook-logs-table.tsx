@@ -94,6 +94,21 @@ function SourceIcon({ source }: { source?: "notion" | "gcal" }) {
   );
 }
 
+function getActionBadgeVariant(
+  action?: WebhookLog["action"],
+): "success" | "default" | "destructive" | "outline" {
+  switch (action) {
+    case "create":
+      return "success";
+    case "update":
+      return "default";
+    case "delete":
+      return "destructive";
+    default:
+      return "outline";
+  }
+}
+
 export function WebhookLogsTable({ logs }: WebhookLogsTableProps) {
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [sourceFilter, setSourceFilter] = useState<string>("all");
@@ -186,8 +201,18 @@ export function WebhookLogsTable({ logs }: WebhookLogsTableProps) {
                         <SourceIcon source={log.source} />
                       </div>
                     </TableCell>
-                    <TableCell className="text-xs">
-                      {log.action ?? log.webhookEventType ?? "-"}
+                    <TableCell>
+                      {log.action ? (
+                        <Badge variant={getActionBadgeVariant(log.action)} size="fixed" className="text-xs">
+                          {log.action}
+                        </Badge>
+                      ) : log.webhookEventType ? (
+                        <Badge variant="outline" size="fixed" className="text-xs">
+                          {log.webhookEventType}
+                        </Badge>
+                      ) : (
+                        <span className="text-xs">-</span>
+                      )}
                     </TableCell>
                     <TableCell
                       className="text-xs max-w-[200px] truncate"
