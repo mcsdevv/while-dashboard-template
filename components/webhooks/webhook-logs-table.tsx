@@ -69,8 +69,8 @@ function getTypeBadgeVariant(
   }
 }
 
-function getStatusBadgeVariant(status: WebhookLog["status"]): "default" | "destructive" {
-  return status === "success" ? "default" : "destructive";
+function getStatusBadgeVariant(status: WebhookLog["status"]): "success" | "destructive" {
+  return status === "success" ? "success" : "destructive";
 }
 
 export function WebhookLogsTable({ logs }: WebhookLogsTableProps) {
