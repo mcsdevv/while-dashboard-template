@@ -48,7 +48,7 @@ function StatusBadge({ status }: { status: NotionWebhookDebugStatus }) {
   if (!status.verified) {
     return <Badge variant="secondary">Verification Required</Badge>;
   }
-  return <Badge variant="default">Active</Badge>;
+  return <Badge variant="success">Active</Badge>;
 }
 
 function DetailRow({

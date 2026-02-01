@@ -1,6 +1,6 @@
 {
   "name": "while-dashboard",
-  "version": "1.5.5",
+  "version": "1.5.6",
   "private": true,
   "scripts": {
     "dev": "PORT=3000 tsx ../../scripts/dev-with-port-fallback.ts",

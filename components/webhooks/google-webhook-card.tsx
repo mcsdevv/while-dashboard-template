@@ -58,7 +58,7 @@ function StatusBadge({ status }: { status: GoogleWebhookDebugStatus }) {
   if (status.needsRenewal) {
     return <Badge variant="secondary">Needs Renewal</Badge>;
   }
-  return <Badge variant="default">Active</Badge>;
+  return <Badge variant="success">Active</Badge>;
 }
 
 function DetailRow({
