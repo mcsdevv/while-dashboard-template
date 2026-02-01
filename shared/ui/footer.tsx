@@ -26,63 +26,60 @@ export function Footer({ theme, setTheme = () => {}, resolvedTheme }: FooterProp
   return (
     <footer className="border-t border-border bg-muted/50">
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        <div className="flex flex-col gap-8 md:flex-row md:justify-between">
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-[1fr_auto_auto] md:gap-12 lg:gap-16">
           {/* Brand */}
-          <div className="md:max-w-md">
+          <div className="max-w-md">
             <div className="flex items-center gap-2">
               <Image src="/icon-no-bg.svg" alt="While" width={32} height={32} />
               <span className="font-medium">While</span>
             </div>
-            <p className="mt-4 max-w-sm text-sm text-muted-foreground">
+            <p className="mt-4 text-sm text-muted-foreground">
               Open-source, self-hosted bidirectional sync between Notion and Google Calendar. Built
               with privacy and reliability in mind.
             </p>
           </div>
 
-          {/* Product and Resources - right aligned */}
-          <div className="flex flex-col gap-6 sm:flex-row sm:gap-12">
-            {/* Product Links */}
-            <div className="min-w-0">
-              <h3 className="font-medium">Product</h3>
-              <ul className="mt-4 space-y-2">
-                {links.product.map((link) => (
-                  <li key={link.name}>
-                    <a
-                      href={link.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="rounded-sm text-sm underline text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                    >
-                      {link.name}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
+          {/* Product Links */}
+          <div className="min-w-[140px]">
+            <h3 className="font-medium">Product</h3>
+            <ul className="mt-4 space-y-2">
+              {links.product.map((link) => (
+                <li key={link.name}>
+                  <a
+                    href={link.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="rounded-sm text-sm underline text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  >
+                    {link.name}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
 
-            {/* Resources Links */}
-            <div className="min-w-0">
-              <h3 className="font-medium">Resources</h3>
-              <ul className="mt-4 space-y-2">
-                {links.resources.map((link) => (
-                  <li key={link.name}>
-                    <a
-                      href={link.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="rounded-sm text-sm underline text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                    >
-                      {link.name}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
+          {/* Resources Links */}
+          <div className="min-w-[160px]">
+            <h3 className="font-medium">Resources</h3>
+            <ul className="mt-4 space-y-2">
+              {links.resources.map((link) => (
+                <li key={link.name}>
+                  <a
+                    href={link.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="rounded-sm text-sm underline text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  >
+                    {link.name}
+                  </a>
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
 
         {/* Tech Stack & License */}
-        <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t pt-8 md:flex-row">
+        <div className="mt-12 flex flex-col items-center gap-4 border-t pt-8 sm:flex-row sm:justify-center sm:gap-6">
           <p className="text-sm text-muted-foreground">
             A project by{" "}
             <a
@@ -95,7 +92,13 @@ export function Footer({ theme, setTheme = () => {}, resolvedTheme }: FooterProp
             </a>
             .
           </p>
+          <span className="hidden text-muted-foreground/50 sm:inline" aria-hidden="true">
+            •
+          </span>
           <ThemeToggle theme={theme} setTheme={setTheme} resolvedTheme={resolvedTheme} />
+          <span className="hidden text-muted-foreground/50 sm:inline" aria-hidden="true">
+            •
+          </span>
           <p className="text-sm text-muted-foreground">
             Released under the{" "}
             <a
