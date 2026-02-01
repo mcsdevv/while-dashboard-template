@@ -3,17 +3,17 @@
 import { LogsViewer } from "@/components/dashboard/logs-viewer";
 import type { SyncLog } from "@/lib/types";
 import {
-  Button,
+  AutoRefreshToggle,
   Card,
   CardContent,
   CardHeader,
+  RefreshButton,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   Skeleton,
 } from "@/shared/ui";
-import { RefreshCw } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 
 const SKELETON_ROWS = ["skeleton-1", "skeleton-2", "skeleton-3", "skeleton-4", "skeleton-5"];
@@ -24,22 +24,28 @@ export default function ActivityPage() {
   const [logs, setLogs] = useState<SyncLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
+  const [autoRefresh, setAutoRefresh] = useState(true);
   const [timeWindow, setTimeWindow] = useState<TimeWindow>("24h");
 
-  const fetchLogs = useCallback(async () => {
-    setLoading(true);
-    try {
-      const response = await fetch(`/api/metrics?window=${timeWindow}`);
-      if (response.ok) {
-        const data = await response.json();
-        setLogs(data.recentLogs || []);
+  const fetchLogs = useCallback(
+    async (isRefresh = false) => {
+      if (!isRefresh) {
+        setLoading(true);
       }
-    } catch (error) {
-      console.error("Error fetching logs:", error);
-    } finally {
-      setLoading(false);
-    }
-  }, [timeWindow]);
+      try {
+        const response = await fetch(`/api/metrics?window=${timeWindow}`);
+        if (response.ok) {
+          const data = await response.json();
+          setLogs(data.recentLogs || []);
+        }
+      } catch (error) {
+        console.error("Error fetching logs:", error);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [timeWindow],
+  );
 
   const handleSyncNow = async () => {
     setSyncing(true);
@@ -59,9 +65,13 @@ export default function ActivityPage() {
 
   useEffect(() => {
     fetchLogs();
-    const interval = setInterval(fetchLogs, 30000);
-    return () => clearInterval(interval);
   }, [fetchLogs]);
+
+  useEffect(() => {
+    if (!autoRefresh) return;
+    const interval = setInterval(() => fetchLogs(true), 30000);
+    return () => clearInterval(interval);
+  }, [autoRefresh, fetchLogs]);
 
   const timeWindowLabels: Record<TimeWindow, string> = {
     "24h": "Last 24 Hours",
@@ -79,15 +89,12 @@ export default function ActivityPage() {
           <p className="text-muted-foreground text-sm mt-1">View sync history and event logs</p>
         </div>
         <div className="flex items-center gap-3">
-          <Button
-            variant="outline"
-            size="sm"
+          <AutoRefreshToggle checked={autoRefresh} onCheckedChange={setAutoRefresh} />
+          <RefreshButton
             onClick={handleSyncNow}
-            disabled={syncing}
-          >
-            <RefreshCw className={`h-4 w-4 mr-2 ${syncing ? "animate-spin" : ""}`} />
-            {syncing ? "Syncing..." : "Sync Now"}
-          </Button>
+            loading={syncing}
+            label={syncing ? "Syncing..." : "Sync Now"}
+          />
           <Select value={timeWindow} onValueChange={(value) => setTimeWindow(value as TimeWindow)}>
             <SelectTrigger className="w-[180px]" aria-label="Select time window">
               {timeWindowLabels[timeWindow]}

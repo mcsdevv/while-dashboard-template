@@ -1,7 +1,6 @@
 "use client";
 
-import { Button, Card, Skeleton } from "@/shared/ui";
-import { RefreshCw } from "lucide-react";
+import { AutoRefreshToggle, Button, Card, RefreshButton, Skeleton } from "@/shared/ui";
 import { useCallback, useEffect, useState } from "react";
 
 import { GoogleWebhookCard } from "./google-webhook-card";
@@ -211,25 +210,8 @@ export function WebhooksPage() {
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <label className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer">
-            <input
-              type="checkbox"
-              checked={autoRefresh}
-              onChange={(e) => setAutoRefresh(e.target.checked)}
-              className="rounded border-input"
-            />
-            Auto-refresh (30s)
-          </label>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => fetchData(true)}
-            disabled={refreshing}
-            className="gap-2"
-          >
-            <RefreshCw className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`} />
-            Refresh
-          </Button>
+          <AutoRefreshToggle checked={autoRefresh} onCheckedChange={setAutoRefresh} />
+          <RefreshButton onClick={() => fetchData(true)} loading={refreshing} />
         </div>
       </div>
 
