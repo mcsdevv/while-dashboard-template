@@ -31,15 +31,35 @@ interface CalendarEvent {
 }
 
 function transformLogsToEvents(logs: SyncLog[]): CalendarEvent[] {
+  // Build mapping of linked IDs from logs with both cross-references
+  // This allows deduplication when the same event appears with different IDs
+  // (Notion UUID vs Google Calendar ID) from bidirectional sync
+  const notionToGcal = new Map<string, string>();
+
+  for (const log of logs) {
+    if (log.gcalEventId && log.notionPageId) {
+      notionToGcal.set(log.notionPageId, log.gcalEventId);
+    }
+  }
+
+  // Get canonical key for an event (prefer gcalEventId for consistency)
+  const getCanonicalKey = (log: SyncLog): string => {
+    if (log.gcalEventId) return log.gcalEventId;
+    if (notionToGcal.has(log.eventId)) return notionToGcal.get(log.eventId)!;
+    return log.eventId;
+  };
+
   const eventMap = new Map<string, SyncLog>();
 
   for (const log of logs) {
     if (!log.eventStartTime || !log.eventEndTime) continue;
     if (log.eventStatus === "cancelled") continue;
 
-    const existing = eventMap.get(log.eventId);
+    const key = getCanonicalKey(log);
+    const existing = eventMap.get(key);
+
     if (!existing) {
-      eventMap.set(log.eventId, log);
+      eventMap.set(key, log);
     } else {
       const existingTime =
         typeof existing.timestamp === "string"
@@ -50,13 +70,13 @@ function transformLogsToEvents(logs: SyncLog[]): CalendarEvent[] {
           ? new Date(log.timestamp).getTime()
           : log.timestamp.getTime();
       if (logTime > existingTime) {
-        eventMap.set(log.eventId, log);
+        eventMap.set(key, log);
       }
     }
   }
 
   return Array.from(eventMap.values()).map((log) => ({
-    id: log.eventId,
+    id: log.gcalEventId || log.notionPageId || log.eventId,
     title: log.eventTitle,
     start: new Date(log.eventStartTime!),
     end: new Date(log.eventEndTime!),
@@ -78,9 +98,7 @@ export function CalendarView({ logs }: CalendarViewProps) {
 
   const getEventsForDay = (day: Date) =>
     events.filter(
-      (event) =>
-        isSameDay(event.start, day) ||
-        (event.start <= day && event.end >= day)
+      (event) => isSameDay(event.start, day) || (event.start <= day && event.end >= day),
     );
 
   const handlePrevMonth = () => setCurrentDate(subMonths(currentDate, 1));
@@ -111,19 +129,12 @@ export function CalendarView({ logs }: CalendarViewProps) {
               >
                 <ChevronLeft className="h-4 w-4" />
               </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handleNextMonth}
-                aria-label="Next month"
-              >
+              <Button variant="ghost" size="icon" onClick={handleNextMonth} aria-label="Next month">
                 <ChevronRight className="h-4 w-4" />
               </Button>
             </div>
           </div>
-          <h2 className="text-lg font-medium">
-            {format(currentDate, "MMMM yyyy")}
-          </h2>
+          <h2 className="text-lg font-medium">{format(currentDate, "MMMM yyyy")}</h2>
         </div>
 
         {/* Week Day Headers */}
