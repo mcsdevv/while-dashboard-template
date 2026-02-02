@@ -182,15 +182,3 @@
   }
 }
 
-/* Schedule-X Calendar */
-.sx-react-calendar-wrapper {
-  width: 100%;
-  height: 700px;
-  max-height: calc(100vh - 200px);
-}
-
-@media (max-width: 640px) {
-  .sx-react-calendar-wrapper {
-    height: 500px;
-  }
-}
