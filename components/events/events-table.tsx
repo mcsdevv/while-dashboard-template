@@ -232,6 +232,8 @@ export function EventsTable({ logs }: EventsTableProps) {
                 <TableHeader className="sticky top-0 bg-background z-10">
                   <TableRow>
                     <TableHead className="bg-muted">Timestamp</TableHead>
+                    <TableHead className="bg-muted">Event Start</TableHead>
+                    <TableHead className="bg-muted">Event End</TableHead>
                     <TableHead className="bg-muted">Direction</TableHead>
                     <TableHead className="bg-muted w-[100px]">Operation</TableHead>
                     <TableHead className="bg-muted">Event Title</TableHead>
@@ -251,6 +253,12 @@ export function EventsTable({ logs }: EventsTableProps) {
                     >
                       <TableCell className="text-xs text-muted-foreground whitespace-nowrap">
                         {formatDate(new Date(log.timestamp))}
+                      </TableCell>
+                      <TableCell className="text-xs text-muted-foreground whitespace-nowrap">
+                        {log.eventStartTime ? formatDate(new Date(log.eventStartTime)) : "-"}
+                      </TableCell>
+                      <TableCell className="text-xs text-muted-foreground whitespace-nowrap">
+                        {log.eventEndTime ? formatDate(new Date(log.eventEndTime)) : "-"}
                       </TableCell>
                       <TableCell>
                         <Badge variant="outline" className="text-xs whitespace-nowrap">

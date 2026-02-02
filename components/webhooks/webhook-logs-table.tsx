@@ -31,6 +31,8 @@ interface WebhookLog {
   action?: "create" | "update" | "delete";
   eventTitle?: string;
   eventId?: string;
+  eventStartTime?: Date | string;
+  eventEndTime?: Date | string;
   resourceState?: string;
   channelId?: string;
   messageNumber?: number;
@@ -186,6 +188,8 @@ export function WebhookLogsTable({
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-[140px]">Timestamp</TableHead>
+                  <TableHead className="w-[140px]">Event Start</TableHead>
+                  <TableHead className="w-[140px]">Event End</TableHead>
                   <TableHead className="w-[100px]">Type</TableHead>
                   <TableHead className="w-[80px]">Source</TableHead>
                   <TableHead className="w-[80px]">Action</TableHead>
@@ -203,6 +207,12 @@ export function WebhookLogsTable({
                   >
                     <TableCell className="text-xs font-mono">
                       {formatTimestamp(log.timestamp)}
+                    </TableCell>
+                    <TableCell className="text-xs font-mono">
+                      {log.eventStartTime ? formatTimestamp(log.eventStartTime) : "-"}
+                    </TableCell>
+                    <TableCell className="text-xs font-mono">
+                      {log.eventEndTime ? formatTimestamp(log.eventEndTime) : "-"}
                     </TableCell>
                     <TableCell>
                       <Badge
