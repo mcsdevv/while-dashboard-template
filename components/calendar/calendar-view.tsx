@@ -3,10 +3,10 @@
 import type { SyncLog } from "@/lib/types";
 import { Button, Card, CardContent } from "@/shared/ui";
 import {
+  addDays,
   addMonths,
   eachDayOfInterval,
   endOfMonth,
-  endOfWeek,
   format,
   isSameDay,
   isSameMonth,
@@ -92,7 +92,7 @@ export function CalendarView({ logs }: CalendarViewProps) {
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(currentDate);
   const calendarStart = startOfWeek(monthStart, { weekStartsOn: 0 });
-  const calendarEnd = endOfWeek(monthEnd, { weekStartsOn: 0 });
+  const calendarEnd = addDays(calendarStart, 34); // 35 days = 5 rows × 7 days
 
   const days = eachDayOfInterval({ start: calendarStart, end: calendarEnd });
 
