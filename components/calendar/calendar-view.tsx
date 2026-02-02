@@ -26,6 +26,7 @@ import { useMemo, useState } from "react";
 
 interface CalendarViewProps {
   logs: SyncLog[];
+  searchQuery?: string;
 }
 
 interface CalendarEvent {
@@ -298,13 +299,19 @@ function transformLogsToEvents(logs: SyncLog[]): CalendarEvent[] {
   }));
 }
 
-export function CalendarView({ logs }: CalendarViewProps) {
+export function CalendarView({ logs, searchQuery }: CalendarViewProps) {
   const router = useRouter();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [viewMode, setViewMode] = useState<ViewMode>("month");
   const { weekStartsOn } = useCalendarPreferences();
 
-  const events = useMemo(() => transformLogsToEvents(logs), [logs]);
+  const events = useMemo(() => {
+    const allEvents = transformLogsToEvents(logs);
+    if (!searchQuery) return allEvents;
+
+    const query = searchQuery.toLowerCase();
+    return allEvents.filter((event) => event.title.toLowerCase().includes(query));
+  }, [logs, searchQuery]);
 
   const handlePrev = () => {
     if (viewMode === "day") setCurrentDate(subDays(currentDate, 1));

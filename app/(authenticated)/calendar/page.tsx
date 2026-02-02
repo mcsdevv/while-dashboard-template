@@ -6,6 +6,7 @@ import {
   AutoRefreshToggle,
   Card,
   CardContent,
+  Input,
   RefreshButton,
   Select,
   SelectContent,
@@ -23,6 +24,7 @@ export default function CalendarPage() {
   const [refreshing, setRefreshing] = useState(false);
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [timeWindow, setTimeWindow] = useState<TimeWindow>("30d");
+  const [searchQuery, setSearchQuery] = useState("");
 
   const fetchLogs = useCallback(
     async (isRefresh = false) => {
@@ -73,6 +75,13 @@ export default function CalendarPage() {
           <p className="text-muted-foreground text-sm mt-1">View synced events on a calendar</p>
         </div>
         <div className="flex items-center gap-3">
+          <Input
+            placeholder="Search events..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-[200px]"
+            aria-label="Search events"
+          />
           <AutoRefreshToggle checked={autoRefresh} onCheckedChange={setAutoRefresh} />
           <RefreshButton onClick={() => fetchLogs(true)} loading={refreshing} />
           <Select value={timeWindow} onValueChange={(value) => setTimeWindow(value as TimeWindow)}>
@@ -100,7 +109,7 @@ export default function CalendarPage() {
           </CardContent>
         </Card>
       ) : (
-        <CalendarView logs={logs} />
+        <CalendarView logs={logs} searchQuery={searchQuery} />
       )}
     </div>
   );
