@@ -38,6 +38,16 @@ interface CalendarEvent {
 
 type ViewMode = "day" | "week" | "month";
 
+function formatDuration(start: Date, end: Date): string {
+  const minutes = Math.round((end.getTime() - start.getTime()) / 60000);
+  const hours = Math.floor(minutes / 60);
+  const remainingMinutes = minutes % 60;
+
+  if (hours === 0) return `${remainingMinutes}m`;
+  if (remainingMinutes === 0) return `${hours}h`;
+  return `${hours}h ${remainingMinutes}m`;
+}
+
 function DayView({
   date,
   events,
@@ -64,7 +74,7 @@ function DayView({
             className="w-full flex items-center gap-3 bg-muted p-3 text-left transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <span className="text-sm text-muted-foreground whitespace-nowrap">
-              {format(event.start, "h:mm a")} - {format(event.end, "h:mm a")}
+              {format(event.start, "h:mm a")} ({formatDuration(event.start, event.end)})
             </span>
             <span className="text-sm font-medium truncate">{event.title}</span>
           </button>
@@ -133,6 +143,7 @@ function WeekView({
                     onClick={() => onEventClick(event.id)}
                     className="w-full truncate bg-muted px-1.5 py-0.5 text-left text-xs text-foreground transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   >
+                    {format(event.start, "h:mm a")} ({formatDuration(event.start, event.end)}){" "}
                     {event.title}
                   </button>
                 ))}
@@ -229,6 +240,7 @@ function MonthView({
                     onClick={() => onEventClick(event.id)}
                     className="w-full truncate bg-muted px-1.5 py-0.5 text-left text-xs text-foreground transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   >
+                    {format(event.start, "h:mm a")} ({formatDuration(event.start, event.end)}){" "}
                     {event.title}
                   </button>
                 ))}
