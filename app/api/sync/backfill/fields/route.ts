@@ -1,6 +1,10 @@
 /**
- * API endpoints for backfill service.
- * Used to populate existing Notion pages with new field data from Google Calendar.
+ * API endpoints for field backfill service.
+ * Populates newly-enabled fields (attendees, organizer, etc.) on existing Notion pages
+ * using data from their linked Google Calendar events.
+ *
+ * Uses Next.js `after()` to guarantee background task completion
+ * with Vercel Fluid Compute (default 300s timeout, up to 800s on Pro).
  */
 import {
   cancelBackfill,
@@ -8,8 +12,12 @@ import {
   resetBackfill,
   startBackfill,
 } from "@/lib/sync/backfill";
+import { after } from "next/server";
 import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+
+// Allow up to 5 minutes for backfill (default Fluid Compute limit)
+export const maxDuration = 300;
 
 // Valid fields that can be backfilled
 const BACKFILL_FIELDS = [
@@ -28,8 +36,8 @@ const startBackfillSchema = z.object({
 });
 
 /**
- * GET /api/sync/backfill
- * Returns current backfill progress
+ * GET /api/sync/backfill/fields
+ * Returns current field backfill progress
  */
 export async function GET() {
   try {
@@ -45,8 +53,8 @@ export async function GET() {
 }
 
 /**
- * POST /api/sync/backfill
- * Starts a new backfill operation (non-blocking)
+ * POST /api/sync/backfill/fields
+ * Starts a new field backfill operation (non-blocking)
  * Body: { fields: string[] }
  */
 export async function POST(request: NextRequest) {
@@ -73,10 +81,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Start backfill in background (non-blocking)
-    // We don't await this - it runs in the background
-    startBackfill(fields).catch((error) => {
-      console.error("Backfill failed:", error);
+    // Schedule background work using Next.js after()
+    // Guaranteed to complete within maxDuration (Fluid Compute)
+    after(async () => {
+      try {
+        await startBackfill(fields);
+      } catch (error) {
+        console.error("Backfill failed:", error);
+      }
     });
 
     // Return immediately with initial status
@@ -95,8 +107,8 @@ export async function POST(request: NextRequest) {
 }
 
 /**
- * DELETE /api/sync/backfill
- * Cancels a running backfill operation
+ * DELETE /api/sync/backfill/fields
+ * Cancels a running field backfill operation
  */
 export async function DELETE() {
   try {

@@ -119,11 +119,7 @@ function CollapsibleSection({
             className="shrink-0 h-8 w-8 p-0"
             aria-label={copied ? "Copied" : "Copy to clipboard"}
           >
-            {copied ? (
-              <Check className="h-4 w-4 text-green-600" />
-            ) : (
-              <Copy className="h-4 w-4" />
-            )}
+            {copied ? <Check className="h-4 w-4 text-green-600" /> : <Copy className="h-4 w-4" />}
           </Button>
         </div>
       </CardHeader>
@@ -321,21 +317,15 @@ export function SyncLogDetail({ logId }: SyncLogDetailProps) {
           {log.eventDescription && (
             <DetailRow
               label="Description"
-              value={<span className="break-words whitespace-pre-wrap">{log.eventDescription}</span>}
+              value={
+                <span className="break-words whitespace-pre-wrap">{log.eventDescription}</span>
+              }
             />
           )}
           {log.eventStartTime && (
-            <DetailRow
-              label="Start"
-              value={formatTimestamp(log.eventStartTime)}
-            />
+            <DetailRow label="Start" value={formatTimestamp(log.eventStartTime)} />
           )}
-          {log.eventEndTime && (
-            <DetailRow
-              label="End"
-              value={formatTimestamp(log.eventEndTime)}
-            />
-          )}
+          {log.eventEndTime && <DetailRow label="End" value={formatTimestamp(log.eventEndTime)} />}
           {log.eventLocation && (
             <DetailRow
               label="Location"
@@ -353,19 +343,12 @@ export function SyncLogDetail({ logId }: SyncLogDetailProps) {
             />
           )}
           {log.eventReminders !== undefined && log.eventReminders !== null && (
-            <DetailRow
-              label="Reminders"
-              value={`${log.eventReminders} minutes before`}
-            />
+            <DetailRow label="Reminders" value={`${log.eventReminders} minutes before`} />
           )}
           {log.eventAttendees && log.eventAttendees.length > 0 && (
             <DetailRow
               label="Attendees"
-              value={
-                <span className="break-words">
-                  {log.eventAttendees.join(", ")}
-                </span>
-              }
+              value={<span className="break-words">{log.eventAttendees.join(", ")}</span>}
             />
           )}
           {log.eventOrganizer && (
@@ -396,10 +379,7 @@ export function SyncLogDetail({ logId }: SyncLogDetailProps) {
             />
           )}
           {log.eventColor && (
-            <DetailRow
-              label="Color"
-              value={<span className="capitalize">{log.eventColor}</span>}
-            />
+            <DetailRow label="Color" value={<span className="capitalize">{log.eventColor}</span>} />
           )}
           {log.eventVisibility && (
             <DetailRow

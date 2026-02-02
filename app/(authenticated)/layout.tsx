@@ -2,6 +2,8 @@ import { AppShell } from "@/components/shell";
 import { isSetupComplete } from "@/lib/settings";
 import { redirect } from "next/navigation";
 
+export const dynamic = "force-dynamic";
+
 export default async function AuthenticatedLayout({
   children,
 }: {

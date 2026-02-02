@@ -4,6 +4,7 @@ import { AppHeader } from "./header";
 import { MobileNav } from "./mobile-nav";
 import { AppSidebar } from "./sidebar";
 import { SidebarProvider } from "./sidebar-context";
+import { SidebarVisibilityProvider } from "./sidebar-visibility-context";
 
 interface AppShellProps {
   children: React.ReactNode;
@@ -12,14 +13,16 @@ interface AppShellProps {
 export function AppShell({ children }: AppShellProps) {
   return (
     <SidebarProvider>
-      <div className="flex flex-1">
-        <AppSidebar />
-        <div className="flex flex-1 flex-col">
-          <AppHeader />
-          <main className="flex-1 overflow-auto">{children}</main>
+      <SidebarVisibilityProvider>
+        <div className="flex flex-1">
+          <AppSidebar />
+          <div className="flex flex-1 flex-col">
+            <AppHeader />
+            <main className="flex-1 overflow-auto">{children}</main>
+          </div>
+          <MobileNav />
         </div>
-        <MobileNav />
-      </div>
+      </SidebarVisibilityProvider>
     </SidebarProvider>
   );
 }

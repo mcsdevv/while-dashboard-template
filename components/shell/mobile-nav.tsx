@@ -6,9 +6,13 @@ import { X } from "lucide-react";
 import Link from "next/link";
 import { useSidebar } from "./sidebar-context";
 import { SidebarNav } from "./sidebar-nav";
+import { useSidebarVisibility } from "./sidebar-visibility-context";
 
 export function MobileNav() {
   const { mobileOpen, setMobileOpen } = useSidebar();
+  const { isVisible } = useSidebarVisibility();
+
+  const visibleNavigation = navigation.filter((item) => isVisible(item.id));
 
   if (!mobileOpen) return null;
 
@@ -54,7 +58,7 @@ export function MobileNav() {
 
         {/* Navigation */}
         <div className="flex-1 overflow-y-auto py-4">
-          <SidebarNav items={navigation} />
+          <SidebarNav items={visibleNavigation} />
         </div>
 
         {/* Footer */}

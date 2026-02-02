@@ -70,20 +70,12 @@ export default function CalendarPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Calendar</h1>
-          <p className="text-muted-foreground text-sm mt-1">
-            View synced events on a calendar
-          </p>
+          <p className="text-muted-foreground text-sm mt-1">View synced events on a calendar</p>
         </div>
         <div className="flex items-center gap-3">
-          <AutoRefreshToggle
-            checked={autoRefresh}
-            onCheckedChange={setAutoRefresh}
-          />
+          <AutoRefreshToggle checked={autoRefresh} onCheckedChange={setAutoRefresh} />
           <RefreshButton onClick={() => fetchLogs(true)} loading={refreshing} />
-          <Select
-            value={timeWindow}
-            onValueChange={(value) => setTimeWindow(value as TimeWindow)}
-          >
+          <Select value={timeWindow} onValueChange={(value) => setTimeWindow(value as TimeWindow)}>
             <SelectTrigger className="w-[180px]" aria-label="Select time window">
               {timeWindowLabels[timeWindow]}
             </SelectTrigger>

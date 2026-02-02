@@ -131,11 +131,7 @@ function CollapsibleSection({
             className="shrink-0 h-8 w-8 p-0"
             aria-label={copied ? "Copied" : "Copy to clipboard"}
           >
-            {copied ? (
-              <Check className="h-4 w-4 text-green-600" />
-            ) : (
-              <Copy className="h-4 w-4" />
-            )}
+            {copied ? <Check className="h-4 w-4 text-green-600" /> : <Copy className="h-4 w-4" />}
           </Button>
         </div>
       </CardHeader>
@@ -319,7 +315,7 @@ export function WebhookLogDetail({ logId }: WebhookLogDetailProps) {
                   {log.action}
                 </Badge>
               ) : (
-                log.webhookEventType ?? "-"
+                (log.webhookEventType ?? "-")
               )
             }
           />

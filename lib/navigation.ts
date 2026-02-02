@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 
 export interface NavItem {
+  id: string;
   title: string;
   href: string;
   icon: LucideIcon;
@@ -25,41 +26,49 @@ export interface NavItem {
 
 export const navigation: NavItem[] = [
   {
+    id: "dashboard",
     title: "Dashboard",
     href: "/",
     icon: Home,
   },
   {
+    id: "calendar",
     title: "Calendar",
     href: "/calendar",
     icon: CalendarRange,
   },
   {
+    id: "activity",
     title: "Activity",
     href: "/activity",
     icon: Activity,
   },
   {
+    id: "events",
     title: "Events",
     href: "/events",
     icon: CalendarDays,
   },
   {
+    id: "webhooks",
     title: "Webhooks",
     href: "/webhooks",
     icon: Radio,
   },
   {
+    id: "connections",
     title: "Connections",
     href: "/connections",
     icon: Link2,
     children: [
       {
+        id: "connections-google",
         title: "Google Calendar",
         href: "/connections/google",
         icon: Calendar,
       },
       {
+        id: "connections-notion",
         title: "Notion",
         href: "/connections/notion",
         icon: Database,
@@ -67,21 +76,25 @@ export const navigation: NavItem[] = [
     ],
   },
   {
+    id: "field-mapping",
     title: "Field Mapping",
     href: "/field-mapping",
     icon: GitBranch,
   },
   {
+    id: "settings",
     title: "Settings",
     href: "/settings",
     icon: Settings,
   },
   {
+    id: "setup-wizard",
     title: "Setup Wizard",
     href: "/setup/1",
     icon: Sparkles,
   },
   {
+    id: "help",
     title: "Help",
     href: "https://while.so/docs",
     icon: HelpCircle,

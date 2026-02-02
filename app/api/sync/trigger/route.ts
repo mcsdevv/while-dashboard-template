@@ -48,8 +48,12 @@ export async function POST() {
     }
 
     console.log("✅ Manual sync completed");
-    console.log(`   Notion → GCal: ${results.notionToGcal.synced} synced, ${results.notionToGcal.errors} errors`);
-    console.log(`   GCal → Notion: ${results.gcalToNotion.synced} synced, ${results.gcalToNotion.errors} errors`);
+    console.log(
+      `   Notion → GCal: ${results.notionToGcal.synced} synced, ${results.notionToGcal.errors} errors`,
+    );
+    console.log(
+      `   GCal → Notion: ${results.gcalToNotion.synced} synced, ${results.gcalToNotion.errors} errors`,
+    );
 
     return NextResponse.json({
       status: "success",
