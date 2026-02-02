@@ -3,6 +3,7 @@ import {
   Activity,
   Calendar,
   CalendarDays,
+  CalendarRange,
   Database,
   GitBranch,
   HelpCircle,
@@ -27,6 +28,11 @@ export const navigation: NavItem[] = [
     title: "Dashboard",
     href: "/",
     icon: Home,
+  },
+  {
+    title: "Calendar",
+    href: "/calendar",
+    icon: CalendarRange,
   },
   {
     title: "Activity",
