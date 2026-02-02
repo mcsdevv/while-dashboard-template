@@ -1,5 +1,6 @@
 "use client";
 
+import { CalendarPreferencesProvider } from "./calendar-preferences-context";
 import { AppHeader } from "./header";
 import { MobileNav } from "./mobile-nav";
 import { AppSidebar } from "./sidebar";
@@ -14,14 +15,16 @@ export function AppShell({ children }: AppShellProps) {
   return (
     <SidebarProvider>
       <SidebarVisibilityProvider>
-        <div className="flex flex-1">
-          <AppSidebar />
-          <div className="flex flex-1 flex-col">
-            <AppHeader />
-            <main className="flex-1 overflow-auto">{children}</main>
+        <CalendarPreferencesProvider>
+          <div className="flex flex-1">
+            <AppSidebar />
+            <div className="flex flex-1 flex-col">
+              <AppHeader />
+              <main className="flex-1 overflow-auto">{children}</main>
+            </div>
+            <MobileNav />
           </div>
-          <MobileNav />
-        </div>
+        </CalendarPreferencesProvider>
       </SidebarVisibilityProvider>
     </SidebarProvider>
   );

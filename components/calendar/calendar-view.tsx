@@ -1,5 +1,6 @@
 "use client";
 
+import { useCalendarPreferences } from "@/components/shell/calendar-preferences-context";
 import type { SyncLog } from "@/lib/types";
 import { Button, Card, CardContent } from "@/shared/ui";
 import {
@@ -76,13 +77,18 @@ function WeekView({
   currentDate,
   events,
   onEventClick,
+  weekStartsOn,
 }: {
   currentDate: Date;
   events: CalendarEvent[];
   onEventClick: (id: string) => void;
+  weekStartsOn: 0 | 1;
 }) {
-  const weekStart = startOfWeek(currentDate, { weekStartsOn: 0 });
-  const weekDays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const weekStart = startOfWeek(currentDate, { weekStartsOn });
+  const weekDays =
+    weekStartsOn === 1
+      ? ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+      : ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   const days = eachDayOfInterval({
     start: weekStart,
     end: addDays(weekStart, 6),
@@ -147,18 +153,23 @@ function MonthView({
   currentDate,
   events,
   onEventClick,
+  weekStartsOn,
 }: {
   currentDate: Date;
   events: CalendarEvent[];
   onEventClick: (id: string) => void;
+  weekStartsOn: 0 | 1;
 }) {
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(currentDate);
-  const calendarStart = startOfWeek(monthStart, { weekStartsOn: 0 });
+  const calendarStart = startOfWeek(monthStart, { weekStartsOn });
   const calendarEnd = addDays(calendarStart, 34);
 
   const days = eachDayOfInterval({ start: calendarStart, end: calendarEnd });
-  const weekDays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const weekDays =
+    weekStartsOn === 1
+      ? ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+      : ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
   const getEventsForDay = (day: Date) =>
     events.filter(
@@ -291,6 +302,7 @@ export function CalendarView({ logs }: CalendarViewProps) {
   const router = useRouter();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [viewMode, setViewMode] = useState<ViewMode>("month");
+  const { weekStartsOn } = useCalendarPreferences();
 
   const events = useMemo(() => transformLogsToEvents(logs), [logs]);
 
@@ -315,8 +327,8 @@ export function CalendarView({ logs }: CalendarViewProps) {
   const getHeaderTitle = () => {
     if (viewMode === "day") return format(currentDate, "EEEE, MMMM d, yyyy");
     if (viewMode === "week") {
-      const weekStart = startOfWeek(currentDate, { weekStartsOn: 0 });
-      const weekEnd = endOfWeek(currentDate, { weekStartsOn: 0 });
+      const weekStart = startOfWeek(currentDate, { weekStartsOn });
+      const weekEnd = endOfWeek(currentDate, { weekStartsOn });
       return `${format(weekStart, "MMM d")} - ${format(weekEnd, "d, yyyy")}`;
     }
     return format(currentDate, "MMMM yyyy");
@@ -387,10 +399,20 @@ export function CalendarView({ logs }: CalendarViewProps) {
           <DayView date={currentDate} events={events} onEventClick={handleEventClick} />
         )}
         {viewMode === "week" && (
-          <WeekView currentDate={currentDate} events={events} onEventClick={handleEventClick} />
+          <WeekView
+            currentDate={currentDate}
+            events={events}
+            onEventClick={handleEventClick}
+            weekStartsOn={weekStartsOn}
+          />
         )}
         {viewMode === "month" && (
-          <MonthView currentDate={currentDate} events={events} onEventClick={handleEventClick} />
+          <MonthView
+            currentDate={currentDate}
+            events={events}
+            onEventClick={handleEventClick}
+            weekStartsOn={weekStartsOn}
+          />
         )}
       </CardContent>
     </Card>

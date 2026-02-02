@@ -1,5 +1,6 @@
 "use client";
 
+import { CalendarSettings } from "@/components/settings/calendar-settings";
 import { ConnectionStatus } from "@/components/settings/connection-status";
 import { DangerZone } from "@/components/settings/danger-zone";
 import { GoogleSettings } from "@/components/settings/google-settings";
@@ -83,6 +84,9 @@ export default function SettingsPage() {
 
       {/* Sidebar Settings */}
       <SidebarSettings />
+
+      {/* Calendar Settings */}
+      <CalendarSettings />
 
       {/* Service Settings */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
