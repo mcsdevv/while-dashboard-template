@@ -2,7 +2,16 @@
 
 import { useCalendarPreferences } from "@/components/shell/calendar-preferences-context";
 import type { SyncLog } from "@/lib/types";
-import { Button, Card, CardContent } from "@/shared/ui";
+import {
+  Button,
+  Card,
+  CardContent,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/ui";
 import {
   addDays,
   addMonths,
@@ -11,9 +20,13 @@ import {
   endOfMonth,
   endOfWeek,
   format,
+  getMonth,
+  getYear,
   isSameDay,
   isSameMonth,
   isToday,
+  setMonth,
+  setYear,
   startOfMonth,
   startOfWeek,
   subDays,
@@ -339,6 +352,35 @@ export function CalendarView({ logs, searchQuery }: CalendarViewProps) {
 
   const handleToday = () => setCurrentDate(new Date());
 
+  const handleMonthChange = (monthName: string) => {
+    const monthIndex = months.indexOf(monthName);
+    if (monthIndex !== -1) {
+      setCurrentDate(setMonth(currentDate, monthIndex));
+    }
+  };
+
+  const handleYearChange = (year: string) => {
+    setCurrentDate(setYear(currentDate, parseInt(year)));
+  };
+
+  const months = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
+
+  const currentYear = getYear(new Date());
+  const years = Array.from({ length: 11 }, (_, i) => currentYear - 5 + i);
+
   const handleEventClick = (eventId: string) => {
     router.push(`/events/${encodeURIComponent(eventId)}`);
   };
@@ -382,7 +424,36 @@ export function CalendarView({ logs, searchQuery }: CalendarViewProps) {
             </div>
           </div>
 
-          <h2 className="text-lg font-medium">{getHeaderTitle()}</h2>
+          {viewMode === "month" ? (
+            <div className="flex items-center gap-2">
+              <Select value={months[getMonth(currentDate)]} onValueChange={handleMonthChange}>
+                <SelectTrigger className="w-[130px] h-8 text-sm font-medium">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {months.map((month) => (
+                    <SelectItem key={month} value={month}>
+                      {month}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={String(getYear(currentDate))} onValueChange={handleYearChange}>
+                <SelectTrigger className="w-[90px] h-8 text-sm font-medium">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {years.map((year) => (
+                    <SelectItem key={year} value={String(year)}>
+                      {year}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          ) : (
+            <h2 className="text-lg font-medium">{getHeaderTitle()}</h2>
+          )}
 
           {/* View Mode Toggle */}
           <div className="flex items-center border border-input">
