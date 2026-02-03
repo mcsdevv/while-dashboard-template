@@ -16,6 +16,7 @@
     "test:e2e:ui": "playwright test --ui"
   },
   "dependencies": {
+    "@date-fns/tz": "^1.4.1",
     "@googleapis/calendar": "^9.0.0",
     "@notionhq/client": "^2.2.15",
     "@tailwindcss/postcss": "^4.1.18",

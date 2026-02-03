@@ -2,6 +2,7 @@
 
 import { useCalendarPreferences } from "@/components/shell/calendar-preferences-context";
 import type { SyncLog } from "@/lib/types";
+import { tz } from "@date-fns/tz";
 import {
   Button,
   Card,
@@ -36,6 +37,7 @@ import {
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
+import { TimezoneSelect } from "./timezone-select";
 
 interface CalendarViewProps {
   logs: SyncLog[];
@@ -65,10 +67,12 @@ function DayView({
   date,
   events,
   onEventClick,
+  tzContext,
 }: {
   date: Date;
   events: CalendarEvent[];
   onEventClick: (id: string) => void;
+  tzContext: ReturnType<typeof tz>;
 }) {
   const dayEvents = events
     .filter((e) => isSameDay(e.start, date) || (e.start <= date && e.end >= date))
@@ -87,7 +91,8 @@ function DayView({
             className="w-full flex items-center gap-3 bg-muted p-3 text-left transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <span className="text-sm text-muted-foreground whitespace-nowrap">
-              {format(event.start, "h:mm a")} ({formatDuration(event.start, event.end)})
+              {format(event.start, "h:mm a", { in: tzContext })} (
+              {formatDuration(event.start, event.end)})
             </span>
             <span className="text-sm font-medium truncate">{event.title}</span>
           </button>
@@ -102,11 +107,13 @@ function WeekView({
   events,
   onEventClick,
   weekStartsOn,
+  tzContext,
 }: {
   currentDate: Date;
   events: CalendarEvent[];
   onEventClick: (id: string) => void;
   weekStartsOn: 0 | 1;
+  tzContext: ReturnType<typeof tz>;
 }) {
   const weekStart = startOfWeek(currentDate, { weekStartsOn });
   const weekDays =
@@ -156,8 +163,8 @@ function WeekView({
                     onClick={() => onEventClick(event.id)}
                     className="w-full truncate bg-muted px-1.5 py-0.5 text-left text-xs text-foreground transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   >
-                    {format(event.start, "h:mm a")} ({formatDuration(event.start, event.end)}){" "}
-                    {event.title}
+                    {format(event.start, "h:mm a", { in: tzContext })} (
+                    {formatDuration(event.start, event.end)}) {event.title}
                   </button>
                 ))}
                 {dayEvents.length > 5 && (
@@ -179,11 +186,13 @@ function MonthView({
   events,
   onEventClick,
   weekStartsOn,
+  tzContext,
 }: {
   currentDate: Date;
   events: CalendarEvent[];
   onEventClick: (id: string) => void;
   weekStartsOn: 0 | 1;
+  tzContext: ReturnType<typeof tz>;
 }) {
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(currentDate);
@@ -253,8 +262,8 @@ function MonthView({
                     onClick={() => onEventClick(event.id)}
                     className="w-full truncate bg-muted px-1.5 py-0.5 text-left text-xs text-foreground transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   >
-                    {format(event.start, "h:mm a")} ({formatDuration(event.start, event.end)}){" "}
-                    {event.title}
+                    {format(event.start, "h:mm a", { in: tzContext })} (
+                    {formatDuration(event.start, event.end)}) {event.title}
                   </button>
                 ))}
                 {dayEvents.length > 3 && (
@@ -328,7 +337,8 @@ export function CalendarView({ logs, searchQuery }: CalendarViewProps) {
   const router = useRouter();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [viewMode, setViewMode] = useState<ViewMode>("month");
-  const { weekStartsOn } = useCalendarPreferences();
+  const { weekStartsOn, timezone, setTimezone } = useCalendarPreferences();
+  const tzContext = tz(timezone);
 
   const events = useMemo(() => {
     const allEvents = transformLogsToEvents(logs);
@@ -360,7 +370,7 @@ export function CalendarView({ logs, searchQuery }: CalendarViewProps) {
   };
 
   const handleYearChange = (year: string) => {
-    setCurrentDate(setYear(currentDate, parseInt(year)));
+    setCurrentDate(setYear(currentDate, Number.parseInt(year)));
   };
 
   const months = [
@@ -455,38 +465,47 @@ export function CalendarView({ logs, searchQuery }: CalendarViewProps) {
             <h2 className="text-lg font-medium">{getHeaderTitle()}</h2>
           )}
 
-          {/* View Mode Toggle */}
-          <div className="flex items-center border border-input">
-            <Button
-              variant={viewMode === "day" ? "default" : "ghost"}
-              size="sm"
-              onClick={() => setViewMode("day")}
-              className="rounded-none border-0"
-            >
-              Day
-            </Button>
-            <Button
-              variant={viewMode === "week" ? "default" : "ghost"}
-              size="sm"
-              onClick={() => setViewMode("week")}
-              className="rounded-none border-0 border-x border-input"
-            >
-              Week
-            </Button>
-            <Button
-              variant={viewMode === "month" ? "default" : "ghost"}
-              size="sm"
-              onClick={() => setViewMode("month")}
-              className="rounded-none border-0"
-            >
-              Month
-            </Button>
+          <div className="flex items-center gap-3">
+            <TimezoneSelect value={timezone} onChange={setTimezone} />
+
+            {/* View Mode Toggle */}
+            <div className="flex items-center border border-input">
+              <Button
+                variant={viewMode === "day" ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setViewMode("day")}
+                className="rounded-none border-0"
+              >
+                Day
+              </Button>
+              <Button
+                variant={viewMode === "week" ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setViewMode("week")}
+                className="rounded-none border-0 border-x border-input"
+              >
+                Week
+              </Button>
+              <Button
+                variant={viewMode === "month" ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setViewMode("month")}
+                className="rounded-none border-0"
+              >
+                Month
+              </Button>
+            </div>
           </div>
         </div>
 
         {/* View Content */}
         {viewMode === "day" && (
-          <DayView date={currentDate} events={events} onEventClick={handleEventClick} />
+          <DayView
+            date={currentDate}
+            events={events}
+            onEventClick={handleEventClick}
+            tzContext={tzContext}
+          />
         )}
         {viewMode === "week" && (
           <WeekView
@@ -494,6 +513,7 @@ export function CalendarView({ logs, searchQuery }: CalendarViewProps) {
             events={events}
             onEventClick={handleEventClick}
             weekStartsOn={weekStartsOn}
+            tzContext={tzContext}
           />
         )}
         {viewMode === "month" && (
@@ -502,6 +522,7 @@ export function CalendarView({ logs, searchQuery }: CalendarViewProps) {
             events={events}
             onEventClick={handleEventClick}
             weekStartsOn={weekStartsOn}
+            tzContext={tzContext}
           />
         )}
       </CardContent>

@@ -6,10 +6,10 @@
  * with Vercel Fluid Compute (default 300s timeout, up to 800s on Pro).
  */
 import {
+  MAX_HISTORICAL_DAYS,
   cancelHistoricalSync,
   getHistoricalSyncPreview,
   getHistoricalSyncProgress,
-  MAX_HISTORICAL_DAYS,
   resetHistoricalSync,
   startHistoricalSync,
 } from "@/lib/sync/historical";

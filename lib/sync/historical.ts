@@ -136,7 +136,9 @@ export async function getHistoricalSyncPreview(days: number): Promise<Historical
     }
   }
 
-  console.log(`📊 Preview: ${events.length} total, ${newEvents} new, ${alreadySynced} synced, ${recurringInstances} recurring`);
+  console.log(
+    `📊 Preview: ${events.length} total, ${newEvents} new, ${alreadySynced} synced, ${recurringInstances} recurring`,
+  );
 
   return {
     total: events.length,
@@ -195,7 +197,7 @@ export async function startHistoricalSync(days: number): Promise<void> {
     let processed = 0;
     let created = 0;
     let updated = 0;
-    let skipped = 0;
+    const skipped = 0;
     let errors = 0;
 
     for (let i = 0; i < allEvents.length; i += BATCH_SIZE) {

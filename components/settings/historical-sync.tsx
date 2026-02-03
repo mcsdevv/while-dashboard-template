@@ -1,14 +1,7 @@
 "use client";
 
 import { useToast } from "@/lib/toast";
-import {
-  Button,
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/shared/ui";
+import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui";
 import { Calendar, Clock, History, Loader2, X } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 
@@ -86,7 +79,7 @@ export function HistoricalSync() {
       const response = await fetch("/api/sync/historical", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ days: parseInt(selectedDays), preview: true }),
+        body: JSON.stringify({ days: Number.parseInt(selectedDays), preview: true }),
       });
 
       if (!response.ok) {
@@ -115,7 +108,7 @@ export function HistoricalSync() {
       const response = await fetch("/api/sync/historical", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ days: parseInt(selectedDays) }),
+        body: JSON.stringify({ days: Number.parseInt(selectedDays) }),
       });
 
       if (!response.ok) {
@@ -187,7 +180,9 @@ export function HistoricalSync() {
   const isCancelled = progress?.status === "cancelled";
   const hasResult = isCompleted || isFailed || isCancelled;
 
-  const progressPercent = progress?.total ? Math.round((progress.processed / progress.total) * 100) : 0;
+  const progressPercent = progress?.total
+    ? Math.round((progress.processed / progress.total) * 100)
+    : 0;
 
   return (
     <Card>
@@ -221,7 +216,8 @@ export function HistoricalSync() {
             </div>
             <div className="flex justify-between text-xs text-muted-foreground">
               <span>
-                Created: {progress.created} | Updated: {progress.updated} | Errors: {progress.errors}
+                Created: {progress.created} | Updated: {progress.updated} | Errors:{" "}
+                {progress.errors}
               </span>
               <Button variant="ghost" size="sm" onClick={handleCancel} className="h-6 px-2">
                 <X className="h-3 w-3 mr-1" />
@@ -326,11 +322,7 @@ export function HistoricalSync() {
                   "Preview"
                 )}
               </Button>
-              <Button
-                onClick={handleStartSync}
-                disabled={loading || !preview}
-                className="flex-1"
-              >
+              <Button onClick={handleStartSync} disabled={loading || !preview} className="flex-1">
                 {loading ? (
                   <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
