@@ -16,6 +16,11 @@ import {
 } from "@/shared/ui";
 import { Calendar } from "lucide-react";
 
+const dayLabels: Record<0 | 1, string> = {
+  0: "Sunday",
+  1: "Monday",
+};
+
 export function CalendarSettings() {
   const { weekStartsOn, setWeekStartsOn } = useCalendarPreferences();
 
@@ -36,7 +41,7 @@ export function CalendarSettings() {
             onValueChange={(value) => setWeekStartsOn(Number(value) as 0 | 1)}
           >
             <SelectTrigger className="w-32">
-              <SelectValue />
+              <SelectValue>{dayLabels[weekStartsOn]}</SelectValue>
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="1">Monday</SelectItem>
