@@ -1,7 +1,17 @@
 "use client";
 
 import { useToast } from "@/lib/toast";
-import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui";
+import {
+  Button,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/shared/ui";
 import { Calendar, Clock, History, Loader2, X } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 
@@ -322,23 +332,36 @@ export function HistoricalSync() {
                   "Preview"
                 )}
               </Button>
-              <Button onClick={handleStartSync} disabled={loading || !preview} className="flex-1">
-                {loading ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Starting...
-                  </>
-                ) : (
-                  "Start Sync"
+              <Tooltip>
+                <TooltipTrigger
+                  render={(props) => (
+                    <span
+                      {...props}
+                      tabIndex={!preview ? 0 : undefined}
+                      className="flex-1"
+                    >
+                      <Button
+                        onClick={handleStartSync}
+                        disabled={loading || !preview}
+                        className={`w-full ${!preview ? "pointer-events-none" : ""}`}
+                      >
+                        {loading ? (
+                          <>
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            Starting...
+                          </>
+                        ) : (
+                          "Start Sync"
+                        )}
+                      </Button>
+                    </span>
+                  )}
+                />
+                {!preview && (
+                  <TooltipContent>Click Preview first to see events</TooltipContent>
                 )}
-              </Button>
+              </Tooltip>
             </div>
-
-            {!preview && (
-              <p className="text-xs text-muted-foreground text-center">
-                Click Preview to see how many events will be synced
-              </p>
-            )}
           </>
         )}
       </CardContent>
