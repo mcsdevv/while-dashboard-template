@@ -82,16 +82,16 @@ export const navigation: NavItem[] = [
     icon: GitBranch,
   },
   {
-    id: "settings",
-    title: "Settings",
-    href: "/settings",
-    icon: Settings,
-  },
-  {
     id: "setup-wizard",
     title: "Setup Wizard",
     href: "/setup/1",
     icon: Sparkles,
+  },
+  {
+    id: "settings",
+    title: "Settings",
+    href: "/settings",
+    icon: Settings,
   },
   {
     id: "help",
