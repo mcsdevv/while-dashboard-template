@@ -46,7 +46,7 @@ export function Dashboard() {
     };
   } | null>(null);
   const [loading, setLoading] = useState(true);
-  const [timeWindow, setTimeWindow] = useState<TimeWindow>("24h");
+  const [timeWindow, setTimeWindow] = useState<TimeWindow>("90d");
 
   useEffect(() => {
     const fetchData = async () => {

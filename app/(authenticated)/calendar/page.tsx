@@ -23,7 +23,7 @@ export default function CalendarPage() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [autoRefresh, setAutoRefresh] = useState(true);
-  const [timeWindow, setTimeWindow] = useState<TimeWindow>("30d");
+  const [timeWindow, setTimeWindow] = useState<TimeWindow>("90d");
   const [searchQuery, setSearchQuery] = useState("");
 
   const fetchLogs = useCallback(

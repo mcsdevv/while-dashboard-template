@@ -25,7 +25,7 @@ export default function ActivityPage() {
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const [autoRefresh, setAutoRefresh] = useState(true);
-  const [timeWindow, setTimeWindow] = useState<TimeWindow>("24h");
+  const [timeWindow, setTimeWindow] = useState<TimeWindow>("90d");
 
   const fetchLogs = useCallback(
     async (isRefresh = false) => {
