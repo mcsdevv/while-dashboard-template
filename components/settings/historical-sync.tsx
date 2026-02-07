@@ -335,11 +335,7 @@ export function HistoricalSync() {
               <Tooltip>
                 <TooltipTrigger
                   render={(props) => (
-                    <span
-                      {...props}
-                      tabIndex={!preview ? 0 : undefined}
-                      className="flex-1"
-                    >
+                    <span {...props} tabIndex={!preview ? 0 : undefined} className="flex-1">
                       <Button
                         onClick={handleStartSync}
                         disabled={loading || !preview}
@@ -357,9 +353,7 @@ export function HistoricalSync() {
                     </span>
                   )}
                 />
-                {!preview && (
-                  <TooltipContent>Click Preview first to see events</TooltipContent>
-                )}
+                {!preview && <TooltipContent>Click Preview first to see events</TooltipContent>}
               </Tooltip>
             </div>
           </>

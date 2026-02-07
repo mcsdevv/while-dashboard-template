@@ -7,8 +7,10 @@ import * as React from "react";
 import { cn } from "./utils";
 
 // Wrapper to provide Radix-compatible onValueChange signature
-interface SelectProps
-  extends Omit<React.ComponentPropsWithoutRef<typeof SelectPrimitive.Root>, "onValueChange"> {
+interface SelectProps extends Omit<
+  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Root>,
+  "onValueChange"
+> {
   onValueChange?: (value: string) => void;
   onOpenChange?: (open: boolean) => void;
 }

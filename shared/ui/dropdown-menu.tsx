@@ -16,8 +16,10 @@ const DropdownMenuPortal = Menu.Portal;
 
 const DropdownMenuSub = Menu.Root;
 
-interface DropdownMenuRadioGroupProps
-  extends Omit<React.ComponentPropsWithoutRef<typeof Menu.RadioGroup>, "onValueChange"> {
+interface DropdownMenuRadioGroupProps extends Omit<
+  React.ComponentPropsWithoutRef<typeof Menu.RadioGroup>,
+  "onValueChange"
+> {
   onValueChange?: (value: string) => void;
 }
 

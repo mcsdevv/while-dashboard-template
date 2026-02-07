@@ -4,8 +4,10 @@ import { Switch as BaseSwitch } from "@base-ui/react/switch";
 import * as React from "react";
 import { cn } from "./utils";
 
-export interface SwitchProps
-  extends Omit<React.ComponentPropsWithoutRef<typeof BaseSwitch.Root>, "children"> {
+export interface SwitchProps extends Omit<
+  React.ComponentPropsWithoutRef<typeof BaseSwitch.Root>,
+  "children"
+> {
   /** Additional class names for the switch root */
   className?: string;
   /** Additional class names for the thumb */

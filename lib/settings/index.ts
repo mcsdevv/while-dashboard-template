@@ -20,11 +20,7 @@ export {
 } from "./types";
 
 // Migration
-export {
-  ensureExtendedFieldMapping,
-  isLegacyFieldMapping,
-  migrateFieldMapping,
-} from "./migration";
+export { ensureExtendedFieldMapping, isLegacyFieldMapping, migrateFieldMapping } from "./migration";
 
 // Encryption utilities
 export { decrypt, encrypt, isEncryptionConfigured, safeDecrypt, safeEncrypt } from "./encryption";

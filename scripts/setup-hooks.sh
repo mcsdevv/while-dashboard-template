@@ -36,17 +36,23 @@ else
   exit 1
 fi
 
-# Run biome lint with auto-fix
-echo "📝  Formatting and linting code..."
+# Run oxlint with auto-fix and oxfmt formatting
+echo "📝  Linting and formatting code..."
 $PNPM_CMD run lint:fix
+$PNPM_CMD run format
 
-# Stage any changes made by the formatter
+# Stage any changes made by the formatter/fixer
 git add -u
 
-# Check if there are still linting errors
-echo "✅  Verifying lint status..."
+# Check if there are still linting/formatting errors
+echo "✅  Verifying lint and format status..."
 if ! $PNPM_CMD run lint; then
   echo "❌  Linting failed. Please fix the errors manually and try again."
+  exit 1
+fi
+
+if ! $PNPM_CMD run format:check; then
+  echo "❌  Formatting check failed. Please fix and try again."
   exit 1
 fi
 
@@ -60,8 +66,9 @@ chmod +x "$GIT_DIR/hooks/pre-commit"
 echo "✅  Git hooks installed successfully!"
 echo ""
 echo "💡  The pre-commit hook will now:"
-echo "   1. Auto-format your code with biome"
-echo "   2. Run linting checks"
-echo "   3. Prevent commits if linting fails"
+echo "   1. Auto-fix lint issues with oxlint"
+echo "   2. Auto-format your code with oxfmt"
+echo "   3. Run linting and format checks"
+echo "   4. Prevent commits if checks fail"
 echo ""
 echo "To bypass the hook (not recommended): git commit --no-verify"

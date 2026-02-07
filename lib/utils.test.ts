@@ -7,6 +7,7 @@ test("cn - combines class names", () => {
 });
 
 test("cn - handles conditional classes", () => {
+  // oxlint-disable-next-line no-constant-binary-expression -- intentionally testing falsy conditional
   const result = cn("foo", false && "bar", "baz");
   expect(result).toBe("foo baz");
 });

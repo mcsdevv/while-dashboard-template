@@ -22,13 +22,9 @@ vi.mock("@/shared/ui", () => ({
   Card: ({ children, ...props }: { children: React.ReactNode; [key: string]: unknown }) => (
     <div {...props}>{children}</div>
   ),
-  CardContent: ({
-    children,
-    ...props
-  }: {
-    children: React.ReactNode;
-    [key: string]: unknown;
-  }) => <div {...props}>{children}</div>,
+  CardContent: ({ children, ...props }: { children: React.ReactNode; [key: string]: unknown }) => (
+    <div {...props}>{children}</div>
+  ),
   CardDescription: ({
     children,
     ...props
@@ -36,13 +32,9 @@ vi.mock("@/shared/ui", () => ({
     children: React.ReactNode;
     [key: string]: unknown;
   }) => <p {...props}>{children}</p>,
-  CardHeader: ({
-    children,
-    ...props
-  }: {
-    children: React.ReactNode;
-    [key: string]: unknown;
-  }) => <div {...props}>{children}</div>,
+  CardHeader: ({ children, ...props }: { children: React.ReactNode; [key: string]: unknown }) => (
+    <div {...props}>{children}</div>
+  ),
   CardTitle: ({ children, ...props }: { children: React.ReactNode; [key: string]: unknown }) => (
     <h1 {...props}>{children}</h1>
   ),

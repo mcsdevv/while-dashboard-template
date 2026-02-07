@@ -29,8 +29,7 @@ const buttonVariants = tv({
 });
 
 export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {
+  extends React.ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof buttonVariants> {
   /**
    * Render the button as a different element using the render prop pattern.
    * Example: <Button render={<Link href="/contact" />}>Contact</Button>

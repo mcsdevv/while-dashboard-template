@@ -65,7 +65,11 @@ function DetailRow({
   label,
   value,
   mono = false,
-}: { label: string; value: string; mono?: boolean }) {
+}: {
+  label: string;
+  value: string;
+  mono?: boolean;
+}) {
   return (
     <div className="flex justify-between items-start gap-4 py-1.5 border-b border-border/50 last:border-0">
       <span className="text-sm text-muted-foreground shrink-0">{label}</span>

@@ -8,13 +8,7 @@ interface PropertyDiffProps {
   changes: PropertyChange[];
 }
 
-function DiffLine({
-  type,
-  value,
-}: {
-  type: "added" | "removed";
-  value: string;
-}) {
+function DiffLine({ type, value }: { type: "added" | "removed"; value: string }) {
   const isAdded = type === "added";
   return (
     <div

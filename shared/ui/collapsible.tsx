@@ -29,18 +29,16 @@ export function CollapsibleTrigger({
       className={cn(
         "flex items-center gap-2 cursor-pointer",
         chevronPosition === "right" && "justify-between",
-        className
+        className,
       )}
     >
-      {chevronPosition === "left" && (
-        <ChevronIcon className="h-4 w-4 flex-shrink-0" />
-      )}
+      {chevronPosition === "left" && <ChevronIcon className="h-4 w-4 flex-shrink-0" />}
       {children}
       {chevronPosition === "right" && (
         <ChevronIcon
           className={cn(
             "h-4 w-4 flex-shrink-0 transition-transform duration-200",
-            isOpen && "rotate-180"
+            isOpen && "rotate-180",
           )}
         />
       )}
@@ -54,11 +52,7 @@ interface CollapsibleContentProps {
   className?: string;
 }
 
-export function CollapsibleContent({
-  isOpen,
-  children,
-  className,
-}: CollapsibleContentProps) {
+export function CollapsibleContent({ isOpen, children, className }: CollapsibleContentProps) {
   if (!isOpen) return null;
 
   return <div className={className}>{children}</div>;

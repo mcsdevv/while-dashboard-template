@@ -39,14 +39,8 @@ vi.mock("@/shared/ui", () => ({
   DialogHeader: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   DialogTitle: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   Input: (props: React.InputHTMLAttributes<HTMLInputElement>) => <input {...props} />,
-  Label: ({
-    children,
-    ...props
-  }: {
-    children: React.ReactNode;
-    [key: string]: unknown;
-  }) => (
-    // biome-ignore lint/a11y/noLabelWithoutControl: test stub
+  Label: ({ children, ...props }: { children: React.ReactNode; [key: string]: unknown }) => (
+    // oxlint-disable-next-line jsx_a11y/label-has-associated-control -- test stub
     <label {...props}>{children}</label>
   ),
   Select: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
@@ -160,7 +154,10 @@ describe("FieldMappingStep", () => {
     const createCall = fetchMock.mock.calls.find(
       ([url, init]) => String(url) === "/api/setup/notion/property" && init?.method === "POST",
     );
-    const body = JSON.parse((createCall?.[1] as RequestInit).body as string);
+    if (!createCall) {
+      throw new Error("Expected POST /api/setup/notion/property to have been called.");
+    }
+    const body = JSON.parse((createCall[1] as RequestInit).body as string);
     expect(body).toEqual({ name: "Location", type: "rich_text" });
 
     await waitFor(() =>
