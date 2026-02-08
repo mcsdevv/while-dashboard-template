@@ -6,7 +6,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Notion-GCal Sync Dashboard",
+  title: "While Dashboard",
   description: "Real-time bidirectional sync between Notion and Google Calendar",
   icons: {
     icon: "/icon.svg",
