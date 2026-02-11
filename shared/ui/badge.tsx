@@ -2,7 +2,7 @@ import type * as React from "react";
 import { type VariantProps, tv } from "tailwind-variants";
 
 const badgeVariants = tv({
-  base: "inline-flex items-center justify-center rounded-none border px-4 py-1.5 text-xs font-medium capitalize transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+  base: "inline-flex items-center justify-center rounded-none border px-4 py-1.5 text-[11px] font-medium uppercase tracking-wider transition-colors duration-100 focus:outline-none focus:ring-1 focus:ring-ring",
   variants: {
     variant: {
       default: "border-transparent bg-foreground text-background hover:bg-foreground/80",
@@ -12,6 +12,7 @@ const badgeVariants = tv({
         "border border-emerald-500/30 bg-emerald-500/5 text-emerald-500 hover:bg-emerald-500/10",
       warning: "border border-amber-500/30 bg-amber-500/5 text-amber-500 hover:bg-amber-500/10",
       outline: "text-foreground border-foreground/20",
+      terminal: "border-none bg-transparent text-muted-foreground before:content-['['] after:content-[']'] px-0",
     },
     size: {
       default: "",

@@ -20,7 +20,7 @@ const TooltipContent = React.forwardRef<
       <TooltipPrimitive.Popup
         ref={ref}
         className={cn(
-          "z-[9999] rounded-md border bg-popover px-2 py-1 text-xs text-popover-foreground shadow-md",
+          "z-[9999] rounded-none border bg-popover px-2 py-1 text-[11px] text-popover-foreground shadow-md",
           "data-[starting-style]:opacity-0 data-[starting-style]:scale-95",
           "data-[ending-style]:opacity-0 data-[ending-style]:scale-95",
           "transition-[transform,opacity] duration-150",

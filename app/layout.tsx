@@ -1,7 +1,7 @@
 import { Providers } from "@/components/providers";
 import { auth } from "@/lib/auth";
 import { isAuthConfigured } from "@/lib/env";
-import { GeistSans } from "geist/font/sans";
+import { GeistMono } from "geist/font/mono";
 import type { Metadata } from "next";
 import "./globals.css";
 
@@ -22,7 +22,7 @@ export default async function RootLayout({
 
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${GeistSans.className} flex flex-col min-h-screen antialiased`}>
+      <body className={`${GeistMono.className} flex flex-col min-h-screen antialiased`}>
         <Providers session={session}>
           <div className="flex flex-1 flex-col">
             <div className="flex-1">{children}</div>

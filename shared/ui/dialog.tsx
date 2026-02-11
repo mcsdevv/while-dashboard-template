@@ -41,7 +41,7 @@ const DialogContent = React.forwardRef<
     <BaseDialog.Popup
       ref={ref}
       className={cn(
-        "fixed left-1/2 top-1/2 z-50 grid w-full max-w-lg -translate-x-1/2 -translate-y-1/2 gap-4 border bg-background p-6 shadow-lg sm:rounded-lg",
+        "fixed left-1/2 top-1/2 z-50 grid w-full max-w-lg -translate-x-1/2 -translate-y-1/2 gap-4 border bg-background p-6 shadow-lg rounded-none",
         "data-[starting-style]:opacity-0 data-[starting-style]:scale-95",
         "data-[ending-style]:opacity-0 data-[ending-style]:scale-95",
         "transition-[transform,opacity] duration-150",
@@ -50,7 +50,7 @@ const DialogContent = React.forwardRef<
       {...props}
     >
       {children}
-      <DialogClose className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
+      <DialogClose className="absolute right-4 top-4 rounded-none opacity-70 ring-offset-background transition-opacity duration-100 hover:opacity-100 focus:outline-none focus:ring-1 focus:ring-ring disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
         <X className="h-4 w-4" />
         <span className="sr-only">Close</span>
       </DialogClose>
@@ -90,7 +90,7 @@ const DialogDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <BaseDialog.Description
     ref={ref}
-    className={cn("text-sm text-muted-foreground", className)}
+    className={cn("text-[13px] text-muted-foreground", className)}
     {...props}
   />
 ));

@@ -13,7 +13,7 @@ const Sidebar = React.forwardRef<HTMLElement, SidebarProps>(
     <aside
       ref={ref}
       className={cn(
-        "h-screen sticky top-0 flex flex-col transition-all duration-200 border-r border-border bg-card",
+        "h-screen sticky top-0 flex flex-col transition-all duration-100 border-r border-border bg-card",
         collapsed ? "w-16" : "w-64",
         className,
       )}
@@ -62,7 +62,7 @@ const SidebarGroupLabel = React.forwardRef<HTMLDivElement, React.HTMLAttributes<
     <div
       ref={ref}
       className={cn(
-        "px-3 py-1.5 text-xs font-medium text-muted-foreground uppercase tracking-wider",
+        "px-3 py-1.5 text-[11px] font-medium text-muted-foreground uppercase tracking-[0.1em]",
         className,
       )}
       {...props}
@@ -83,7 +83,7 @@ const SidebarNavItem = React.forwardRef<HTMLButtonElement, SidebarNavItemProps>(
     <button
       ref={ref}
       className={cn(
-        "relative w-full flex cursor-pointer items-center gap-3 px-3 py-2 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+        "relative w-full flex cursor-pointer items-center gap-3 px-3 py-2 text-[13px] transition-colors duration-100 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
         active
           ? "bg-muted text-foreground font-medium"
           : "text-muted-foreground hover:bg-muted hover:text-foreground",

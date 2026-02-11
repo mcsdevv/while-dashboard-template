@@ -48,7 +48,7 @@ const DropdownMenuSubTrigger = React.forwardRef<
   <Menu.SubmenuTrigger
     ref={ref}
     className={cn(
-      "flex cursor-pointer select-none items-center gap-2 rounded-none px-2 py-1.5 text-sm outline-none focus:bg-accent data-[popup-open]:bg-accent [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+      "flex cursor-pointer select-none items-center gap-2 rounded-none px-2 py-1.5 text-[13px] outline-none focus:bg-accent data-[popup-open]:bg-accent [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
       inset && "pl-8",
       className,
     )}
@@ -71,7 +71,7 @@ const DropdownMenuSubContent = React.forwardRef<
         "z-50 min-w-[8rem] overflow-hidden rounded-none border bg-popover! p-1 text-popover-foreground shadow-lg origin-[var(--transform-origin)]",
         "data-[starting-style]:opacity-0 data-[starting-style]:scale-95",
         "data-[ending-style]:opacity-0 data-[ending-style]:scale-95",
-        "transition-[transform,opacity] duration-150",
+        "transition-[transform,opacity] duration-100",
         className,
       )}
       {...props}
@@ -95,7 +95,7 @@ const DropdownMenuContent = React.forwardRef<HTMLDivElement, DropdownMenuContent
             "z-50 max-h-[var(--available-height)] min-w-[8rem] overflow-y-auto overflow-x-hidden rounded-none border bg-popover! p-1 text-popover-foreground shadow-md origin-[var(--transform-origin)]",
             "data-[starting-style]:opacity-0 data-[starting-style]:scale-95",
             "data-[ending-style]:opacity-0 data-[ending-style]:scale-95",
-            "transition-[transform,opacity] duration-150",
+            "transition-[transform,opacity] duration-100",
             className,
           )}
           {...props}
@@ -117,7 +117,7 @@ const DropdownMenuItem = React.forwardRef<
     closeOnClick
     {...props}
     className={cn(
-      "relative flex cursor-pointer select-none items-center gap-2 rounded-none px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&>svg]:size-4 [&>svg]:shrink-0",
+      "relative flex cursor-pointer select-none items-center gap-2 rounded-none px-2 py-1.5 text-[13px] outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&>svg]:size-4 [&>svg]:shrink-0",
       inset && "pl-8",
       className,
     )}
@@ -132,7 +132,7 @@ const DropdownMenuCheckboxItem = React.forwardRef<
   <Menu.CheckboxItem
     ref={ref}
     className={cn(
-      "relative flex cursor-pointer select-none items-center rounded-none py-1.5 pl-8 pr-2 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+      "relative flex cursor-pointer select-none items-center rounded-none py-1.5 pl-8 pr-2 text-[13px] outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
       className,
     )}
     checked={checked}
@@ -156,7 +156,7 @@ const DropdownMenuRadioItem = React.forwardRef<
     ref={ref}
     closeOnClick
     className={cn(
-      "relative flex cursor-pointer select-none items-center rounded-none py-1.5 pl-8 pr-2 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+      "relative flex cursor-pointer select-none items-center rounded-none py-1.5 pl-8 pr-2 text-[13px] outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
       className,
     )}
     {...props}
@@ -179,7 +179,7 @@ const DropdownMenuLabel = React.forwardRef<
 >(({ className, inset, ...props }, ref) => (
   <Menu.GroupLabel
     ref={ref}
-    className={cn("px-2 py-1.5 text-sm font-semibold", inset && "pl-8", className)}
+    className={cn("px-2 py-1.5 text-[11px] font-medium uppercase tracking-wider", inset && "pl-8", className)}
     {...props}
   />
 ));

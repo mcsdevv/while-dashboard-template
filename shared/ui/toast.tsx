@@ -87,7 +87,7 @@ export function Toast({ id, title, description, variant = "default" }: ToastProp
   return (
     <div
       className={cn(
-        "pointer-events-auto relative flex w-full items-start gap-3 overflow-hidden rounded-lg border p-4 shadow-lg",
+        "pointer-events-auto relative flex w-full items-start gap-3 overflow-hidden rounded-none border p-4 shadow-lg",
         "animate-in slide-in-from-bottom-5 fade-in-0 duration-300",
         variant === "success" && "border-emerald-500/50 bg-emerald-500/10 dark:bg-emerald-500/20",
         variant === "destructive" &&
