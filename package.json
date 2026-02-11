@@ -1,6 +1,6 @@
 {
   "name": "while-dashboard",
-  "version": "1.37.1",
+  "version": "1.37.2",
   "private": true,
   "scripts": {
     "dev": "PORT=3000 tsx ../../scripts/dev-with-port-fallback.ts",
@@ -25,6 +25,7 @@
     "date-fns": "^4.1.0",
     "geist": "^1.5.1",
     "google-auth-library": "^9.0.0",
+    "input-otp": "^1.4.2",
     "lucide-react": "^0.563.0",
     "next": "^16.1.6",
     "next-auth": "^5.0.0-beta.30",
