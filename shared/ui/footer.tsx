@@ -14,6 +14,10 @@ const links = {
     { name: "Troubleshooting", href: "https://while.so/docs/guides/troubleshooting" },
     { name: "Architecture", href: "https://while.so/docs/architecture" },
   ],
+  legal: [
+    { name: "Privacy Policy", href: "https://while.so/privacy" },
+    { name: "Terms of Service", href: "https://while.so/terms" },
+  ],
 };
 
 interface FooterProps {
@@ -26,7 +30,7 @@ export function Footer({ theme, setTheme = () => {}, resolvedTheme }: FooterProp
   return (
     <footer className="border-t border-border bg-muted/50">
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-[1fr_auto_auto] md:gap-12 lg:gap-16">
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-[1fr_auto_auto_auto] md:gap-12 lg:gap-16">
           {/* Brand */}
           <div className="max-w-md">
             <div className="flex items-center gap-2">
@@ -63,6 +67,25 @@ export function Footer({ theme, setTheme = () => {}, resolvedTheme }: FooterProp
             <h3 className="font-medium">Resources</h3>
             <ul className="mt-4 space-y-2">
               {links.resources.map((link) => (
+                <li key={link.name}>
+                  <a
+                    href={link.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="rounded-sm text-sm underline text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  >
+                    {link.name}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Legal Links */}
+          <div className="min-w-[140px]">
+            <h3 className="font-medium">Legal</h3>
+            <ul className="mt-4 space-y-2">
+              {links.legal.map((link) => (
                 <li key={link.name}>
                   <a
                     href={link.href}
