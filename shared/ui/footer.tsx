@@ -16,7 +16,6 @@ const links = {
   ],
   legal: [
     { name: "Privacy Policy", href: "https://while.so/privacy" },
-    { name: "Terms of Service", href: "https://while.so/terms" },
   ],
 };
 

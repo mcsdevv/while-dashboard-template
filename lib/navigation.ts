@@ -106,5 +106,4 @@ export const footerLinks = [
   { href: "https://while.so/docs", label: "Docs" },
   { href: "https://while.so/support", label: "Support" },
   { href: "https://github.com/mcsdevv/while", label: "GitHub" },
-  { href: "https://while.so/terms", label: "Terms" },
 ];
