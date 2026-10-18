@@ -1,140 +1,179 @@
-/**
- * Integration tests for webhook handlers
- *
- * These tests verify the functionality we manually tested:
- * Test 1: GCal → Notion (create event)
- * Test 2: GCal → Notion (update event)
- * Test 3: GCal → Notion (delete event)
- * Test 4: Notion → GCal (create event)
- * Test 5: Notion → GCal (update event)
- * Test 6: Notion → GCal (delete event)
- */
+import { createHmac } from "node:crypto";
+import { beforeEach, describe, expect, test, vi } from "vitest";
+import { NextRequest } from "next/server";
+import { fetchGcalEventsSince } from "@/lib/google-calendar/client";
+import { getNotionEvent } from "@/lib/notion/client";
+import { syncGcalToNotion, syncNotionToGcal } from "@/lib/sync/engine";
+import {
+  getSyncState,
+  getWebhookChannel,
+  getNotionWebhook,
+  updateSyncState,
+} from "@/lib/webhook/channel-manager";
+import { acquireLock } from "@/lib/webhook/lock";
+import { POST as googlePost } from "./google-calendar/route";
+import { POST as notionPost } from "./notion/route";
 
-import { expect, test } from "vitest";
+const redis = vi.hoisted(() => ({ get: vi.fn(), set: vi.fn() }));
+const release = vi.hoisted(() => vi.fn());
+vi.mock("@/lib/redis", () => ({ getRedis: () => redis }));
+vi.mock("@/lib/settings", () => ({ getNotionConfig: vi.fn() }));
+vi.mock("@/lib/google-calendar/client", () => ({
+  fetchGcalEventsSince: vi.fn(),
+  findGcalEventByNotionId: vi.fn(),
+  deleteGcalEvent: vi.fn(),
+}));
+vi.mock("@/lib/notion/client", () => ({ getNotionEvent: vi.fn() }));
+vi.mock("@/lib/sync/engine", () => ({
+  syncGcalToNotion: vi.fn(),
+  syncNotionToGcal: vi.fn(),
+  deleteFromNotion: vi.fn(),
+}));
+vi.mock("@/lib/sync/logger", () => ({ logWebhookEvent: vi.fn() }));
+vi.mock("@/lib/webhook/channel-manager", () => ({
+  getSyncState: vi.fn(),
+  getWebhookChannel: vi.fn(),
+  getNotionWebhook: vi.fn(),
+  updateSyncState: vi.fn(),
+  markNotionWebhookVerified: vi.fn(),
+  saveNotionWebhook: vi.fn(),
+}));
+vi.mock("@/lib/webhook/lock", () => ({ acquireLock: vi.fn() }));
 
-/**
- * Test 1 & 4: Event Creation
- * Verifies that events can be created via webhooks
- */
-test("webhook should support event creation flow", () => {
-  // Test covers:
-  // - Notion webhook receives page.created event
-  // - GCal webhook receives "exists" event with new event
-  // - Both systems can create events
-  expect(true).toBeTruthy();
+const event = {
+  id: "event-1",
+  notionPageId: "page-1",
+  title: "Meeting",
+  startTime: new Date(),
+  endTime: new Date(),
+};
+function googleRequest(resourceId = "resource-1") {
+  return new NextRequest("https://example.com/api/webhooks/google-calendar", {
+    method: "POST",
+    headers: {
+      "x-goog-resource-state": "exists",
+      "x-goog-channel-id": "channel-1",
+      "x-goog-resource-id": resourceId,
+      "x-goog-message-number": "42",
+    },
+  });
+}
+function notionRequest(type = "page.properties_updated", signature?: string) {
+  const body = JSON.stringify({ type, entity: { id: "12345678-1234-4234-9234-123456789012" } });
+  const signed =
+    signature ?? `sha256=${createHmac("sha256", "verification-token").update(body).digest("hex")}`;
+  return new NextRequest("https://example.com/api/webhooks/notion", {
+    method: "POST",
+    body,
+    headers: { "x-notion-signature": signed },
+  });
+}
+
+beforeEach(() => {
+  vi.resetAllMocks();
+  redis.get.mockResolvedValue(null);
+  release.mockResolvedValue(undefined);
+  vi.mocked(acquireLock).mockResolvedValue(release);
+  vi.mocked(getWebhookChannel).mockResolvedValue({
+    channelId: "channel-1",
+    resourceId: "resource-1",
+    expiration: Date.now() + 10000,
+    calendarId: "calendar",
+    createdAt: new Date(),
+    lastRenewedAt: new Date(),
+  });
+  vi.mocked(getSyncState).mockResolvedValue({ syncToken: "old-token", lastSync: null });
+  vi.mocked(fetchGcalEventsSince).mockResolvedValue({
+    events: [event],
+    nextSyncToken: "new-token",
+  });
+  vi.mocked(getNotionWebhook).mockResolvedValue({
+    verified: true,
+    subscriptionId: "subscription",
+    databaseId: "database",
+    verificationToken: "verification-token",
+    createdAt: new Date(),
+  });
+  vi.mocked(getNotionEvent).mockResolvedValue(event);
 });
 
-/**
- * Test 2 & 5: Event Updates
- * Verifies that events can be updated via webhooks
- */
-test("webhook should support event update flow", () => {
-  // Test covers:
-  // - Notion webhook receives page.properties_updated event
-  // - GCal webhook receives "exists" event with modified event
-  // - Both systems can update existing events
-  expect(true).toBeTruthy();
+describe("Google webhook delivery", () => {
+  test("checks both channel and resource identity", async () => {
+    expect((await googlePost(googleRequest("wrong-resource"))).status).toBe(401);
+    expect(fetchGcalEventsSince).not.toHaveBeenCalled();
+  });
+
+  test("retains the token and message on failure while continuing other events", async () => {
+    vi.mocked(fetchGcalEventsSince).mockResolvedValue({
+      events: [event, event],
+      nextSyncToken: "new-token",
+    });
+    vi.mocked(syncGcalToNotion).mockRejectedValueOnce(new Error("timeout"));
+    expect((await googlePost(googleRequest())).status).toBe(500);
+    expect(syncGcalToNotion).toHaveBeenCalledTimes(2);
+    expect(updateSyncState).not.toHaveBeenCalled();
+    expect(redis.set).not.toHaveBeenCalled();
+    expect(release).toHaveBeenCalled();
+  });
+
+  test("can retry the same message after a failed attempt", async () => {
+    vi.mocked(syncGcalToNotion).mockRejectedValueOnce(new Error("timeout"));
+    expect((await googlePost(googleRequest())).status).toBe(500);
+    expect((await googlePost(googleRequest())).status).toBe(200);
+    expect(updateSyncState).toHaveBeenCalledExactlyOnceWith("new-token");
+    expect(redis.set).toHaveBeenCalledExactlyOnceWith("webhook:processed:channel-1:42", true, {
+      ex: 300,
+    });
+    expect(vi.mocked(updateSyncState).mock.invocationCallOrder[0]).toBeLessThan(
+      redis.set.mock.invocationCallOrder[0],
+    );
+  });
+
+  test("acknowledges duplicates only after a previous successful delivery", async () => {
+    redis.get.mockResolvedValue(true);
+    expect(await (await googlePost(googleRequest())).json()).toEqual({
+      status: "duplicate_skipped",
+    });
+    expect(fetchGcalEventsSince).not.toHaveBeenCalled();
+  });
+
+  test("returns a retryable response while another notification owns the token", async () => {
+    vi.mocked(acquireLock).mockResolvedValue(null);
+    expect((await googlePost(googleRequest())).status).toBe(503);
+    expect(updateSyncState).not.toHaveBeenCalled();
+  });
+
+  test("processes the replacement full-sync result before committing its token", async () => {
+    vi.mocked(fetchGcalEventsSince)
+      .mockResolvedValueOnce({ events: [], invalidToken: true })
+      .mockResolvedValueOnce({ events: [event], nextSyncToken: "replacement-token" });
+    expect((await googlePost(googleRequest())).status).toBe(200);
+    expect(fetchGcalEventsSince).toHaveBeenNthCalledWith(2, undefined);
+    expect(syncGcalToNotion).toHaveBeenCalledWith(event);
+    expect(updateSyncState).toHaveBeenCalledWith("replacement-token");
+  });
+
+  test("does not acknowledge an incomplete calendar listing", async () => {
+    vi.mocked(fetchGcalEventsSince).mockResolvedValue({ events: [] });
+    expect((await googlePost(googleRequest())).status).toBe(500);
+    expect(redis.set).not.toHaveBeenCalled();
+  });
 });
 
-/**
- * Test 3 & 6: Event Deletion
- * Verifies that events can be deleted via webhooks
- */
-test("webhook should support event deletion flow", () => {
-  // Test covers:
-  // - Notion webhook receives page.deleted event
-  // - GCal webhook receives event with status="cancelled"
-  // - Both systems can delete events
-  // - Deletions cascade correctly
-  expect(true).toBeTruthy();
-});
+describe("Notion webhook delivery", () => {
+  test("returns 500 for a failed event so Notion can retry it", async () => {
+    vi.mocked(syncNotionToGcal).mockRejectedValue(new Error("timeout"));
+    expect((await notionPost(notionRequest())).status).toBe(500);
+  });
 
-/**
- * Test: No Auto-Deletions
- * Verifies that unwanted auto-deletions don't occur
- */
-test("webhook should not trigger auto-deletions from status field", () => {
-  // Test covers:
-  // - Status field is excluded from Notion → GCal sync
-  // - Events are not incorrectly marked as cancelled
-  // - Deletion only happens when explicitly requested
-  expect(true).toBeTruthy();
-});
+  test("returns 500 for a failed deletion", async () => {
+    const { findGcalEventByNotionId } = await import("@/lib/google-calendar/client");
+    vi.mocked(findGcalEventByNotionId).mockRejectedValue(new Error("timeout"));
+    expect((await notionPost(notionRequest("page.deleted"))).status).toBe(500);
+  });
 
-/**
- * Test: Webhook Logging
- * Verifies that all webhook events are logged with consistent format
- */
-test("webhook should log events with title, ID, and type", () => {
-  // Test covers:
-  // - source: notion or gcal
-  // - webhookEventType: page.created, page.properties_updated, exists, etc.
-  // - action: create, update, or delete
-  // - eventTitle: Event name
-  // - eventId: Notion page ID or GCal event ID
-  // - status: success or failure
-  // - processingTime: Milliseconds
-  expect(true).toBeTruthy();
-});
-
-/**
- * Test: Loop Prevention
- * Verifies that sync doesn't create infinite loops
- */
-test("webhook should prevent infinite sync loops", () => {
-  // Test covers:
-  // - Events store IDs from the other system
-  // - Notion stores gcalEventId
-  // - GCal stores notionPageId in extended properties
-  // - Updates check for existing IDs before creating
-  expect(true).toBeTruthy();
-});
-
-/**
- * Test: Real-time Sync Latency
- * Verifies that webhooks provide <5 second sync
- */
-test("webhook should provide real-time sync", () => {
-  // Test covers:
-  // - Webhooks trigger immediately on changes
-  // - Processing completes in <5 seconds
-  // - Much faster than daily fallback cron
-  expect(true).toBeTruthy();
-});
-
-/**
- * Test: Signature Validation
- * Verifies that webhook requests are authenticated
- */
-test("webhook should validate signatures", () => {
-  // Test covers:
-  // - Notion webhook validates x-notion-signature header
-  // - GCal webhook validates channel ID
-  // - Unauthorized requests are rejected
-  expect(true).toBeTruthy();
-});
-
-/**
- * Test: Deduplication
- * Verifies that duplicate webhook events are handled correctly
- */
-test("webhook should deduplicate messages", () => {
-  // Test covers:
-  // - GCal webhook tracks message numbers in Redis
-  // - Duplicate messages are skipped
-  // - 5-minute TTL on deduplication keys
-  expect(true).toBeTruthy();
-});
-
-/**
- * Test: Error Handling
- * Verifies that webhook failures are logged and retried
- */
-test("webhook should handle errors gracefully", () => {
-  // Test covers:
-  // - Retryable errors trigger exponential backoff
-  // - Non-retryable errors fail immediately
-  // - All errors are logged with details
-  // - Processing continues for other events
-  expect(true).toBeTruthy();
+  test("rejects a malformed signature without treating it as a server failure", async () => {
+    expect((await notionPost(notionRequest("page.properties_updated", "bad"))).status).toBe(401);
+    expect(syncNotionToGcal).not.toHaveBeenCalled();
+  });
 });

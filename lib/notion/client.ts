@@ -22,7 +22,7 @@ async function getClient(): Promise<Client> {
   }
 
   const config = await getNotionConfig();
-  cachedNotionClient = new Client({ auth: config.apiToken });
+  cachedNotionClient = new Client({ auth: config.apiToken, timeoutMs: 10_000 });
   cachedDatabaseId = config.databaseId;
 
   return cachedNotionClient;
@@ -70,9 +70,9 @@ export function getPropertyValue(
 
   switch (prop.type) {
     case "title":
-      return prop.title[0]?.plain_text || "";
+      return prop.title.map((item) => item.plain_text).join("");
     case "rich_text":
-      return prop.rich_text[0]?.plain_text || "";
+      return prop.rich_text.map((item) => item.plain_text).join("");
     case "date":
       return prop.date;
     case "select":
@@ -141,6 +141,7 @@ function setPropertyValue(
 // Convert Notion page to Event
 export async function notionPageToEvent(page: PageObjectResponse): Promise<Event | null> {
   try {
+    if (page.archived || page.in_trash) return null;
     const properties = page.properties;
     const fieldMapping = await getFieldMapping();
 
@@ -245,6 +246,17 @@ export async function notionPageToEvent(page: PageObjectResponse): Promise<Event
 
 // Fetch all events from Notion database
 export async function fetchNotionEvents(): Promise<Event[]> {
+  const events: Event[] = [];
+  let cursor: string | undefined;
+  do {
+    const page = await fetchNotionEventsPage(cursor, 100);
+    events.push(...page.events);
+    cursor = page.nextCursor;
+  } while (cursor);
+  return events;
+}
+
+export async function fetchNotionEventsPage(cursor?: string, pageSize = 10) {
   try {
     const client = await getClient();
     const databaseId = await getDatabaseId();
@@ -252,6 +264,9 @@ export async function fetchNotionEvents(): Promise<Event[]> {
 
     const response: QueryDatabaseResponse = await client.databases.query({
       database_id: databaseId,
+      start_cursor: cursor,
+      page_size: pageSize,
+      sorts: [{ timestamp: "created_time", direction: "ascending" }],
       filter: {
         property: fieldMapping.date.notionPropertyName,
         date: {
@@ -270,11 +285,34 @@ export async function fetchNotionEvents(): Promise<Event[]> {
       }
     }
 
-    return events;
+    if (response.has_more && !response.next_cursor) {
+      throw new Error("Notion returned an incomplete page without a cursor");
+    }
+    return { events, nextCursor: response.has_more ? response.next_cursor! : undefined };
   } catch (error) {
     console.error("Error fetching Notion events:", error);
     throw error;
   }
+}
+
+/** Recover a page when creation succeeded but writing its Google backlink failed. */
+export async function findNotionEventByGcalId(gcalEventId: string): Promise<Event | null> {
+  const client = await getClient();
+  const databaseId = await getDatabaseId();
+  const { gcalEventId: mapping } = await getFieldMapping();
+  if (!mapping.enabled) return null;
+  const filter = {
+    property: mapping.notionPropertyName,
+    [mapping.propertyType]: { equals: gcalEventId },
+  };
+  if (!["rich_text", "title", "url", "select"].includes(mapping.propertyType)) return null;
+  const response = await client.databases.query({
+    database_id: databaseId,
+    filter: filter as NonNullable<Parameters<typeof client.databases.query>[0]["filter"]>,
+    page_size: 1,
+  });
+  const page = response.results[0];
+  return isPageObjectResponse(page) ? notionPageToEvent(page) : null;
 }
 
 // Create a new event in Notion
@@ -431,6 +469,18 @@ export async function updateNotionEvent(pageId: string, event: Partial<Event>): 
       setPropertyValue(properties, fieldMapping.visibility, event.visibility);
     }
 
+    if (Object.keys(properties).length === 0) return;
+    const current = await client.pages.retrieve({ page_id: pageId });
+    if (
+      isPageObjectResponse(current) &&
+      Object.entries(properties).every(
+        ([name, value]) =>
+          JSON.stringify(normalizeProperty(current.properties[name])) ===
+          JSON.stringify(normalizeProperty(value)),
+      )
+    )
+      return;
+
     await client.pages.update({
       page_id: pageId,
       properties,
@@ -439,6 +489,37 @@ export async function updateNotionEvent(pageId: string, event: Partial<Event>): 
     console.error("Error updating Notion event:", error);
     throw error;
   }
+}
+
+/** Only an explicit archive/trash flag proves a page was deleted; a 404 can mean lost access. */
+export async function isNotionPageArchived(pageId: string): Promise<boolean> {
+  const client = await getClient();
+  const page = await client.pages.retrieve({ page_id: pageId });
+  return isPageObjectResponse(page) && (page.archived || page.in_trash);
+}
+
+function normalizeProperty(value: unknown): unknown {
+  if (!value || typeof value !== "object") return null;
+  const property = value as Record<string, unknown>;
+  for (const type of ["title", "rich_text"]) {
+    if (Array.isArray(property[type])) {
+      return property[type].map((item) => item.text?.content ?? item.plain_text ?? "").join("");
+    }
+  }
+  if ("date" in property) {
+    const date = property.date as { start?: string; end?: string } | null;
+    return date
+      ? [
+          date.start ? new Date(date.start).toISOString() : null,
+          date.end ? new Date(date.end).toISOString() : null,
+        ]
+      : null;
+  }
+  if ("select" in property) return (property.select as { name: string } | null)?.name ?? null;
+  for (const type of ["number", "checkbox", "url"]) {
+    if (type in property) return property[type] ?? (type === "url" ? "" : null);
+  }
+  return null;
 }
 
 // Delete a Notion event (archive the page)

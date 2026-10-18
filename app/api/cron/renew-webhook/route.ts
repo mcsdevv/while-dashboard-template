@@ -1,23 +1,17 @@
-import {
-  fetchGcalEventsSince,
-  setupGcalWebhook,
-  stopGcalWebhook,
-} from "@/lib/google-calendar/client";
+import { setupGcalWebhook, stopGcalWebhook } from "@/lib/google-calendar/client";
 import { getGoogleConfig } from "@/lib/settings";
-import {
-  getWebhookChannel,
-  needsRenewal,
-  saveWebhookChannel,
-  updateSyncState,
-} from "@/lib/webhook/channel-manager";
+import { getWebhookChannel, needsRenewal, saveWebhookChannel } from "@/lib/webhook/channel-manager";
 import { type NextRequest, NextResponse } from "next/server";
+import { acquireLock } from "@/lib/webhook/lock";
+
+export const maxDuration = 60;
 
 /**
  * Cron job to automatically renew webhook channels before expiration
- * Runs every 6 hours to check if renewal is needed
- * Renews if channel expires in less than 6 hours
+ * Runs daily and renews within 36 hours of expiration.
  */
 export async function GET(request: NextRequest) {
+  let release: (() => Promise<void>) | null = null;
   try {
     // Verify cron authorization
     const authHeader = request.headers.get("authorization");
@@ -26,6 +20,9 @@ export async function GET(request: NextRequest) {
     if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    release = await acquireLock("webhook:gcal:renewal", 90);
+    if (!release) return NextResponse.json({ status: "already_running" });
 
     console.log("🔄 Webhook renewal cron job started...");
 
@@ -56,14 +53,6 @@ export async function GET(request: NextRequest) {
 
     console.log("⚠️  Channel expires soon, renewing...");
 
-    // Stop old channel
-    try {
-      await stopGcalWebhook(channel.channelId, channel.resourceId);
-      console.log(`✓ Stopped old channel: ${channel.channelId}`);
-    } catch (error) {
-      console.warn("Failed to stop old channel (might already be stopped):", error);
-    }
-
     // Get webhook URL
     const webhookUrl =
       process.env.WEBHOOK_URL ||
@@ -71,28 +60,27 @@ export async function GET(request: NextRequest) {
 
     // Create new channel
     console.log("🔗 Creating new webhook channel...");
+    const googleConfig = await getGoogleConfig();
     const newChannelInfo = await setupGcalWebhook(webhookUrl);
 
-    // Get calendar ID from config
-    const googleConfig = await getGoogleConfig();
-
-    // Save new channel metadata
-    await saveWebhookChannel({
-      channelId: newChannelInfo.channelId,
-      resourceId: newChannelInfo.resourceId,
-      expiration: newChannelInfo.expiration,
-      calendarId: googleConfig.calendarId,
-      createdAt: channel.createdAt, // Keep original creation time
-      lastRenewedAt: new Date(),
-    });
-
-    // Re-establish sync token with new channel
-    console.log("🔄 Re-establishing sync token...");
-    const result = await fetchGcalEventsSince(undefined);
-    if (result.nextSyncToken) {
-      await updateSyncState(result.nextSyncToken);
-      console.log("✓ Sync token re-established");
+    // Keep the working channel until its replacement is durably stored.
+    try {
+      await saveWebhookChannel({
+        ...newChannelInfo,
+        calendarId: googleConfig.calendarId,
+        createdAt: channel.createdAt,
+        lastRenewedAt: new Date(),
+      });
+    } catch (error) {
+      await stopGcalWebhook(newChannelInfo.channelId, newChannelInfo.resourceId).catch(() => {});
+      throw error;
     }
+    try {
+      await stopGcalWebhook(channel.channelId, channel.resourceId);
+    } catch (error) {
+      console.warn("Could not stop the previous webhook channel:", error);
+    }
+    // A channel renewal does not consume changes: preserve the existing calendar sync token.
 
     const expiresAt = new Date(newChannelInfo.expiration);
     const expiresIn = newChannelInfo.expiration - Date.now();
@@ -122,5 +110,8 @@ export async function GET(request: NextRequest) {
       },
       { status: 500 },
     );
+  } finally {
+    if (release)
+      await release().catch((error) => console.error("Could not release renewal lock:", error));
   }
 }

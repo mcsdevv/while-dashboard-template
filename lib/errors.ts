@@ -244,6 +244,16 @@ export function isRetryableError(error: unknown): boolean {
     return false;
   }
 
+  const apiError = error as Error & {
+    status?: number;
+    code?: number | string;
+    response?: { status?: number };
+  };
+  const status = Number(apiError.status ?? apiError.response?.status ?? apiError.code);
+  if (status === 429 || (status >= 500 && status <= 599) || apiError.code === "rate_limited") {
+    return true;
+  }
+
   const message = error.message.toLowerCase();
 
   // Rate limiting errors
@@ -259,6 +269,7 @@ export function isRetryableError(error: unknown): boolean {
   if (
     message.includes("network") ||
     message.includes("timeout") ||
+    message.includes("timed out") ||
     message.includes("econnrefused") ||
     message.includes("enotfound") ||
     message.includes("etimedout")

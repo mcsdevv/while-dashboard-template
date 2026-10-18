@@ -3,6 +3,7 @@ import type { Event } from "@/lib/types";
 import { calendar, type calendar_v3 } from "@googleapis/calendar";
 import { OAuth2Client } from "google-auth-library";
 import { parseRRule } from "./rrule-parser";
+import { isUnchangedGcalPatch } from "./compare";
 
 // Cached clients (lazy initialization)
 let cachedOAuth2Client: OAuth2Client | null = null;
@@ -42,6 +43,8 @@ async function getCalendarClient(): Promise<calendar_v3.Calendar> {
   cachedCalendarClient = calendar({
     version: "v3",
     auth,
+    timeout: 10_000,
+    retry: false, // The sync engine owns retries and its request time budget.
   });
 
   return cachedCalendarClient;
@@ -177,34 +180,49 @@ export function gcalEventToEvent(gcalEvent: calendar_v3.Schema$Event): Event | n
 // Fetch all events from Google Calendar
 export async function fetchGcalEvents(timeMin?: Date, timeMax?: Date): Promise<Event[]> {
   try {
-    const calendarClient = await getCalendarClient();
-    const calendarId = await getCalendarId();
-
     // Default to fetching events from now up to 1 year in the future
     const defaultTimeMin = timeMin || new Date();
     const defaultTimeMax = timeMax || new Date(Date.now() + 365 * 24 * 60 * 60 * 1000); // 1 year from now
 
-    const response = await calendarClient.events.list({
-      calendarId,
-      timeMin: defaultTimeMin.toISOString(),
-      timeMax: defaultTimeMax.toISOString(),
-      singleEvents: true, // Expand recurring events into instances
-      orderBy: "startTime",
-    });
-
     const events: Event[] = [];
-    for (const gcalEvent of response.data.items || []) {
-      const event = gcalEventToEvent(gcalEvent);
-      if (event) {
-        events.push(event);
-      }
-    }
+    let pageToken: string | undefined;
+    do {
+      const page = await fetchGcalEventsPage(defaultTimeMin, defaultTimeMax, pageToken, 250);
+      events.push(...page.events);
+      pageToken = page.nextCursor;
+    } while (pageToken);
 
     return events;
   } catch (error) {
     console.error("Error fetching Google Calendar events:", error);
     throw error;
   }
+}
+
+/** A bounded page for resumable reconciliation jobs. */
+export async function fetchGcalEventsPage(
+  timeMin: Date,
+  timeMax: Date,
+  pageToken?: string,
+  pageSize = 10,
+) {
+  const calendarClient = await getCalendarClient();
+  const calendarId = await getCalendarId();
+  const response = await calendarClient.events.list({
+    calendarId,
+    timeMin: timeMin.toISOString(),
+    timeMax: timeMax.toISOString(),
+    singleEvents: true,
+    orderBy: "startTime",
+    maxResults: pageSize,
+    pageToken,
+  });
+  return {
+    events: (response.data.items ?? [])
+      .map(gcalEventToEvent)
+      .filter((event): event is Event => event !== null),
+    nextCursor: response.data.nextPageToken || undefined,
+  };
 }
 
 // Fetch events since last sync using sync token (incremental sync for webhooks)
@@ -217,24 +235,28 @@ export async function fetchGcalEventsSince(syncToken?: string): Promise<{
     const calendarClient = await getCalendarClient();
     const calendarId = await getCalendarId();
 
-    const response = await calendarClient.events.list({
-      calendarId,
-      syncToken: syncToken,
-      singleEvents: true,
-      maxResults: 2500, // Maximum allowed by API
-    });
-
     const events: Event[] = [];
-    for (const gcalEvent of response.data.items || []) {
-      const event = gcalEventToEvent(gcalEvent);
-      if (event) {
-        events.push(event);
+    let pageToken: string | undefined;
+    let nextSyncToken: string | undefined;
+    do {
+      const response = await calendarClient.events.list({
+        calendarId,
+        syncToken,
+        singleEvents: true,
+        maxResults: 2500,
+        pageToken,
+      });
+      for (const gcalEvent of response.data.items || []) {
+        const event = gcalEventToEvent(gcalEvent);
+        if (event) events.push(event);
       }
-    }
+      pageToken = response.data.nextPageToken || undefined;
+      nextSyncToken = response.data.nextSyncToken || undefined;
+    } while (pageToken);
 
     return {
       events,
-      nextSyncToken: response.data.nextSyncToken || undefined,
+      nextSyncToken,
       invalidToken: false,
     };
   } catch (error: unknown) {
@@ -245,7 +267,7 @@ export async function fetchGcalEventsSince(syncToken?: string): Promise<{
         ? (error as { code: unknown }).code
         : null;
 
-    if (errorMessage.includes("Sync token") || errorCode === 410) {
+    if (errorMessage.includes("Sync token") || Number(errorCode) === 410) {
       console.warn("Sync token invalid, need to perform full sync");
       return {
         events: [],
@@ -395,6 +417,9 @@ export async function updateGcalEvent(eventId: string, event: Partial<Event>): P
       };
     }
 
+    const current = await calendarClient.events.get({ calendarId, eventId });
+    if (isUnchangedGcalPatch(current.data, gcalEvent)) return;
+
     try {
       await calendarClient.events.patch({
         calendarId,
@@ -444,20 +469,19 @@ export async function deleteGcalEvent(eventId: string): Promise<void> {
 
 /**
  * Find a Google Calendar event by its Notion page ID
- * Searches recent events (past 30 days + future) for matching notionPageId
+ * Uses Google's metadata filter, including events outside the usual sync window.
  */
 export async function findGcalEventByNotionId(notionPageId: string): Promise<Event | null> {
   try {
-    // Search events from 30 days ago to 1 year in the future
-    const timeMin = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-    const timeMax = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
-
-    const events = await fetchGcalEvents(timeMin, timeMax);
-
-    // Find the event with matching Notion page ID
-    const matchingEvent = events.find((event) => event.notionPageId === notionPageId);
-
-    return matchingEvent || null;
+    const calendarClient = await getCalendarClient();
+    const calendarId = await getCalendarId();
+    const response = await calendarClient.events.list({
+      calendarId,
+      privateExtendedProperty: [`notion_page_id=${notionPageId}`],
+      maxResults: 1,
+    });
+    const matchingEvent = response.data.items?.[0];
+    return matchingEvent ? gcalEventToEvent(matchingEvent) : null;
   } catch (error) {
     console.error("Error finding GCal event by Notion ID:", error);
     throw error;

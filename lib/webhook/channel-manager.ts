@@ -70,11 +70,11 @@ export function getTimeUntilExpiration(channel: WebhookChannel): number {
 }
 
 /**
- * Check if channel needs renewal (expires in less than 6 hours)
+ * Check if channel needs renewal (expires within 36 hours (the renewal cron runs daily))
  */
 export function needsRenewal(channel: WebhookChannel): boolean {
-  const SIX_HOURS = 6 * 60 * 60 * 1000;
-  return getTimeUntilExpiration(channel) < SIX_HOURS;
+  const RENEWAL_WINDOW = 36 * 60 * 60 * 1000;
+  return getTimeUntilExpiration(channel) <= RENEWAL_WINDOW;
 }
 
 /**

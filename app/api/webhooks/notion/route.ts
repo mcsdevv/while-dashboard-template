@@ -23,7 +23,10 @@ function validateSignature(body: string, signature: string, verificationToken: s
   const expectedSignature = `sha256=${hmac.digest("hex")}`;
 
   // Timing-safe comparison
-  return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSignature));
+  return (
+    signature.length === expectedSignature.length &&
+    crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSignature))
+  );
 }
 
 /**
@@ -43,7 +46,7 @@ export async function POST(request: NextRequest) {
     let body: unknown;
     try {
       body = JSON.parse(bodyText);
-    } catch (error) {
+    } catch {
       console.error("❌ Invalid JSON in Notion webhook");
       return NextResponse.json({ error: "Invalid JSON payload" }, { status: 400 });
     }
@@ -188,6 +191,7 @@ export async function POST(request: NextRequest) {
           status: "failure",
           error: error instanceof Error ? error.message : "Unknown error",
         });
+        return NextResponse.json({ error: "Notion event failed to sync" }, { status: 500 });
       }
 
       return NextResponse.json({ message: "Event processed" });
@@ -251,6 +255,7 @@ export async function POST(request: NextRequest) {
           status: "failure",
           error: error instanceof Error ? error.message : "Unknown error",
         });
+        return NextResponse.json({ error: "Notion event failed to sync" }, { status: 500 });
       }
 
       return NextResponse.json({ message: "Event processed" });

@@ -1,9 +1,28 @@
-import { isRetryableError } from "@/lib/errors";
-import { createGcalEvent, deleteGcalEvent, updateGcalEvent } from "@/lib/google-calendar/client";
-import { createNotionEvent, deleteNotionEvent, updateNotionEvent } from "@/lib/notion/client";
+import {
+  createGcalEvent,
+  deleteGcalEvent,
+  findGcalEventByNotionId,
+  updateGcalEvent,
+} from "@/lib/google-calendar/client";
+import {
+  createNotionEvent,
+  deleteNotionEvent,
+  findNotionEventByGcalId,
+  updateNotionEvent,
+} from "@/lib/notion/client";
 import { logSync } from "@/lib/sync/logger";
 import { retryWithBackoff } from "@/lib/sync/retry";
-import type { Event, SyncDirection, SyncOperation } from "@/lib/types";
+import type { Event } from "@/lib/types";
+
+async function recoverOrCreateNotionEvent(event: Event): Promise<string> {
+  const existing = await findNotionEventByGcalId(event.gcalEventId || event.id);
+  if (existing) {
+    const pageId = existing.notionPageId || existing.id;
+    await updateNotionEvent(pageId, event);
+    return pageId;
+  }
+  return createNotionEvent(event);
+}
 
 /**
  * Sync an event from Notion to Google Calendar
@@ -94,11 +113,19 @@ export async function syncNotionToGcal(event: Event): Promise<void> {
     } else {
       // This event doesn't exist in GCal yet, so CREATE it
       const gcalEventId = await retryWithBackoff(
-        () =>
-          createGcalEvent({
+        async () => {
+          const existing = await findGcalEventByNotionId(event.notionPageId || event.id);
+          if (existing) {
+            const id = existing.gcalEventId || existing.id;
+            const { status: _status, ...fields } = event;
+            await updateGcalEvent(id, { ...fields, notionPageId: event.notionPageId || event.id });
+            return id;
+          }
+          return createGcalEvent({
             ...event,
             notionPageId: event.notionPageId || event.id,
-          }),
+          });
+        },
         {
           onRetry: (error, attempt) => {
             console.log(`Retrying createGcalEvent (attempt ${attempt}):`, error.message);
@@ -171,10 +198,8 @@ export async function syncNotionToGcal(event: Event): Promise<void> {
 
     console.error(`✗ Failed to sync Notion event to GCal: ${event.title}`, error);
 
-    // Re-throw if it's not a retryable error, so we can alert
-    if (!isRetryableError(error)) {
-      throw error;
-    }
+    // Retries have already been exhausted. Callers must know this operation failed.
+    throw error;
   }
 }
 
@@ -242,26 +267,17 @@ export async function syncGcalToNotion(event: Event): Promise<void> {
       } catch (updateError: unknown) {
         // If the Notion page is archived/deleted, create a new one instead
         const errorMessage = updateError instanceof Error ? updateError.message : "";
-        const errorCode =
-          updateError && typeof updateError === "object" && "code" in updateError
-            ? String((updateError as { code: unknown }).code)
-            : "";
-
-        if (
-          errorMessage.includes("archived") ||
-          errorCode === "validation_error" ||
-          errorCode === "object_not_found"
-        ) {
+        if (errorMessage.includes("archived")) {
           console.log(
             `⚠️  Notion page ${event.notionPageId} is archived/deleted, creating new page for "${event.title}"`,
           );
 
           // Create new Notion page
           // Exclude status field since Status property doesn't exist in Notion
-          const { status, ...eventWithoutStatus } = event;
+          const { status: _status, ...eventWithoutStatus } = event;
           const notionPageId = await retryWithBackoff(
             () =>
-              createNotionEvent({
+              recoverOrCreateNotionEvent({
                 ...eventWithoutStatus,
                 gcalEventId: event.gcalEventId || event.id,
               }),
@@ -315,10 +331,10 @@ export async function syncGcalToNotion(event: Event): Promise<void> {
     } else {
       // This event doesn't exist in Notion yet, so CREATE it
       // Exclude status field since Status property doesn't exist in Notion
-      const { status, ...eventWithoutStatus } = event;
+      const { status: _status, ...eventWithoutStatus } = event;
       const notionPageId = await retryWithBackoff(
         () =>
-          createNotionEvent({
+          recoverOrCreateNotionEvent({
             ...eventWithoutStatus,
             gcalEventId: event.gcalEventId || event.id,
           }),
@@ -394,10 +410,7 @@ export async function syncGcalToNotion(event: Event): Promise<void> {
 
     console.error(`✗ Failed to sync GCal event to Notion: ${event.title}`, error);
 
-    // Re-throw if it's not a retryable error
-    if (!isRetryableError(error)) {
-      throw error;
-    }
+    throw error;
   }
 }
 
@@ -437,9 +450,7 @@ export async function deleteFromGcal(gcalEventId: string, eventTitle: string): P
 
     console.error(`✗ Failed to delete GCal event: ${eventTitle}`, error);
 
-    if (!isRetryableError(error)) {
-      throw error;
-    }
+    throw error;
   }
 }
 
@@ -479,8 +490,6 @@ export async function deleteFromNotion(notionPageId: string, eventTitle: string)
 
     console.error(`✗ Failed to delete Notion event: ${eventTitle}`, error);
 
-    if (!isRetryableError(error)) {
-      throw error;
-    }
+    throw error;
   }
 }
